@@ -42,11 +42,13 @@ public class main {
 		new MandelbrotNavigator(g);
 //		Complex center = new Complex(-1.7397248925716058, 1.1513980444175365E-5);
 //		MandelbrotZoom zoom = new MandelbrotZoom(center, 800, 600, MandelbrotZoom.DEFAULT_DELTA_RANGE, new LinearRange(100, 2500));
-//		MandelbrotFrame m = zoom.getStart();
-//		m.calculateAll();
 //		
-//		ImageUtils.saveImage(m.toImage(g), "C:\\Users\\pedro\\Desktop\\mandelbrotImages/Mandelbrot.png");
-//		String gifPath = ImageUtils.getNextFileName("C:\\Users\\pedro\\Desktop\\mandelbrotImages\\gif/Mandelbrot.gif");
+//		for(MandelbrotFrame frame : zoom.toDiscrete(10)) {
+//			frame.calculateAll();
+//			ImageUtils.saveImage(frame.toImage(GradientFactory.random()), ImageUtils.getNextFileName("C:\\Users\\pedro\\Desktop\\MandelbrotStuff\\images/Mandelbrot.png"));
+//		}
+		
+//		String gifPath = ImageUtils.getNextFileName("C:\\Users\\pedro\\Desktop\\MandelbrotStuff\\gif/Mandelbrot.gif");
 //		try {
 //			GIFZoom gif = new GIFZoom(zoom, 25, 30, gifPath);
 //			gif.setGradient(g);
@@ -61,7 +63,7 @@ public class main {
 		Range<Color> g2 = new RGBGradient(.2, 0).slice(20);
 		Range<Color> g3 = new HSBGradient(.9, 1.2).slice(10);
 		MultiRange<Color> g4 = new MultiRange<>(g1, g2, g3, g2);
-		return g4;
+		return g4.slice(4);
 	}
 	
 }

@@ -44,7 +44,7 @@ public class MandelbrotNavigator extends JFrame{
 	}
 	
 	public void initializeVisualizer() {
-		zoom = new MandelbrotZoom(new Complex(0,0), panel.getWidth(), panel.getWidth()).invert();
+		zoom = new MandelbrotZoom(new Complex(0,0), panel.getWidth(), panel.getWidth());
 		setPercent(0);
 		new Thread(() -> {
 			try {
