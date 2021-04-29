@@ -2,14 +2,18 @@ package rangeUtils;
 
 import java.util.Iterator;
 
-public class RangeIterable<T> implements Iterable<T>{
+public class DiscreteRange<T> implements Iterable<T>{
 
 	private Range<T> range;
 	private double percentInc;
 	
-	public RangeIterable(Range<T> range, int steps) {
+	public DiscreteRange(Range<T> range, int steps) {
 		this.range = range;
-		this.percentInc = 1d / steps;
+		this.percentInc = 1d / (steps - 1);
+	}
+	
+	public T valueAt(int index) {
+		return range.valueAt(percentInc * index);
 	}
 
 	@Override
@@ -19,17 +23,17 @@ public class RangeIterable<T> implements Iterable<T>{
 	
 	private class RangeIterator implements Iterator<T>{
 
-		private double current;
+		private double current = -percentInc;
 		
 		@Override
 		public boolean hasNext() {
-			return current <= 1;
+			return current <= (1 - percentInc);
 		}
 
 		@Override
 		public T next() {
 			current += percentInc;
-			return range.valueAt(current - percentInc);
+			return range.valueAt(current);
 		}
 		
 	}

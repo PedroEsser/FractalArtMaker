@@ -1,28 +1,38 @@
 package logic;
 
+import java.awt.Color;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
+import java.util.List;
 
 import gradients.Gradient;
 import gradients.HSBGradient;
+import rangeUtils.Range;
 import utils.Rectangle;
 
 public class MandelbrotFrame {
 
-	public static final int DEFAULT_MAX_ITERATION = 200;
-	private static final double ESCAPE_RADIUS_SQUARED = 10;
+	public static final int DEFAULT_MAX_ITERATIONS = 200;
+	private static final double ESCAPE_RADIUS_SQUARED = 4;
 	public static final Gradient DEFAULT_GRADIENT = new HSBGradient();
-	private static final double DEFAULT_DELTA = 0.005;
+	private static final double DEFAULT_DELTA = 0.01;
 	private static final float LOG2_RECIPROCAL = (float)(1 / Math.log(2));
 	public static int BELONG_COLOR = 0;		// rgb for the color BLACK
-	private double delta;
-	private Complex center;
-	private float[][] data;
 	
-	public MandelbrotFrame(Complex center, int width, int height, double delta) {
+	private final double delta;
+	private final int maxIterations;
+	private final Complex center;
+	private final float[][] data;
+	
+	public MandelbrotFrame(Complex center, int width, int height, double delta, int maxIterations) {
 		this.center = center;
 		this.data = new float[width][height];
 		this.delta = delta;
+		this.maxIterations = maxIterations;
+	}
+	
+	public MandelbrotFrame(Complex center, int width, int height, double delta) {
+		this(center, width, height, delta, DEFAULT_MAX_ITERATIONS);
 	}
 	
 	public MandelbrotFrame(int width, int height, double delta) {
@@ -45,34 +55,63 @@ public class MandelbrotFrame {
 		return data[0].length;
 	}
 	
-	public void calculate(Rectangle r, int maxIterations) {
-		r.loop(p -> calculatePoint(p, maxIterations));
+	public double getDelta() {
+		return delta;
 	}
 	
-	public void calculateAll(int maxIterations) {
-		calculate(allPoints(), maxIterations);
+	public Complex getCenter() {
+		return center;
 	}
 	
-	public void calculatePoint(Point p, int maxIterations) {
+	public void set(Point p, float percent) {
+		data[p.x][p.y] = percent;
+	}
+	
+	public void set(int x, int y, float percent) {
+		data[x][y] = percent;
+	}
+	
+	public float get(int i, int j) {
+		return data[i][j];
+	}
+	
+	public void copyData(MandelbrotFrame frame, Rectangle r, int dx, int dy) {
+		float[][] copy = r.slice(frame.data);
+		
+		r.loop(p -> {
+			set(p.x + dx, p.y + dy, copy[p.x - r.x1][p.y - r.y1]);
+		});
+	}
+	
+	public void calculate(Rectangle r) {
+		r.loop(p -> calculatePoint(p));
+	}
+	
+	public void calculateAll() {
+		calculate(allPoints());
+	}
+	
+	public void calculatePoint(Point p) {
 		Complex c = toComplex(p);
 		Complex z = new Complex();
 		int iterations = 0;
 		while(true) {
 			z.square();
 			z.add(c);
-			if(z.amplitudeSquared() > ESCAPE_RADIUS_SQUARED || ++iterations == maxIterations)
+			if(z.amplitudeSquared() > ESCAPE_RADIUS_SQUARED || ++iterations >= maxIterations)
 				break;
 		}
 		if(iterations == maxIterations) {
 			data[p.x][p.y] = 1;
 			return;
-		}
+		}				// adding smooth transition
 		z.square();
 		z.add(c);
 		z.square();
 		z.add(c);
-		float percent = (iterations + 1 - (float)Math.log(Math.log(z.amplitudeSquared())) * LOG2_RECIPROCAL) / maxIterations;
-		data[p.x][p.y] = percent < 0 ? 0 : percent > 1 ? 1 : percent;
+		float percent = (float)(iterations + 1 - Math.log(Math.log(z.amplitudeSquared())) * LOG2_RECIPROCAL) / maxIterations;
+		percent =  percent < 0 || Float.isNaN(percent) ? 0 : percent > 1 ? 1 : percent;
+		data[p.x][p.y] = percent;
 	}
 	
 	public Complex toComplex(Point p) {
@@ -85,17 +124,29 @@ public class MandelbrotFrame {
 		return new Rectangle(0, 0, getWidth(), getHeight());
 	}
 	
+	public BufferedImage toImage(Range<Color> gradient) {
+		BufferedImage img = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_3BYTE_BGR);
+		allPoints().loop(p -> drawPixel(img, p, gradient));
+		return img;
+	}
+	
 	public BufferedImage toImage() {
 		return this.toImage(DEFAULT_GRADIENT);
 	}
 	
-	public BufferedImage toImage(Gradient gradient) {
-		BufferedImage img = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_3BYTE_BGR);
-		allPoints().loop(p -> {
-			float percent = data[p.x][p.y];
+	private void drawPixel(BufferedImage img, Point p, Range<Color> gradient) {
+		float percent = data[p.x][p.y];
+		try {
 			img.setRGB(p.x, p.y, percent == 1 ? BELONG_COLOR : gradient.valueAt(percent).getRGB());
-		});
-		return img;
+		}catch(Exception e) {
+			System.out.println("Drawing: " + percent);
+		}
+		
+	}
+	
+	public void drawPixels(BufferedImage img, Range<Color> gradient, Rectangle[] areas) {
+		for(Rectangle area : areas)
+			area.loop(p -> drawPixel(img, p, gradient));
 	}
 	
 }

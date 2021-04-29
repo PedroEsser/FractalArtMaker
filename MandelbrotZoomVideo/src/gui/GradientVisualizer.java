@@ -6,12 +6,13 @@ import java.awt.Graphics;
 import javax.swing.JPanel;
 
 import gradients.Gradient;
+import rangeUtils.Range;
 
 public class GradientVisualizer extends JPanel{
 
-	private Gradient gradient;
+	private Range<Color> gradient;
 	
-	public GradientVisualizer(Gradient gradient) {
+	public GradientVisualizer(Range<Color> gradient) {
 		this.gradient = gradient;
 	}
 
@@ -19,7 +20,7 @@ public class GradientVisualizer extends JPanel{
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		int x = 0;
-		for(Color c : gradient.getIterable(this.getWidth())) {
+		for(Color c : gradient.toDiscrete(this.getWidth())) {
 			g.setColor(c);
 			g.drawLine(x, 0, x++, this.getHeight());
 		}

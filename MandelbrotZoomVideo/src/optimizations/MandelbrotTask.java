@@ -3,21 +3,18 @@ package optimizations;
 import logic.MandelbrotFrame;
 import utils.Rectangle;
 
-public class MandelbrotTask extends Thread{
+public class MandelbrotTask{
 
 	private final Rectangle r;
-	private final MandelbrotFrame f;
-	private final int maxIterations;
+	private final MandelbrotFrame frame;
 	
-	public MandelbrotTask(Rectangle r, MandelbrotFrame f, int maxIterations) {
+	public MandelbrotTask(Rectangle r, MandelbrotFrame frame) {
 		this.r = r;
-		this.f = f;
-		this.maxIterations = maxIterations;
+		this.frame = frame;
 	}
 	
-	@Override
-	public void run() {
-		f.calculate(r, maxIterations);
+	public void doTask() {
+		frame.calculate(r);
 	}
 	
 }

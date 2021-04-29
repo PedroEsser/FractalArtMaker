@@ -2,21 +2,23 @@ package gradients;
 
 import java.awt.Color;
 
+import rangeUtils.Constant;
 import rangeUtils.LinearRange;
 import rangeUtils.NumericRange;
+import rangeUtils.Range;
 
 public class HSBGradient implements Gradient{
 
-	private NumericRange hueRange, saturationRange, brightnessRange;
+	private Range<Double> hueRange, saturationRange, brightnessRange;
 	
-	public HSBGradient(NumericRange hueRange, NumericRange saturationRange, NumericRange brightnessRange) {
+	public HSBGradient(Range<Double> hueRange, Range<Double> saturationRange, Range<Double> brightnessRange) {
 		this.hueRange = hueRange;
 		this.saturationRange = saturationRange;
 		this.brightnessRange = brightnessRange;
 	}
 	
 	public HSBGradient(NumericRange hueRange) {
-		this(hueRange, new LinearRange(1, 1), new LinearRange(1, 1));
+		this(hueRange, new Constant<>(1d), new Constant<>(1d));
 	}
 	
 	public HSBGradient(float startHue, float endHue, float startSaturation, float endSaturation, float startBrightness, float endBrightness) {
@@ -31,8 +33,8 @@ public class HSBGradient implements Gradient{
 		this.brightnessRange = new LinearRange(hsbStart[2], hsbEnd[2]);;
 	}
 	
-	public HSBGradient(float startHue, float endHue) {
-		this(startHue, endHue, 1f, 1f, 1f,  1f);
+	public HSBGradient(double startHue, double endHue) {
+		this(new LinearRange(startHue, endHue));
 	}
 
 	public HSBGradient() {

@@ -1,16 +1,23 @@
 package logic;
 
 import java.awt.Color;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import gradients.Gradient;
+import gradients.GradientFactory;
 import gradients.HSBGradient;
-import gradients.LoopGradient;
-import gradients.MultiGradient;
 import gradients.RGBGradient;
+import gui.MandelbrotNavigator;
 import gui.MenuGUI;
+import rangeUtils.Constant;
 import rangeUtils.LinearRange;
 import rangeUtils.LogarithmicRange;
+import rangeUtils.LoopRange;
+import rangeUtils.MultiRange;
+import rangeUtils.Range;
 import utils.ImageUtils;
+import utils.Rectangle;
 
 public class main {
 
@@ -24,43 +31,37 @@ public class main {
 		0.2503488805773595, 1.0276060968842138E-5
 		-1.7493674404574746, 9.25510049074256E-9
 		-1.4475067062921971, 0.005044822940268131
+		0.001643721971153, -0.822467633298876
+		-1.7397248925716058, 1.1513980444175365E-5
 	 */
 	
 	public static void main(String[] args) {
-		new MenuGUI(costumGradient());
-		Complex center = new Complex(-1.6743680857561216, -0.0057050142440923345);
-		MandelbrotZoom zoom = new MandelbrotZoom(center, 800, 600);
-		//MandelbrotFrame m = new MandelbrotFrame(center, 800, 600, 0.00002);
-		MandelbrotFrame m = zoom.random();
-		m.calculateAll(1000);
-		Gradient g = costumGradient();
-		ImageUtils.saveImage(m.toImage(g), "C:\\Users\\pedro\\Desktop\\mandelbrotImages/Mandelbrot.png");
-		GIFZoom gif;
-		try {//Complex center, int width, int height, double initialDelta, double finalDelta, double zoomSpeed, String path
-			gif = new GIFZoom(center, 500, 500, 1E-14, 5, "");
-			gif.createZoom(ImageUtils.getNextFileName("C:\\Users\\pedro\\Desktop\\mandelbrotImages\\gif/Mandelbrot.gif"), g, new LinearRange(100, 2000));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		Range<Color> g = costumGradient();
+		//g = GradientFactory.random();
+		new MenuGUI(g);
+		new MandelbrotNavigator(g);
+//		Complex center = new Complex(-1.7397248925716058, 1.1513980444175365E-5);
+//		MandelbrotZoom zoom = new MandelbrotZoom(center, 800, 600, MandelbrotZoom.DEFAULT_DELTA_RANGE, new LinearRange(100, 2500));
+//		MandelbrotFrame m = zoom.getStart();
+//		m.calculateAll();
+//		
+//		ImageUtils.saveImage(m.toImage(g), "C:\\Users\\pedro\\Desktop\\mandelbrotImages/Mandelbrot.png");
+//		String gifPath = ImageUtils.getNextFileName("C:\\Users\\pedro\\Desktop\\mandelbrotImages\\gif/Mandelbrot.gif");
+//		try {
+//			GIFZoom gif = new GIFZoom(zoom, 25, 30, gifPath);
+//			gif.setGradient(g);
+//			gif.start();		//171
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 	}
 	
-	public static Gradient costumGradient() {
-		Gradient g1 = new RGBGradient();
-		g1 = new LoopGradient(g1, 2);
-		Gradient g2 = new HSBGradient(.9f, .4f);//.9f, .4f
-		g2 = new LoopGradient(g2, 2.5);
-		MultiGradient mg = new MultiGradient();
-		mg.addGradient(g1, 0.2f);
-		mg.addGradient(g2, 0.5f);
-		Gradient g3 = new HSBGradient(Color.RED, Color.GREEN);
-		mg.addGradient(g3, 0.4f);
-		LogarithmicRange r1 = new LogarithmicRange(1, 3);
-		Gradient g4 = new HSBGradient(r1);
-		LinearRange r2 = new LinearRange(0, 1);
-		Gradient g5 = new HSBGradient(r2);
-		LoopGradient lg = new LoopGradient(mg, 20);
-		//return new MultiGradient(g4, g5);
-		return mg;
+	public static Range<Color> costumGradient() {
+		Range<Color> g1 = new HSBGradient(.5, .75).slice(10);
+		Range<Color> g2 = new RGBGradient(.2, 0).slice(20);
+		Range<Color> g3 = new HSBGradient(.9, 1.2).slice(10);
+		MultiRange<Color> g4 = new MultiRange<>(g1, g2, g3, g2);
+		return g4;
 	}
 	
 }

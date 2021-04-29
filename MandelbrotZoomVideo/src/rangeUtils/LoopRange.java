@@ -2,12 +2,20 @@ package rangeUtils;
 
 public class LoopRange<T> implements Range<T>{
 
-	private double loopCount;
+	private final Range<Double> numericRange;
 	private final Range<T> range;
 	
-	public LoopRange(Range<T> range, double loopCount) {
+	public LoopRange(Range<T> range, Range<Double> numericRange) {
 		this.range = range;
-		this.loopCount = loopCount;
+		this.numericRange = numericRange;
+	}
+	
+	public LoopRange(Range<T> range, double start, double end) {
+		this(range, new LinearRange(start, end));
+	}
+	
+	public LoopRange(Range<T> range, double loopCount) {
+		this(range, 0, loopCount);
 	}
 	
 	public LoopRange(Range<T> range) {
@@ -16,7 +24,7 @@ public class LoopRange<T> implements Range<T>{
 	
 	@Override
 	public T valueAt(double percent) {
-		float aux = (float)(percent * loopCount);
+		double aux = numericRange.valueAt(percent);
 		int index = (int)(aux);
 		aux -= index;
 		if(index % 2 == 0) 

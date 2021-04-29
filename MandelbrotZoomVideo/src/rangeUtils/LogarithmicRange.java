@@ -9,8 +9,6 @@ public class LogarithmicRange implements NumericRange{
 		this.base = end/start;
 	}
 
-
-
 	@Override
 	public Double valueAt(double percent) {
 		return start * Math.pow(base, percent);
