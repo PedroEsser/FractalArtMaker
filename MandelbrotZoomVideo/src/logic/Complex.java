@@ -2,7 +2,7 @@ package logic;
 
 public class Complex {
 
-	double re, im;
+	private double re, im;
 	
 	public Complex(double re, double im) {
 		this.re = re;
@@ -32,6 +32,14 @@ public class Complex {
 	    this.im += c.im;
 	}
 	
+	public double getRe() {
+		return re;
+	}
+
+	public double getIm() {
+		return im;
+	}
+
 	public Complex getAdded(double a, double b){
 	    return new Complex(this.re + a, this.im + b);
 	}

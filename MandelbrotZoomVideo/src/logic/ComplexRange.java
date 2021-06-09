@@ -14,8 +14,8 @@ public class ComplexRange implements Range<Complex>{
 	}
 
 	public ComplexRange(Complex start, Complex end) {
-		this.re = new LinearRange(start.re, end.re);
-		this.im = new LinearRange(start.im, end.im);
+		this.re = new LinearRange(start.getRe(), end.getRe());
+		this.im = new LinearRange(start.getIm(), end.getIm());
 	}
 
 

@@ -1,106 +1,48 @@
 package gui;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.GridLayout;
 import java.awt.Point;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.JFrame;
+import java.util.function.Consumer;
 
 import logic.Complex;
 import logic.MandelbrotFrame;
 import logic.MandelbrotZoom;
 import optimizations.MandelbrotProducer;
-import rangeUtils.Constant;
-import rangeUtils.Range;
 import utils.Rectangle;
 
-public class MandelbrotNavigator extends JFrame{
+public class MandelbrotNavigator {
 
 	private static double PERCENT_STEP = 0.002;
 	private double percent = 0;
-	private double offset = 0;
-	private Range<Color> gradient;
 	private MandelbrotZoom zoom;
 	private MandelbrotFrame frame;
-	private final MandelbrotVisualizer panel;
 	private MandelbrotProducer producer;
+	private Consumer<MandelbrotFrame> frameUpdateCallback;
 	
-	
-	public MandelbrotNavigator(Range<Color> gradient) {
-		this.gradient = gradient;
-		this.panel = new MandelbrotVisualizer(this);
-		
-		this.setSize(MenuGUI.DEFAULT_WINDOW_SIZE);
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		this.add(panel);
-		setVisible(true);
+	public MandelbrotNavigator(int width, int height, Consumer<MandelbrotFrame> frameUpdateCallback) {
+		this.zoom = new MandelbrotZoom(width, height);
+		this.frameUpdateCallback = frameUpdateCallback;
 	}
 	
-	public void initializeVisualizer() {
-		zoom = new MandelbrotZoom(new Complex(0,0), panel.getWidth(), panel.getWidth());
-		setPercent(0);
-		new Thread(() -> {
-			try {
-				while(true) {
-					//Thread.sleep(100);
-					offset += 0.001;
-					setImage(frame.toImage(gradient.offset(offset)));
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				System.out.println(offset);
-			}
-		}).start();
-	}
-	
-	private void workAndUpdate(Rectangle... areas) {
+	private void workAndUpdate(MandelbrotFrame nextFrame, Rectangle... areas) {
 		if(producer != null && producer.isAlive()) {
 			producer.interrupt();
 		}
-		producer = new MandelbrotProducer(frame, areas);
+		producer = new MandelbrotProducer(nextFrame, areas);
 		producer.setCallBack(() -> {
-			//frame.drawPixels(img, gradient, areas);
-			setImage(frame.toImage(gradient.offset(offset)));
+			frame = nextFrame;
+			frameUpdateCallback.accept(frame);
 		});
 		producer.start();
 	}
 	
-	private void setImage(BufferedImage img) {
-		panel.updateImage(img);
+	private void workAndUpdateAll(MandelbrotFrame nextFrame) {
+		workAndUpdate(nextFrame, nextFrame.allPoints());
 	}
 	
-	private void workAndUpdateAll() {
-		workAndUpdate(frame.allPoints());
-	}
-	
-	public void checkResize() {
-		if(wasResized()) {
-			resize();
-			workAndUpdateAll();
-		}
-	}
-	
-	private boolean wasResized() {
-		return frame.getWidth() != panel.getWidth() || frame.getHeight() != panel.getHeight();
-	}
-	
-	private void resize() {
-		zoom.setWidth(panel.getWidth());
-		zoom.setHeight(panel.getHeight());
+	public void resize(int width, int height) {
+		zoom.setWidth(width);
+		zoom.setHeight(height);
 		setPercent(percent);
-	}
-	
-	public void setPercent(double percent) {
-		this.percent = percent;
-		frame = zoom.valueAt(percent);
-		workAndUpdateAll();
 	}
 	
 	public void zoom(int units) {
@@ -108,19 +50,23 @@ public class MandelbrotNavigator extends JFrame{
 		setPercent(newPercent);
 	}
 	
+	public void setPercent(double percent) {
+		this.percent = percent;
+		workAndUpdateAll(zoom.valueAt(percent));
+	}
+	
 	public void move(Point p) {
-		MandelbrotFrame previousFrame = frame;
 		Complex newCenter = frame.toComplex(p);
-		zoom.setCenter(newCenter);
 		System.out.println(newCenter);
-		frame = zoom.valueAt(percent);
+		zoom.setCenter(newCenter);
+		MandelbrotFrame nextFrame = zoom.valueAt(percent);
 		
 		int w = frame.getWidth();
 		int h = frame.getHeight();
 		int dx = p.x - w / 2;
 		int dy = p.y - h / 2;
 		Rectangle r = new Rectangle(Math.max(0, dx), Math.max(0, dy), Math.min(w + dx, w), Math.min(h + dy, h));
-		frame.copyData(previousFrame, r, -dx, -dy);
+		nextFrame.copyData(frame, r, -dx, -dy);
 		  
 		Rectangle r1 = new Rectangle();
 		Rectangle r2 = new Rectangle();
@@ -147,10 +93,34 @@ public class MandelbrotNavigator extends JFrame{
 		  r2.y1 = 0;
 		  r2.y2 = - dy;
 		}
-		workAndUpdate(r1, r2);
+		workAndUpdate(nextFrame, r1, r2);
 	}
-		 
+	
+	public MandelbrotZoom getZoom() {
+		return zoom;
+	}
+
+	public void setZoom(MandelbrotZoom zoom) {
+		this.zoom = zoom;
+	}
+
+	public MandelbrotFrame getFrame() {
+		return frame;
+	}
+
+	public void setFrame(MandelbrotFrame frame) {
+		this.frame = frame;
+	}
+	
+	public String[] getInfo() {
+		String[] info = new String[4];
+		Complex center = frame.getCenter();
+		info[0] = "Re: " + center.getRe();
+		info[1] = "Im: " + -center.getIm();
+		info[2] = "Delta : " + frame.getDelta();
+		info[3] = "Iterations : " + frame.getMaxIterations();
+		
+		return info;
+	}
+	
 }
-	
-	
-	

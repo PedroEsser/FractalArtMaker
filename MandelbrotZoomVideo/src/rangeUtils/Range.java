@@ -24,7 +24,7 @@ public interface Range<T> {
 	
 	public default Range<T> invert(){ return percent -> valueAt(1 - percent);}
 	
-	public default Range<T> offset(double offset){ return percent -> valueAt(wrap(percent + offset));}
+	public default Range<T> offset(double offset){ return percent -> valueAt(percent + offset);}
 	
 	
 	public default Range<T> loop(){ return new LoopRange<>(this);}
@@ -38,6 +38,18 @@ public interface Range<T> {
 	
 	public default Range<T> slice(double start, double end){ return new SlicedRange<T>(this, start, end);}
 	
+	
+	public default Range<T> truncate(double max){ return percent -> valueAt(truncate(percent, 0, max));}
+	
+	public default Range<T> truncate(double min, double max){ return percent -> valueAt(truncate(percent, min, max));}
+	
+	
+	public default Range<T> fromNumericRange(Range<Double> range){ return percent -> valueAt(range.valueAt(percent));}
+	
+	
+	public static double truncate(double val, double min, double max) {
+		return val < min ? min : val > max ? max : val;
+	}
 	
 	public static double wrap(double percent) {
 		return percent - Math.floor(percent);

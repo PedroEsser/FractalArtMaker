@@ -28,12 +28,12 @@ public class GradientFactory {
 	
 	public static Range<Color> random(){
 		Random rand = new Random();
-		Color[] randomColors = new Color[30];
+		Color[] randomColors = new Color[5];
 		for(int i = 0 ; i < randomColors.length ; i++) {
 			Color c = Color.getHSBColor((float)Math.random() * .7f + .7f, 1f, 1f);
 			randomColors[i] = c;
 		}
-		return fadeColors(randomColors).loop(2);
+		return fadeColors(randomColors).slice(10);
 	}
 	
 }

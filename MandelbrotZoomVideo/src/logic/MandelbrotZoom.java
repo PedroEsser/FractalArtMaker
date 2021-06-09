@@ -8,8 +8,8 @@ import rangeUtils.Range;
 
 public class MandelbrotZoom implements Range<MandelbrotFrame>{
 
-	public static final NumericRange DEFAULT_DELTA_RANGE = new LogarithmicRange(0.005, 1E-14);
-	public static final NumericRange DEFAULT_MAX_ITERATION_RANGE = new LinearRange(100, 1600);
+	public static final NumericRange DEFAULT_DELTA_RANGE = new LogarithmicRange(0.01, 1E-16);
+	public static final NumericRange DEFAULT_MAX_ITERATION_RANGE = new LinearRange(100, 4000);
 	
 	private int width, height;
 	private Range<Complex> centerRange;
@@ -54,7 +54,7 @@ public class MandelbrotZoom implements Range<MandelbrotFrame>{
 	
 	@Override
 	public MandelbrotFrame valueAt(double percent) {
-		return new MandelbrotFrame(centerRange.valueAt(percent), width, height, deltaRange.valueAt(percent), maxIterationRange.valueAt(percent).intValue());
+		return new MandelbrotFrame(centerRange.valueAt(percent), width, height, deltaRange.valueAt(percent), maxIterationsAt(percent));
 	}
 	
 	@Override
@@ -112,6 +112,10 @@ public class MandelbrotZoom implements Range<MandelbrotFrame>{
 
 	public void setMaxIteration(double maxIterations) {
 		this.maxIterationRange = new Constant<>(maxIterations);
+	}
+	
+	public int maxIterationsAt(double percent) {
+		return maxIterationRange.valueAt(percent).intValue();
 	}
 	
 }

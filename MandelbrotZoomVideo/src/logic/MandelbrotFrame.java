@@ -22,7 +22,7 @@ public class MandelbrotFrame {
 	private final double delta;
 	private final int maxIterations;
 	private final Complex center;
-	private final float[][] data;
+	private float[][] data;
 	
 	public MandelbrotFrame(Complex center, int width, int height, double delta, int maxIterations) {
 		this.center = center;
@@ -63,6 +63,10 @@ public class MandelbrotFrame {
 		return center;
 	}
 	
+	public int getMaxIterations() {
+		return maxIterations;
+	}
+	
 	public void set(Point p, float percent) {
 		data[p.x][p.y] = percent;
 	}
@@ -76,10 +80,27 @@ public class MandelbrotFrame {
 	}
 	
 	public void copyData(MandelbrotFrame frame, Rectangle r, int dx, int dy) {
-		float[][] copy = r.slice(frame.data);
-		
+//		float[][] copy = r.slice(frame.data);
+//		
+//		r.loop(p -> {
+//			set(p.x + dx, p.y + dy, copy[p.x - r.x1][p.y - r.y1]);
+//		});
 		r.loop(p -> {
-			set(p.x + dx, p.y + dy, copy[p.x - r.x1][p.y - r.y1]);
+			set(p.x + dx, p.y + dy, frame.data[p.x][p.y]);
+		});
+	}
+	
+	public void resize(int width, int height) {
+		float[][] newData = new float[width][height];
+		int w = Math.min(width, this.getWidth());
+		int h = Math.min(height, this.getHeight());
+		for(int i = 0 ; i < w ; i++)
+			for(int j = 0 ; j < h ; j++)
+				newData[i][j] = data[i][j];
+		allPoints().loop(p -> {
+			if(data[p.x][p.y] == 0) {
+				calculatePoint(p);
+			}
 		});
 	}
 	
@@ -110,6 +131,7 @@ public class MandelbrotFrame {
 		z.square();
 		z.add(c);
 		float percent = (float)(iterations + 1 - Math.log(Math.log(z.amplitudeSquared())) * LOG2_RECIPROCAL) / maxIterations;
+		//percent = (float)iterations/maxIterations;
 		percent =  percent < 0 || Float.isNaN(percent) ? 0 : percent > 1 ? 1 : percent;
 		data[p.x][p.y] = percent;
 	}
@@ -136,15 +158,12 @@ public class MandelbrotFrame {
 	
 	private void drawPixel(BufferedImage img, Point p, Range<Color> gradient) {
 		float percent = data[p.x][p.y];
-		try {
-			img.setRGB(p.x, p.y, percent == 1 ? BELONG_COLOR : gradient.valueAt(percent).getRGB());
-		}catch(Exception e) {
-			System.out.println("Drawing: " + percent);
-		}
-		
+		if(gradient == null)
+			System.out.println("geh");
+		img.setRGB(p.x, p.y, percent == 1 ? BELONG_COLOR : gradient.valueAt(percent).getRGB());
 	}
 	
-	public void drawPixels(BufferedImage img, Range<Color> gradient, Rectangle[] areas) {
+	public void drawPixels(BufferedImage img, Range<Color> gradient, Rectangle... areas) {
 		for(Rectangle area : areas)
 			area.loop(p -> drawPixel(img, p, gradient));
 	}
