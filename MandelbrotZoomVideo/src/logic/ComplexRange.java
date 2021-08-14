@@ -1,21 +1,21 @@
 package logic;
 
-import rangeUtils.LinearRange;
-import rangeUtils.NumericRange;
-import rangeUtils.Range;
+import gradient.LinearGradient;
+import gradient.NumericGradient;
+import gradient.Gradient;
 
-public class ComplexRange implements Range<Complex>{
+public class ComplexRange implements Gradient<Complex>{
 
-	private final NumericRange re, im;
+	private final NumericGradient re, im;
 	
-	public ComplexRange(NumericRange re, NumericRange im) {
+	public ComplexRange(NumericGradient re, NumericGradient im) {
 		this.re = re;
 		this.im = im;
 	}
 
 	public ComplexRange(Complex start, Complex end) {
-		this.re = new LinearRange(start.getRe(), end.getRe());
-		this.im = new LinearRange(start.getIm(), end.getIm());
+		this.re = new LinearGradient(start.getRe(), end.getRe());
+		this.im = new LinearGradient(start.getIm(), end.getIm());
 	}
 
 

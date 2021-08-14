@@ -7,14 +7,15 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
 
-import gradients.Gradient;
-import rangeUtils.Range;
+import gradient.Gradient;
+import gradients.ColorGradient;
+import guiUtils.ImagePanel;
 
 public class GradientVisualizer extends ImagePanel{
 
-	private Range<Color> gradient;
+	private Gradient<Color> gradient;
 	
-	public GradientVisualizer(Range<Color> gradient) {
+	public GradientVisualizer(Gradient<Color> gradient) {
 		this.gradient = gradient;
 	}
 
