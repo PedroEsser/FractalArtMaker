@@ -1,5 +1,5 @@
 # Mandelbrot
-MandelBrot set art maker.
+Fractal art maker.
 
 Personal project
 
