@@ -2,12 +2,12 @@ package gradient;
 
 public class BounceGradient<T> implements Gradient<T>{
 
-	private final Gradient<Double> numericRange;
+	private final Gradient<Double> numericGradient;
 	private final Gradient<T> range;
 	
-	public BounceGradient(Gradient<T> range, Gradient<Double> numericRange) {
+	public BounceGradient(Gradient<T> range, Gradient<Double> numericGradient) {
 		this.range = range;
-		this.numericRange = numericRange;
+		this.numericGradient = numericGradient;
 	}
 	
 	public BounceGradient(Gradient<T> range, double start, double end) {
@@ -24,7 +24,7 @@ public class BounceGradient<T> implements Gradient<T>{
 	
 	@Override
 	public T valueAt(double percent) {
-		double aux = numericRange.valueAt(percent);
+		double aux = numericGradient.valueAt(percent);
 		return this.range.valueAt(GradientUtils.bounce(aux));
 	}
 	

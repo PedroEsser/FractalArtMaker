@@ -2,103 +2,208 @@ package optimizations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
+import javax.tools.DocumentationTool.DocumentationTask;
+
+import com.aparapi.Kernel.EXECUTION_MODE;
+import com.aparapi.Range;
+import com.aparapi.device.Device;
+import com.aparapi.device.OpenCLDevice;
+import com.aparapi.internal.kernel.KernelManager;
+import com.aparapi.internal.kernel.KernelManager.DeprecatedMethods;
+import com.aparapi.internal.kernel.KernelManagers;
+
+import gradient.Gradient;
 import logic.FractalFrame;
-import utils.Rectangle;
 
 public class FractalProducer extends Thread {
 	
-	private static final int CONSUMERS = 5;
+	private List<FractalConsumer> consumers;
+	public static final int DEFAULT_BUFFER_SIZE = 8;
+	private final int bufferSize;
+	private boolean paused;
+	private final int dataSize;
+	private final MyBuffer buffer;
+	private final int nFrames;
 	
-	public boolean paused;
-	private final FractalFrame frame;
-	private int currentY;
-	private final List<Rectangle> areasToScan;
-	private Runnable callBack;
-	
-	List<FractalConsumer> consumers;
-	
-	public FractalProducer(FractalFrame frame, boolean paused, Rectangle... areasToScan) {
-		this.frame = frame;
-		this.paused = paused;
-		this.areasToScan = new ArrayList<>(Arrays.asList(areasToScan));
-		currentY = currentArea().y1;
-	}
-	
-	public FractalProducer(FractalFrame frame, boolean paused) {
-		this(frame, paused, frame.allPoints());
-	}
-	
-	public FractalProducer(FractalFrame frame, Rectangle... areasToScan) {
-		this(frame, false, areasToScan);
-	}
-	
-	public synchronized FractalTask getTask() {
-		checkPause();
-		if(areasToScan.isEmpty())
-			return null;
-		Rectangle current = currentArea();
-		if(currentY >= current.y2) {
-			areasToScan.remove(0);
-			if(areasToScan.isEmpty())
-				return null;
-			current = currentArea();
-			currentY = current.y1;
+	public FractalProducer(Gradient<FractalFrame> zoom, int nFrames, List<OpenCLDevice> devices, int bufferSize) {
+		super();
+		this.dataSize = zoom.getStart().getFractal().getSize();
+		this.bufferSize = bufferSize;
+		this.buffer = new MyBuffer(zoom.toDiscrete(nFrames).iterator());
+		this.consumers = new ArrayList<>(devices.size());
+		this.nFrames = nFrames;
+		for(OpenCLDevice d : devices) {
+			EXECUTION_MODE mode = d.getType() == OpenCLDevice.TYPE.GPU ? EXECUTION_MODE.GPU : EXECUTION_MODE.JTP;
+			consumers.add(new FractalConsumer(d, mode));
+			break;
 		}
-		Rectangle r = new Rectangle(current.x1, currentY, current.x2, ++currentY);
-		return new FractalTask(r, frame);
+//		for(int i = 0 ; i < 1 ; i++) {
+//			consumers.add(new FractalConsumer());
+//		}
 	}
 	
-	private Rectangle currentArea() {
-		return areasToScan.get(0);
+	public FractalProducer(Gradient<FractalFrame> zoom, int nFrames) {
+		this(zoom, nFrames, getAllProcessors(), DEFAULT_BUFFER_SIZE);
 	}
 	
-	public void setCallBack(Runnable callBack) {
-		this.callBack = callBack;
+	public FractalFrame getNextFrame() {
+		return buffer.getNextFrame();
 	}
 	
-	public synchronized void checkPause() {
-		while(paused) {
-			try {
-				wait();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
+	public static List<OpenCLDevice> getAllProcessors(){
+		List<OpenCLDevice> processors = OpenCLDevice.listDevices(Device.TYPE.GPU);
+		//processors.addAll(OpenCLDevice.listDevices(Device.TYPE.CPU));
+		return processors;
 	}
 	
 	public void pause() {
-		System.out.println("pausing");
 		this.paused = true;
 	}
 	
-	public synchronized void unpause() {
-		System.out.println("unpausing");
+	public void unpause() {
 		this.paused = false;
-		notifyAll();
+		buffer.resume();
 	}
 	
 	@Override
 	public void run() {
-		consumers = new ArrayList<FractalConsumer>(CONSUMERS);
-		for(int i = 0 ; i < CONSUMERS ; i++) 
-			consumers.add(new FractalConsumer(this));
-		
-		consumers.forEach(c -> c.start());
-		boolean interrupted = false;
-		for(FractalConsumer mc : consumers) {
+		for(FractalConsumer cons : consumers)
+			cons.start();
+		for(FractalConsumer cons : consumers)
 			try {
-				mc.join();
+				cons.join();
 			} catch (InterruptedException e) {
-				interrupted = true;
-				return;
+				e.printStackTrace();
+			}
+	}
+	
+	private class MyBuffer{
+		
+		private final Iterator<FractalFrame> it;
+		private final FractalFrame[] buffer;
+		private int lowerBound, upperBound;
+		
+		
+		public MyBuffer(Iterator<FractalFrame> it) {
+			this.it = it;
+			buffer = new FractalFrame[bufferSize];
+		}
+		
+		public synchronized void resume() {
+			notifyAll();
+		}
+		
+		public synchronized FractalFrame getNextFrame() {
+			if(lowerBound == nFrames)
+				return null;
+			while(buffer[bufferIndex(lowerBound)] == null)
+				try {
+					//System.out.println("Waiting for frame");
+					wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			FractalFrame f = buffer[bufferIndex(lowerBound)];
+			buffer[bufferIndex(lowerBound++)] = null;
+			notifyAll();
+			return f;
+		}
+		
+		public synchronized FractalTask getNextTask() {
+			while(paused) {
+				try {
+					wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			if(!it.hasNext())
+				return null;
+			while(windowSize() == bufferSize)
+				try {
+					//System.out.println("Waiting for task");
+					wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			notifyAll();
+			return new FractalTask(it.next(), upperBound++);
+		}
+		
+		private synchronized void finished(FractalTask currentTask) {
+			//System.out.println("Finished task, "  + currentTask.index + ", " + lowerBound + ", " + upperBound);
+			buffer[bufferIndex(currentTask.index)] = currentTask.frame;
+			if(currentTask.index == lowerBound)
+				notifyAll();
+		}
+		
+		private int windowSize() {
+			return upperBound - lowerBound + 1;
+		}
+		
+		private int bufferIndex(int index) {
+			return index % bufferSize;
+		}
+		
+	}
+	
+	private class FractalConsumer extends Thread{
+		
+		private OpenCLDevice device;
+		private EXECUTION_MODE mode;
+		private int chunkSize = dataSize;
+		
+		
+		public FractalConsumer(OpenCLDevice device, EXECUTION_MODE mode) {
+			this.device = device;
+			this.mode = mode;
+		}
+		
+		public FractalConsumer() {
+		}
+		
+		private void executeChunks(FractalKernel kernel) {
+			int current = 0;
+			while(current < dataSize) {
+				kernel = kernel.copy(current);
+				kernel.executeSome(Range.create(Math.min(chunkSize, dataSize - current)));
+				current += chunkSize;
 			}
 		}
-		if(!interrupted && callBack != null) {
-			callBack.run();
+		
+		@Override
+		public void run() {
+			FractalTask currentTask = buffer.getNextTask();
+			while(currentTask != null) {
+				Range r = device.createRange(chunkSize);
+				FractalKernel kernel = currentTask.frame.getFractal();
+				try {
+					kernel.executeSome(Range.create(chunkSize));//Range.create(chunkSize)
+					//executeChunks(kernel);
+					buffer.finished(currentTask);
+					currentTask = buffer.getNextTask();
+				}catch(Exception e) {
+					e.printStackTrace();
+				}
+			}
+			super.run();
 		}
-			
+		
+	}
+	
+	private class FractalTask{
+		
+		private FractalFrame frame;
+		private int index;
+		
+		public FractalTask(FractalFrame frame, int index) {
+			this.frame = frame;
+			this.index = index;
+		}
+		
 	}
 	
 }

@@ -4,16 +4,16 @@ import gradient.LinearGradient;
 import gradient.NumericGradient;
 import gradient.Gradient;
 
-public class ComplexRange implements Gradient<Complex>{
+public class ComplexGradient implements Gradient<Complex>{
 
 	private final NumericGradient re, im;
 	
-	public ComplexRange(NumericGradient re, NumericGradient im) {
+	public ComplexGradient(NumericGradient re, NumericGradient im) {
 		this.re = re;
 		this.im = im;
 	}
 
-	public ComplexRange(Complex start, Complex end) {
+	public ComplexGradient(Complex start, Complex end) {
 		this.re = new LinearGradient(start.getRe(), end.getRe());
 		this.im = new LinearGradient(start.getIm(), end.getIm());
 	}

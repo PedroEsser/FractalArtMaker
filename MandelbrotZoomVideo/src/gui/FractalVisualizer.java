@@ -4,9 +4,12 @@ import static guiUtils.GUIUtils.getContrastColor;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
 import java.util.function.Consumer;
 
@@ -93,6 +96,10 @@ public class FractalVisualizer extends ImagePanel {
 		this.gradient = gradient;
 	}
 	
+	public Gradient<Color> getGradient() {
+		return gradient;
+	}
+	
 	public void updateFrame(FractalFrame frame) {
 		this.frame = frame;
 		update();
@@ -114,7 +121,7 @@ public class FractalVisualizer extends ImagePanel {
 	
 	public void update() {
 		if(frame != null) 
-			updateImage(frame.toImage(gradient));
+			updateImage(frame.toImage(gradient, 1/navigator.getZoom().getMaxIterationGradient().getEnd().floatValue()));
 	}
 
 	@Override

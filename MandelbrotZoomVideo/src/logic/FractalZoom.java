@@ -6,31 +6,32 @@ import gradient.Constant;
 import gradient.LinearGradient;
 import gradient.LogarithmicGradient;
 import gradient.NumericGradient;
+import optimizations.FractalKernel;
 import gradient.Gradient;
 
 public class FractalZoom implements Gradient<FractalFrame>{
 
-	public static final Gradient<Fractal> DEFAULT_FRACTAL_RANGE = new Constant<Fractal>(new MandelbrotSet());
+	public static final Gradient<FractalKernel> DEFAULT_FRACTAL_RANGE = new Constant<FractalKernel>(FractalFrame.DEFAULT_FRACTAL);
 	public static final LogarithmicGradient DEFAULT_DELTA_RANGE = new LogarithmicGradient(0.01, 1E-16);
-	public static final LogarithmicGradient DEFAULT_MAX_ITERATION_RANGE = new LogarithmicGradient(100, 4000);
+	public static final Gradient<Double> DEFAULT_MAX_ITERATION_RANGE = new LinearGradient(40, 4000).truncateBelow(0);
 	
 	private int width, height;
-	private Gradient<Complex> centerRange;
-	private Gradient<Double> deltaRange;
-	private Gradient<Double> maxIterationRange;
-	private Gradient<Fractal> fractalRange;
+	private Gradient<Complex> centerGradient;
+	private Gradient<Double> deltaGradient;
+	private Gradient<Double> maxIterationGradient;
+	private Gradient<FractalKernel> fractalGradient;
 
-	public FractalZoom(Gradient<Complex> centerRange, int width, int height, Gradient<Double> deltaRange, Gradient<Double> maxIterationRange, Gradient<Fractal> fractalRange) {
-		this.centerRange = centerRange;
+	public FractalZoom(Gradient<Complex> centerGradient, int width, int height, Gradient<Double> deltaGradient, Gradient<Double> maxIterationGradient, Gradient<FractalKernel> fractalGradient) {
+		this.centerGradient = centerGradient;
 		this.width = width;
 		this.height = height;
-		this.deltaRange = deltaRange;
-		this.maxIterationRange = maxIterationRange;
-		this.fractalRange = fractalRange;
+		this.deltaGradient = deltaGradient;
+		this.maxIterationGradient = maxIterationGradient;
+		this.fractalGradient = fractalGradient;
 	}
 	
-	public FractalZoom(Complex center, int width, int height, Gradient<Double> deltaRange, Gradient<Double> maxIterationRange) {
-		this(new Constant<Complex>(center), width, height, deltaRange, maxIterationRange, DEFAULT_FRACTAL_RANGE);
+	public FractalZoom(Complex center, int width, int height, Gradient<Double> deltaGradient, Gradient<Double> maxIterationGradient) {
+		this(new Constant<Complex>(center), width, height, deltaGradient, maxIterationGradient, DEFAULT_FRACTAL_RANGE);
 	}
 	
 	public FractalZoom(Complex center, int width, int height, double initialDelta, double finalDelta, int initialMaxIteration, int finalMaxIteration) {
@@ -41,8 +42,8 @@ public class FractalZoom implements Gradient<FractalFrame>{
 		this(center, width, height, new LogarithmicGradient(initialDelta, finalDelta));
 	}
 	
-	public FractalZoom(Complex center, int width, int height, Gradient<Double> deltaRange) {
-		this(center, width, height, deltaRange, DEFAULT_MAX_ITERATION_RANGE);
+	public FractalZoom(Complex center, int width, int height, Gradient<Double> deltaGradient) {
+		this(center, width, height, deltaGradient, DEFAULT_MAX_ITERATION_RANGE);
 	}
 	
 	public FractalZoom(Complex center, int width, int height) {
@@ -55,16 +56,16 @@ public class FractalZoom implements Gradient<FractalFrame>{
 	
 	@Override
 	public FractalFrame valueAt(double percent) {
-		return new FractalFrame(centerRange.valueAt(percent), width, height, deltaRange.valueAt(percent), maxIterationsAt(percent), fractalRange.valueAt(percent));
+		return new FractalFrame(centerGradient.valueAt(percent), width, height, deltaGradient.valueAt(percent), maxIterationsAt(percent), fractalGradient.valueAt(percent));
 	}
 	
 	@Override
 	public FractalZoom invert() {
-		return new FractalZoom(centerRange.invert(), width, height, deltaRange.invert(), maxIterationRange.invert(), fractalRange.invert());
+		return new FractalZoom(centerGradient.invert(), width, height, deltaGradient.invert(), maxIterationGradient.invert(), fractalGradient.invert());
 	}
 	
 	public FractalZoom clone() {
-		return new FractalZoom(centerRange, width, height, deltaRange, maxIterationRange, fractalRange);
+		return new FractalZoom(centerGradient, width, height, deltaGradient, maxIterationGradient, fractalGradient);
 	}
 
 	public int getWidth() {
@@ -75,20 +76,20 @@ public class FractalZoom implements Gradient<FractalFrame>{
 		return height;
 	}
 	
-	public Gradient<Complex> getCenterRange() {
-		return centerRange;
+	public Gradient<Complex> getCenterGradient() {
+		return centerGradient;
 	}
 
-	public Gradient<Double> getDeltaRange() {
-		return deltaRange;
+	public Gradient<Double> getDeltaGradient() {
+		return deltaGradient;
 	}
 
-	public Gradient<Double> getMaxIterationRange() {
-		return maxIterationRange;
+	public Gradient<Double> getMaxIterationGradient() {
+		return maxIterationGradient;
 	}
 	
-	public Gradient<Fractal> getFractalRange() {
-		return fractalRange;
+	public Gradient<FractalKernel> getFractalGradient() {
+		return fractalGradient;
 	}
 	
 	public void setWidth(int width) {
@@ -99,40 +100,40 @@ public class FractalZoom implements Gradient<FractalFrame>{
 		this.height = height;
 	}
 
-	public void setCenterRange(Gradient<Complex> centerRange) {
-		this.centerRange = centerRange;
+	public void setCenterGradient(Gradient<Complex> centerGradient) {
+		this.centerGradient = centerGradient;
 	}
 
-	public void setDeltaRange(Gradient<Double> deltaRange) {
-		this.deltaRange = deltaRange;
+	public void setDeltaGradient(Gradient<Double> deltaGradient) {
+		this.deltaGradient = deltaGradient;
 	}
 
-	public void setMaxIterationRange(Gradient<Double> maxIterationRange) {
-		this.maxIterationRange = maxIterationRange;
+	public void setMaxIterationGradient(Gradient<Double> maxIterationGradient) {
+		this.maxIterationGradient = maxIterationGradient;
 	}
 	
-	public void setFractalRange(Gradient<Fractal> fractalRange) {
-		this.fractalRange = fractalRange;
+	public void setFractalGradient(Gradient<FractalKernel> fractalGradient) {
+		this.fractalGradient = fractalGradient;
 	}
 	
 	public void setCenter(Complex center) {
-		this.centerRange = new Constant<>(center);
+		this.centerGradient = new Constant<>(center);
 	}
 
 	public void setDelta(double delta) {
-		this.deltaRange = new Constant<>(delta);
+		this.deltaGradient = new Constant<>(delta);
 	}
 
 	public void setMaxIteration(double maxIterations) {
-		this.maxIterationRange = new Constant<>(maxIterations);
+		this.maxIterationGradient = new Constant<>(maxIterations);
 	}
 	
-	public void setFractal(Fractal fractal) {
-		this.fractalRange = new Constant<>(fractal);
+	public void setFractal(FractalKernel fractal) {
+		this.fractalGradient = new Constant<>(fractal);
 	}
 	
 	public int maxIterationsAt(double percent) {
-		return maxIterationRange.valueAt(percent).intValue();
+		return maxIterationGradient.valueAt(percent).intValue();
 	}
 	
 }

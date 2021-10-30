@@ -5,8 +5,12 @@ public class LinearGradient implements NumericGradient{
 	public final double start, range;
 
 	public LinearGradient(double start, double end) {
+		this(start, end, 1);
+	}
+	
+	public LinearGradient(double start, double end, double percent) {
 		this.start = start;
-		this.range = end - start;
+		this.range = (end - start) / percent;
 	}
 	
 	@Override

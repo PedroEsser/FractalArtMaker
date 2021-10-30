@@ -1,4 +1,4 @@
-package gui;
+package colorGradients;
 
 import javax.swing.JFrame;
 

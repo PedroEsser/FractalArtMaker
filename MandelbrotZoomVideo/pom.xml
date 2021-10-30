@@ -27,10 +27,18 @@
 	    <artifactId>jcodec-javase</artifactId>
 	    <version>0.2.5</version>
 	</dependency>
+	
 	<dependency>
 	  <groupId>com.formdev</groupId>
 	  <artifactId>flatlaf</artifactId>
 	  <version>1.1.2</version>
 	</dependency>
+	
+	<dependency>
+	    <groupId>com.aparapi</groupId>
+	    <artifactId>aparapi</artifactId>
+	    <version>1.9.0</version>
+	</dependency>
+	
   </dependencies>
 </project>

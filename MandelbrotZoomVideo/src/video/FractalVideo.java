@@ -3,9 +3,9 @@ package video;
 import java.awt.image.BufferedImage;
 import java.util.Iterator;
 
+import colorGradients.HSBGradient;
 import gradient.Constant;
 import gradient.Gradient;
-import gradients.HSBGradient;
 
 import java.awt.Color;
 
@@ -19,17 +19,18 @@ public abstract class FractalVideo extends Thread{
 	public static final int DEFAULT_DURATION = 20;
 	public static final Gradient<Gradient<Color>> DEFAULT_GRADIENT_RANGE = new Constant<Gradient<Color>>(new HSBGradient());
 	
+	private final FractalProducer producer;
 	private final Gradient<FractalFrame> zoom;
 	private Gradient<Gradient<Color>> gradientRange;
-	protected final int totalFrames;
+	public final int totalFrames;
 	protected int currentFrame;
-	protected FractalProducer currentProducer;
 	private boolean paused = false;
 
 	public FractalVideo(Gradient<FractalFrame> zoom, Gradient<Gradient<Color>> gradientRange, int fps, double duration, String filePath) {
 		this.zoom = zoom;
 		this.gradientRange = gradientRange;
 		this.totalFrames = (int)(fps * duration);
+		this.producer = new FractalProducer(zoom, this.totalFrames);
 	}
 	
 	public FractalVideo(Gradient<FractalFrame> zoom, Gradient<Gradient<Color>> gradientRange, double duration, String filePath) {
@@ -52,44 +53,46 @@ public abstract class FractalVideo extends Thread{
 		this.gradientRange = new Constant<Gradient<Color>>(gradient);
 	}
 	
-	private void produceAndWait(FractalFrame frame) {
-		currentProducer = new FractalProducer(frame, paused);
-		currentProducer.start();
-		try {
-			currentProducer.join();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void togglePause() {
-		if(paused)
-			currentProducer.unpause();
-		else
-			currentProducer.pause();
+	public synchronized boolean togglePause() {
 		paused = !paused;
+		if(producer != null)
+			if(paused) 	producer.pause();
+			else 		producer.unpause();
+		
+		if(!paused)
+			notifyAll();
+		return paused;
 	}
 	
 	@Override
 	public void run() {
 		long timeStamp = System.currentTimeMillis();
+		float norm = 1f / zoom.getEnd().getMaxIterations();
 		
 		if(zoom instanceof Constant) {
 			FractalFrame frame = zoom.getStart();
-			produceAndWait(frame);
+			frame.calculateAll();
 			for(Gradient<Color> gradient : gradientRange.toDiscrete(totalFrames)) {
-				this.encodeImage(frame.toImage(gradient));
-				if(++currentFrame % 10 == 0)
-					System.out.println("Frame " + currentFrame + " of " + totalFrames + " saved.");
+				this.encodeImage(frame.toImage(gradient, norm));
+				currentFrame++;
 			}
 		}else {
 			Iterator<Gradient<Color>> gradientIterator = gradientRange.toDiscrete(totalFrames).iterator();
-			for(FractalFrame frame : zoom.toDiscrete(totalFrames)) {
-				produceAndWait(frame);
-				this.encodeImage(frame.toImage(gradientIterator.next()));
-				if(++currentFrame % 10 == 0)
-					System.out.println("Frame " + currentFrame + " of " + totalFrames + " saved.");
+			
+			producer.start();
+			FractalFrame current = producer.getNextFrame();
+			while(current != null) {
+				//System.out.println("Encoding frame " + currentFrame);
+				this.encodeImage(current.toImage(gradientIterator.next(), norm));
+				currentFrame++;
+				current = producer.getNextFrame();
 			}
+//
+//			for(FractalFrame frame : zoom.toDiscrete(totalFrames)) {
+//				produceAndWait(frame);
+//				this.encodeImage(frame.toImage(gradientIterator.next(), norm));
+//				currentFrame++;
+//			}
 		}
 		
 		
@@ -103,12 +106,10 @@ public abstract class FractalVideo extends Thread{
 		String minutes = "" + seconds / 60 % 60;
 		String secondsString = "" + seconds % 60;
 		return hours + "h " + minutes + "m " + secondsString + "s";
-		
 	}
 	
 	public abstract void encodeImage(BufferedImage img);
 	
 	public abstract void finished();
-
 	
 }

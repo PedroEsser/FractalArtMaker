@@ -66,7 +66,7 @@ public class Complex {
 	public void square() {
 		double aux = this.re;
 		this.re =  this.re * this.re - this.im * this.im;
-		this.im =  aux * this.im + aux * this.im;
+		this.im =  2 * aux * this.im;
 	}
 	
 	public Complex integerPower(int power) {
@@ -122,8 +122,7 @@ public class Complex {
 	
 	
 	public static Complex fromAngle(double angle, double radius) {
-		Complex c = new Complex(Math.cos(angle), Math.sin(angle));
-		c.scale(radius);
+		Complex c = new Complex(Math.cos(angle) * radius, Math.sin(angle) * radius);
 		return c;
 	}
 	

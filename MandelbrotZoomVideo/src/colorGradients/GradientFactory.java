@@ -1,9 +1,10 @@
-package gradients;
+package colorGradients;
 
 import java.awt.Color;
 import java.util.Random;
 
 import gradient.MultiGradient;
+import gradient.Constant;
 import gradient.Gradient;
 
 public class GradientFactory {
@@ -39,16 +40,6 @@ public class GradientFactory {
 		return randomGradient(rand.nextInt(20) + 5, rand.nextInt(8) + 1, rand.nextDouble() * .4 + .1);
 	}
 	
-	public static Gradient<Color> barbieGradient(int nLoops, int finalNLoops) {
-		Gradient<Color> g1 = HSBGradient.hueAround(Color.magenta, .1).bounce(nLoops);
-		Gradient<Color> g2 = HSBGradient.hueAround(Color.pink, .1).bounce(nLoops);
-		Gradient<Color> g3 = HSBGradient.hueAround(new Color(75,0,130), .1).bounce(nLoops);
-		Gradient<Color> g4 = HSBGradient.hueAround(new Color(148,0,211), .1).bounce(nLoops);
-		Gradient<Color> g5 = HSBGradient.hueAround(new Color(147,112,219), .1).bounce(nLoops);
-		MultiGradient<Color> mg2 = new MultiGradient<>(g1, g2, g3, g4, g5);
-		return mg2.loop(finalNLoops);
-	}
-	
 	public static Gradient<Color> hotAndColdGradient(int nGradients, int nLoops, int finalNLoops, double percentGray) {
 		Gradient<Color>[] gradients = new Gradient[nGradients];
 		
@@ -58,9 +49,9 @@ public class GradientFactory {
 		for(int i = 0 ; i < nGradients ; i++) {
 			if(rand.nextDouble() < grayAcc){
 				if(rand.nextBoolean()) {
-					gradients[i] = RGBGradient.grayAround(0, rand.nextDouble() * .3 + .1).bounce(rand.nextInt(10) + 1);
+					gradients[i] = RGBGradient.grayAround(0, rand.nextDouble() * .3 + .1).bounce(nLoops);
 				}else {
-					gradients[i] = RGBGradient.grayAround(1, rand.nextDouble() * .3 + .1).bounce(rand.nextInt(10) + 1);
+					gradients[i] = RGBGradient.grayAround(1, rand.nextDouble() * .3 + .1).bounce(nLoops);
 				}
 				grayAcc = percentGray;
 			}else {
@@ -115,6 +106,17 @@ public class GradientFactory {
 	
 	public static Gradient<Color> hotGradient(){
 		return HSBGradient.hueAround(rand.nextDouble() * 0.1 - 0.05, rand.nextDouble() * .1 + .1);
+	}
+	
+	public static Gradient<Color> fromColors(int finalLoops, Color... colors){
+		MultiGradient<Color> result = new MultiGradient<Color>();
+		for(Color c : colors)
+			result.addGradient(new Constant<Color>(c));
+		return result.loop(finalLoops);
+	}
+	
+	public static Gradient<Color> fromColors(Color... colors){
+		return fromColors(1, colors);
 	}
 	
 }

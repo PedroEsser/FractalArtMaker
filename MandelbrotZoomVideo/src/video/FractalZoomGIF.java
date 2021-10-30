@@ -9,11 +9,11 @@ import java.io.IOException;
 import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
 
+import colorGradients.ColorGradient;
+import colorGradients.HSBGradient;
 import gradient.Constant;
 import gradient.NumericGradient;
 import gradient.Gradient;
-import gradients.ColorGradient;
-import gradients.HSBGradient;
 import logic.FractalFrame;
 import utils.GifSequenceWriter;
 

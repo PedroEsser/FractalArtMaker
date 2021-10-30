@@ -7,17 +7,17 @@ import javax.swing.JPanel;
 
 import gradient.Gradient;
 
-public class NumericRangePanel extends JPanel{
+public class NumericGradientPanel extends JPanel{
 
 	private Gradient<Double> numericRange;
-	private LabelTextFieldTuple start, end;
+	private LabelValueTuple start, end;
 	
-	public NumericRangePanel(Gradient<Double> numericRange) {
+	public NumericGradientPanel(Gradient<Double> numericRange) {
 		super();
 		this.numericRange = numericRange;
 		this.setLayout(new GridLayout(1, 2, 0, 20));
-		this.start = new LabelTextFieldTuple("Start", numericRange.getStart().toString());
-		this.end = new LabelTextFieldTuple("End", numericRange.getEnd().toString());
+		this.start = new LabelValueTuple("Start", numericRange.getStart());
+		this.end = new LabelValueTuple("End", numericRange.getEnd());
 		this.add(start);
 		this.add(end);
 		this.setMinimumSize(new Dimension(600, 60));

@@ -15,13 +15,14 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
+import colorGradients.ColorGradient;
+import colorGradients.RGBGradient;
 import gradient.LinearGradient;
 import gradient.Gradient;
-import gradients.ColorGradient;
-import gradients.RGBGradient;
+import guiUtils.JTuple;
 import guiUtils.LabelPanelTuple;
-import guiUtils.LabelTextFieldTuple;
-import guiUtils.NumericRangePanel;
+import guiUtils.LabelValueTuple;
+import guiUtils.NumericGradientPanel;
 import logic.Complex;
 import logic.FractalFrame;
 
@@ -30,10 +31,10 @@ public class MenuGUI extends JFrame{
 	public static final Dimension DEFAULT_MENU_SIZE = new Dimension(800, 500);
 	private final FractalNavigatorGUI nav;
 	
-	LabelTextFieldTuple iterations;
-	LabelTextFieldTuple delta;
-	LabelTextFieldTuple re;
-	LabelTextFieldTuple im;
+	LabelValueTuple iterations;
+	LabelValueTuple delta;
+	LabelValueTuple re;
+	LabelValueTuple im;
 	GradientVisualizer visualizer;
 	
 	public MenuGUI(FractalNavigatorGUI nav) {
@@ -42,24 +43,24 @@ public class MenuGUI extends JFrame{
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new GridLayout(5, 1, 30, 20));
 		
-		iterations = new LabelTextFieldTuple("Iterations:", "");
+		iterations = new LabelValueTuple("Iterations:", 0);
 		mainPanel.add(iterations);
 		
-		delta = new LabelTextFieldTuple("Delta:", "");
+		delta = new LabelValueTuple("Delta:", 0);
 		mainPanel.add(delta);
 		
-		re = new LabelTextFieldTuple("Re:", "");
-		im = new LabelTextFieldTuple("Im:", "");
+		re = new LabelValueTuple("Re:", 0);
+		im = new LabelValueTuple("Im:", 0);
 		
 		JPanel centerPanel = new JPanel();
 		centerPanel.setLayout(new GridLayout(1, 2, 20, 20));
 		centerPanel.add(re);
 		centerPanel.add(im);
-		LabelPanelTuple centerTuple = new LabelPanelTuple("Center:", centerPanel);
+		JTuple centerTuple = new JTuple(new JLabel("Center:"), centerPanel);
 		mainPanel.add(centerTuple);
 		
 		visualizer = new GradientVisualizer(nav.getGradient());
-		JPanel panel = new LabelPanelTuple("Current Gradient: ", visualizer);
+		JPanel panel = new LabelPanelTuple("Gradient: ", visualizer);
 		mainPanel.add(panel);
 		
 		JButton updateButton = new JButton("Update");
@@ -83,11 +84,11 @@ public class MenuGUI extends JFrame{
 	public void setVisible(boolean b) {
 		if(b) {
 			FractalFrame frame = nav.getVisualizer().getNavigator().getFrame();
-			iterations.setTextFieldText(frame.getMaxIterations() + "");
-			delta.setTextFieldText(frame.getDelta() + "");
+			iterations.setValue(frame.getMaxIterations());
+			delta.setValue(frame.getDelta());
 			Complex center = frame.getCenter();
-			re.setTextFieldText(center.getRe() + "");
-			im.setTextFieldText(-center.getIm() + "");
+			re.setValue(center.getRe());
+			im.setValue(-center.getIm());
 		}
 		super.setVisible(b);
 	}
@@ -95,10 +96,10 @@ public class MenuGUI extends JFrame{
 	private void updateNavigator(ActionEvent e) {
 		this.setVisible(false);
 		
-		double iterations = Double.parseDouble(this.iterations.getTextFieldText());
-		double delta = Double.parseDouble(this.delta.getTextFieldText());
-		double re = Double.parseDouble(this.re.getTextFieldText());
-		double im = Double.parseDouble(this.im.getTextFieldText());
+		double iterations = this.iterations.getValue();
+		double delta = this.delta.getValue();
+		double re = this.re.getValue();
+		double im = this.im.getValue();
 		
 		nav.getVisualizer().getNavigator().setParameters(iterations, delta, re, -im);
 	}

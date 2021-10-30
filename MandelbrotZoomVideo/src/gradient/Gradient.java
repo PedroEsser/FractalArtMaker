@@ -24,7 +24,6 @@ public interface Gradient<T> {
 		return new DiscreteGradient<T>(this, steps);
 	}
 	
-	public default Gradient<T> loop(){ return percent -> valueAt(GradientUtils.loop(percent));}
 	
 	public default Gradient<T> invert(){ return percent -> valueAt(1 - percent);}
 	
@@ -33,10 +32,12 @@ public interface Gradient<T> {
 	
 	public default Gradient<T> bounce(){ return new BounceGradient<>(this);}
 	
-	public default Gradient<T> bounce(double bounceCount){ return new BounceGradient<>(this, bounceCount);}
+	public default Gradient<T> bounce(double bounceCount){ return bounce(0, bounceCount);}
 	
 	public default Gradient<T> bounce(double start, double end){ return new BounceGradient<>(this, start, end);}
 	
+	
+	public default Gradient<T> loop(){ return percent -> valueAt(GradientUtils.loop(percent));}
 	
 	public default Gradient<T> loop(double end){ return loop(0, end);}
 	

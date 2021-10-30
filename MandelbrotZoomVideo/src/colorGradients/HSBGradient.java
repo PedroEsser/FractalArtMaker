@@ -1,4 +1,4 @@
-package gradients;
+package colorGradients;
 
 import java.awt.Color;
 

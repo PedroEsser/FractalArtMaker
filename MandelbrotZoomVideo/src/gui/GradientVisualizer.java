@@ -7,8 +7,8 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
 
+import colorGradients.ColorGradient;
 import gradient.Gradient;
-import gradients.ColorGradient;
 import guiUtils.ImagePanel;
 
 public class GradientVisualizer extends ImagePanel{

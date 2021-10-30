@@ -14,7 +14,7 @@ public class FractalTask{
 	}
 	
 	public void doTask() {
-		frame.calculate(r);
+		//frame.calculate(r);
 	}
 	
 }
