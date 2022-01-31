@@ -58,7 +58,6 @@ public abstract class FractalVideo extends Thread{
 		if(producer != null)
 			if(paused) 	producer.pause();
 			else 		producer.unpause();
-		
 		if(!paused)
 			notifyAll();
 		return paused;
@@ -83,8 +82,17 @@ public abstract class FractalVideo extends Thread{
 			FractalFrame current = producer.getNextFrame();
 			while(current != null) {
 				//System.out.println("Encoding frame " + currentFrame);
-				this.encodeImage(current.toImage(gradientIterator.next(), norm));
+				long t = System.currentTimeMillis();
+//				System.out.println("before image");
+				BufferedImage result = current.toImage(gradientIterator.next(), norm);
+				System.out.println(System.currentTimeMillis() - t + " millis passed coloring image");
+//				System.out.println("before encoding");
+//				t = System.currentTimeMillis();
+				//ImageUtils.saveImage(result, "C:\\Users\\pedro\\git\\Mandelbrot\\MandelbrotZoomVideo\\video\\Frame" + currentFrame + ".png");
+				this.encodeImage(result);
+//				System.out.println(System.currentTimeMillis() - t + " millis passed encoding image");
 				currentFrame++;
+//				System.out.println("before frame");
 				current = producer.getNextFrame();
 			}
 //

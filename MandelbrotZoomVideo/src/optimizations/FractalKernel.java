@@ -48,40 +48,30 @@ public abstract class FractalKernel extends Kernel {
 		return frame.getData().length;
 	}
 	
-	public void executeSome(Range r) {
-		int some = r.getGlobalSize_0();
-		boolean all = some == getSize();
-		if(all)
-			chunkData = frame.getData();
-		else
-			chunkData = new float[some];
+	public void executeSome(int n_pixels) {
+		long t = System.currentTimeMillis();
 		
-		execute(r).get(chunkData);
-		//dispose();
-		if(!all) {
+		boolean all = n_pixels == getSize();
+		if(all) {
+			chunkData = frame.getData();
+			execute(n_pixels);
+		}else {
+			n_pixels = Math.min(getSize() - getOffset(), n_pixels);
+			chunkData = new float[n_pixels];
+			execute(n_pixels);
 			copyData();
 		}
+		
+		long diff = System.currentTimeMillis() - t;
+		System.out.println(this.getTargetDevice().getShortDescription() + ", " + diff + " millis passed");
 	}
 	
 	public void executeAll() {
-		//long t = System.currentTimeMillis();
-		
-		Range r = Range.create(getSize());
-		executeSome(r);
-		
-//		long diff = System.currentTimeMillis() - t;
-//		System.out.println(this.getTargetDevice().getShortDescription() + ", " +  (double)diff / 1000 + " seconds passed");
+		executeSome(getSize());
 	}
 	
 	public int getOffset() {
 		return offset[0];
-	}
-	
-	public void myExecute(Range r) {
-		chunkData = new float[r.getGlobalSize_0()];
-		execute(r).get(chunkData);
-		dispose();
-		copyData();
 	}
 	
 	public void copyData() {

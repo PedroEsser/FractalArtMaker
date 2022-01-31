@@ -3,15 +3,10 @@ package logic;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
-import java.util.Iterator;
-import java.util.List;
 
 import colorGradients.ColorGradient;
 import colorGradients.HSBGradient;
-import fractals.Fractal;
-import fractals.MandelbrotSet;
 import gradient.Gradient;
-import optimizations.DeviceManager;
 import optimizations.FractalKernel;
 import optimizations.MandelbrotKernel;
 import utils.Rectangle;
@@ -81,7 +76,7 @@ public class FractalFrame {
 		return maxIterations;
 	}
 	
-	public FractalKernel getFractal() {
+	public FractalKernel getKernel() {
 		return fractal;
 	}
 	
@@ -186,7 +181,16 @@ public class FractalFrame {
 	
 	public BufferedImage toImage(Gradient<Color> gradient, float norm) {
 		BufferedImage img = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_3BYTE_BGR);
-		allPoints().loop(p -> drawPixel(img, p, gradient, norm));
+		int h = getHeight();
+		for(int i = 0 ; i < getWidth() ; i++) {
+			for(int j = 0 ; j < h ; j++) {
+				float it = get(i, j);
+				int rgb = it == maxIterations ? BELONG_COLOR : Float.isNaN(it) ? gradient.valueAt(0).getRGB() : gradient.valueAt(it * norm).getRGB();
+				img.setRGB(i, j, rgb);
+			}
+//			if(i%100 == 0)
+//				System.out.println(i);
+		}
 		return img;
 	}
 	

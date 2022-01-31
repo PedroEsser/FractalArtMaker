@@ -17,6 +17,10 @@ public class ComplexPowerMandelbrotKernel extends FractalKernel{
 		this.complexPower = new double[] {c.getRe(), c.getIm()};
 	}
 	
+	public ComplexPowerMandelbrotKernel(double re, double im) {
+		this(new Complex(re, im));
+	}
+	
 	public ComplexPowerMandelbrotKernel(ComplexPowerMandelbrotKernel k, int offset) {
 		super(k, offset);
 		this.complexPower = k.complexPower;
@@ -56,7 +60,6 @@ public class ComplexPowerMandelbrotKernel extends FractalKernel{
 		if(iterations == maxIterations[0]) {
 			chunkData[getGlobalId()] = maxIterations[0];
 		}else {
-			
 			if(currentIM != 0 || currentRE != 0){
 				double angle = Math.atan2(currentIM, currentRE);
 				double lnR = Math.log(Math.sqrt(currentRE * currentRE + currentIM * currentIM));

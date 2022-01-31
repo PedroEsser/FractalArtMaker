@@ -10,6 +10,14 @@ import org.jcodec.common.io.NIOUtils;
 import org.jcodec.common.io.SeekableByteChannel;
 import org.jcodec.common.model.Rational;
 
+//import com.github.hoary.javaav.CodecID;
+//import com.github.hoary.javaav.Encoder;
+//import com.github.hoary.javaav.JavaAVException;
+//import com.github.hoary.javaav.MediaPacket;
+//import com.github.hoary.javaav.Options;
+//import com.github.hoary.javaav.PixelFormat;
+//import com.github.hoary.javaav.VideoFrame;
+
 import gradient.Constant;
 import gradient.Gradient;
 import logic.FractalFrame;
@@ -49,5 +57,35 @@ public class FractalZoomMP4 extends FractalVideo{
 			e.printStackTrace();
 		}
 	}
+	
+//	public static void test() {
+//		Options options = new Options();
+//		options.put("tune", "zerolatency");
+//		options.put("preset", "ultrafast");
+//				
+//		Encoder encoder;
+//		try {
+//			encoder = new Encoder(CodecID.H264);
+//			encoder.setPixelFormat(PixelFormat.BGR24);
+//			encoder.setImageWidth(1280);
+//			encoder.setImageHeight(720);
+//			encoder.setGOPSize(25);
+//			encoder.setBitrate(2000000);
+//			encoder.setFramerate(25);
+//			encoder.open(options);
+//
+//			BufferedImage image = new BufferedImage(NORM_PRIORITY, MIN_PRIORITY, MAX_PRIORITY);
+//			VideoFrame frame = VideoFrame.create(image);
+//
+//			MediaPacket packet = encoder.encodeVideo(frame);
+//			
+////			... send packet over a network, write it to a file or whatever
+//
+//			encoder.close();
+//		} catch (JavaAVException e) {
+//			e.printStackTrace();
+//		}
+//		
+//	}
 
 }

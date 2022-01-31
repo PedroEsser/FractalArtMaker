@@ -8,7 +8,6 @@ import java.util.List;
 import javax.swing.UIManager;
 
 import com.aparapi.Range;
-import com.aparapi.Kernel.EXECUTION_MODE;
 import com.aparapi.device.Device;
 import com.aparapi.device.OpenCLDevice;
 import com.aparapi.internal.kernel.KernelManager;
@@ -29,11 +28,11 @@ import gradient.MultiGradient;
 import gradient.Gradient;
 import gui.FractalNavigatorGUI;
 import optimizations.ComplexPowerMandelbrotKernel;
-import optimizations.DeviceManager;
 import optimizations.FractalKernel;
 import optimizations.FractalProducer;
 import optimizations.MandelbrotKernel;
 import utils.ImageUtils;
+import video.FractalZoomMP4;
 
 public class main{
 
@@ -56,7 +55,6 @@ public class main{
 	 */
 	
 	public static void main(String[] args) {
-		
 		try {
 			UIManager.setLookAndFeel(new FlatDarkLaf());
 		} catch (Exception e) {
@@ -65,25 +63,20 @@ public class main{
 //		FractalFrame f = new FractalFrame(new Complex(-.75, 0), 1500, 1500, 0.001, 4000);
 //		
 //		FractalKernel m = new MandelbrotKernel(f);
-		
-//		m.executeAll();
-		
+//		
+////		m.executeAll();
+//		
 //		int inc = 100000;
 //		int passes = (int)Math.ceil((double)m.getSize() / inc);
 //		long time = 0;
-//		for(OpenCLDevice d : OpenCLDevice.listDevices(Device.TYPE.GPU)) {
-//			m = new MandelbrotKernel(f);
-//			m.setExecutionMode(EXECUTION_MODE.GPU);
-//			m.executeAll(d);
-//			break;
-//			for(int j = 0 ; j < passes ; j++) {
-//				time += m.executeSome(d, inc);
-//			}
-//			System.out.println("Total time: " + time + " ms");
-//			time = 0;
+//		for(int i = 0 ; i < passes ; i++) {
+//			long t = System.currentTimeMillis();
+//			m = m.copy(i*inc);
+//			m.executeSome(inc);
+//			time += System.currentTimeMillis() - t;
 //			ImageUtils.saveImage(f.toImage(), ImageUtils.getNextFileName("C:\\Users\\pedro\\Desktop\\MandelbrotStuff\\images/Mandelbrot.png"));
 //		}
-		
+//		System.out.println("Total time: " + time + " millis");
 //		DeviceManager ma = new DeviceManager(m);
 //		ma.start();
 //		try {
@@ -104,13 +97,12 @@ public class main{
 //			ImageUtils.saveImage(f.toImage(), ImageUtils.getNextFileName("C:\\Users\\pedro\\Desktop\\MandelbrotStuff\\images/Mandelbrot.png"));
 //		}
 		
-		
+		//FractalZoomMP4.test();
 		
 		Gradient<Color> g = costumGradient();
 		g = GradientFactory.randomGradient(20, 1, .2);
-		g = GradientFactory.hotAndColdGradient(10, 3, 1, 0.2);
+		//g = GradientFactory.hotAndColdGradient(10, 3, 1, 0.2);
 		new FractalNavigatorGUI(g);
-		
 	}
 	
 	public static Gradient<Color> costumGradient() {

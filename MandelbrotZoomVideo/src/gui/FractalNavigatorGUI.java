@@ -82,7 +82,10 @@ public class FractalNavigatorGUI extends JFrame{
 	}
 	
 	public void randomiseGradient() {
-		gradient = GradientFactory.hotAndColdGradient(30 + (int)(Math.random() * 30), 5, 1, 0.05 + Math.random() * 0.2).loop().fromNumericRange(p -> Math.pow(p, 0.2));
+		if(Math.random() < .5)
+			gradient = GradientFactory.hotAndColdGradient(30 + (int)(Math.random() * 30), 5, 1, 0.05 + Math.random() * 0.2).loop().fromNumericRange(p -> Math.pow(p, 0.2));
+		else
+			gradient = GradientFactory.randomGradient(10 + (int)(Math.random() * 20), 1, .2).loop().fromNumericRange(p -> Math.pow(p, 0.2));
 		offset = 0;
 		visualizer.updateGradient(gradient);
 	}

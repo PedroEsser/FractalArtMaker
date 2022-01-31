@@ -11,10 +11,10 @@ public class RealPowerMandelbrotKernel extends FractalKernel{
 
 	@Override
 	public void run() {
-		int width = getGlobalSize(0);
-		int i = getGlobalId(0);
-		int j = getGlobalId(1);
-		int index = j * width + i;
+		int width = re.length;
+		int index = getGlobalId() + offset[0];
+		int i = index % width;
+		int j = index / width;
 		
 		double constantRE = re[i];
 		double constantIM = im[j];
@@ -26,7 +26,6 @@ public class RealPowerMandelbrotKernel extends FractalKernel{
 		double radius = 0;
 		
 		while(radius <= 4 && iterations < maxIterations[0]) {
-			
 			double angle = Math.atan2(currentIM, currentRE) * realPower[0];
 			radius = Math.pow(Math.sqrt(currentRE * currentRE + currentIM * currentIM), realPower[0]);
 			currentRE = Math.cos(angle) * radius + constantRE;
@@ -37,7 +36,6 @@ public class RealPowerMandelbrotKernel extends FractalKernel{
 		if(iterations == maxIterations[0]) {
 			chunkData[getGlobalId()] = maxIterations[0];
 		}else {
-			
 			double angle = Math.atan2(currentIM, currentRE) * realPower[0];
 			radius = Math.pow(Math.sqrt(currentRE * currentRE + currentIM * currentIM), realPower[0]);
 			currentRE = Math.cos(angle) * radius + constantRE;

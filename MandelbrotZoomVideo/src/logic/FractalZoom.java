@@ -64,6 +64,16 @@ public class FractalZoom implements Gradient<FractalFrame>{
 		return new FractalZoom(centerGradient.invert(), width, height, deltaGradient.invert(), maxIterationGradient.invert(), fractalGradient.invert());
 	}
 	
+	@Override
+	public FractalZoom loop() {
+		return new FractalZoom(centerGradient.loop(), width, height, deltaGradient.loop(), maxIterationGradient.loop(), fractalGradient.loop());
+	}
+	
+	@Override
+	public FractalZoom bounce() {
+		return new FractalZoom(centerGradient.bounce(), width, height, deltaGradient.bounce(), maxIterationGradient.bounce(), fractalGradient.bounce());
+	}
+	
 	public FractalZoom clone() {
 		return new FractalZoom(centerGradient, width, height, deltaGradient, maxIterationGradient, fractalGradient);
 	}

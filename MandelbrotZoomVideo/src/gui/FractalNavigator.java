@@ -4,19 +4,16 @@ import java.awt.Point;
 import java.text.DecimalFormat;
 import java.util.function.Consumer;
 
-import fractals.MandelbrotSet;
 import gradient.Gradient;
 import gradient.LinearGradient;
 import gradient.LogarithmicGradient;
 import logic.Complex;
 import logic.FractalFrame;
 import logic.FractalZoom;
-import optimizations.BurningShipKernel;
 import optimizations.ComplexPowerMandelbrotKernel;
-import optimizations.FractalProducer;
+import optimizations.FractalKernel;
 import optimizations.MandelbrotKernel;
 import optimizations.RealPowerMandelbrotKernel;
-import utils.Rectangle;
 
 public class FractalNavigator {
 
@@ -32,19 +29,13 @@ public class FractalNavigator {
 	
 	public FractalNavigator(int width, int height, Consumer<FractalFrame> frameUpdateCallback) {
 		this.zoom = new FractalZoom(width, height);
-		zoom.setFractal(new ComplexPowerMandelbrotKernel(new Complex(2, 0.00001)));
+		//zoom.setFractal(new RealPowerMandelbrotKernel(2.5));
 		this.frameUpdateCallback = frameUpdateCallback;
 		producer = new MyThreadPool();
 	}
 	
 	private synchronized void workAndUpdate(FractalFrame nextFrame) {
 		producer.workOn(nextFrame);
-//		producer = new FractalProducer(nextFrame, areas);
-//		producer.setCallBack(() -> {
-//			frame = nextFrame;
-//			frameUpdateCallback.accept(frame);
-//		});
-//		producer.start();
 	}
 	
 	public void resize(int width, int height) {
@@ -133,10 +124,9 @@ public class FractalNavigator {
 			}
 		}
 		
-		
-		
 		private class MyThread extends Thread{
 			
+			private static final int chunk_size = 1 << 18;
 			private FractalFrame nextFrame;
 			private boolean cancelled;
 			
@@ -146,12 +136,18 @@ public class FractalNavigator {
 			}
 			
 			void workAndUpdate(FractalFrame nextFrame) {
-				nextFrame.calculateAll();
+//				int current = 0;
+//				FractalKernel kernel = nextFrame.getKernel();
+//				while(!cancelled && current < kernel.getSize()) {
+//					FractalKernel k = kernel.copy(current);
+//					k.executeSome(chunk_size);
+//					current += chunk_size;
+//				}
+				nextFrame.getKernel().executeAll();
 				if(!cancelled) {
 					frame = nextFrame;
 					frameUpdateCallback.accept(frame);
 				}
-				
 			}
 			
 			@Override
