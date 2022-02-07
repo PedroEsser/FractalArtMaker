@@ -3,7 +3,8 @@ package video;
 import java.awt.image.BufferedImage;
 import java.util.Iterator;
 
-import colorGradients.HSBGradient;
+import gpuColorGradients.ColorGradient;
+import gpuColorGradients.HSBGradient;
 import gradient.Constant;
 import gradient.Gradient;
 
@@ -17,40 +18,30 @@ public abstract class FractalVideo extends Thread{
 	
 	public static final int DEFAULT_FPS = 30;
 	public static final int DEFAULT_DURATION = 20;
-	public static final Gradient<Gradient<Color>> DEFAULT_GRADIENT_RANGE = new Constant<Gradient<Color>>(new HSBGradient());
+	public static final Gradient<ColorGradient> DEFAULT_GRADIENT_RANGE = new Constant<ColorGradient>(new HSBGradient());
 	
 	private final FractalProducer producer;
 	private final Gradient<FractalFrame> zoom;
-	private Gradient<Gradient<Color>> gradientRange;
 	public final int totalFrames;
 	protected int currentFrame;
 	private boolean paused = false;
 
-	public FractalVideo(Gradient<FractalFrame> zoom, Gradient<Gradient<Color>> gradientRange, int fps, double duration, String filePath) {
+	public FractalVideo(Gradient<FractalFrame> zoom, int fps, double duration, String filePath) {
 		this.zoom = zoom;
-		this.gradientRange = gradientRange;
 		this.totalFrames = (int)(fps * duration);
 		this.producer = new FractalProducer(zoom, this.totalFrames);
 	}
 	
-	public FractalVideo(Gradient<FractalFrame> zoom, Gradient<Gradient<Color>> gradientRange, double duration, String filePath) {
-		this(zoom, gradientRange, DEFAULT_FPS, duration, filePath);
+	public FractalVideo(Gradient<FractalFrame> zoom, double duration, String filePath) {
+		this(zoom, DEFAULT_FPS, duration, filePath);
 	}
 	
-	public FractalVideo(Gradient<FractalFrame> zoom, Gradient<Gradient<Color>> gradientRange, String filePath) {
-		this(zoom, gradientRange, DEFAULT_DURATION, filePath);
+	public FractalVideo(Gradient<FractalFrame> zoom, Gradient<ColorGradient> gradientRange, String filePath) {
+		this(zoom, DEFAULT_DURATION, filePath);
 	}
 	
 	public FractalVideo(Gradient<FractalFrame> zoom, String filePath) {
 		this(zoom, DEFAULT_GRADIENT_RANGE, filePath);
-	}
-	
-	public void setGradientRange(Gradient<Gradient<Color>> gradientRange) {
-		this.gradientRange = gradientRange;
-	}
-	
-	public void setGradient(Gradient<Color> gradient) {
-		this.gradientRange = new Constant<Gradient<Color>>(gradient);
 	}
 	
 	public synchronized boolean togglePause() {
@@ -66,33 +57,25 @@ public abstract class FractalVideo extends Thread{
 	@Override
 	public void run() {
 		long timeStamp = System.currentTimeMillis();
-		float norm = 1f / zoom.getEnd().getMaxIterations();
 		
 		if(zoom instanceof Constant) {
-			FractalFrame frame = zoom.getStart();
-			frame.calculateAll();
-			for(Gradient<Color> gradient : gradientRange.toDiscrete(totalFrames)) {
-				this.encodeImage(frame.toImage(gradient, norm));
-				currentFrame++;
-			}
-		}else {
-			Iterator<Gradient<Color>> gradientIterator = gradientRange.toDiscrete(totalFrames).iterator();
-			
+//			FractalFrame frame = zoom.getStart();
+//			frame.calculateAll();
+//			for(ColorGradient gradient : gradientRange.toDiscrete(totalFrames)) {
+//				this.encodeImage(frame.toImage());
+//				currentFrame++;
+//			}
+		}else {			
 			producer.start();
 			FractalFrame current = producer.getNextFrame();
 			while(current != null) {
-				//System.out.println("Encoding frame " + currentFrame);
 				long t = System.currentTimeMillis();
-//				System.out.println("before image");
-				BufferedImage result = current.toImage(gradientIterator.next(), norm);
-				System.out.println(System.currentTimeMillis() - t + " millis passed coloring image");
-//				System.out.println("before encoding");
+				BufferedImage result = current.toImage();
+//				System.out.println(System.currentTimeMillis() - t + " millis passed coloring image");
 //				t = System.currentTimeMillis();
-				//ImageUtils.saveImage(result, "C:\\Users\\pedro\\git\\Mandelbrot\\MandelbrotZoomVideo\\video\\Frame" + currentFrame + ".png");
 				this.encodeImage(result);
-//				System.out.println(System.currentTimeMillis() - t + " millis passed encoding image");
+//				System.out.println(System.currentTimeMillis() - t + " millis TO ENCODE");
 				currentFrame++;
-//				System.out.println("before frame");
 				current = producer.getNextFrame();
 			}
 //

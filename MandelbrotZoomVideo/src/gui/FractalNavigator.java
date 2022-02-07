@@ -4,12 +4,14 @@ import java.awt.Point;
 import java.text.DecimalFormat;
 import java.util.function.Consumer;
 
+import gpuColorGradients.ColorGradient;
 import gradient.Gradient;
 import gradient.LinearGradient;
 import gradient.LogarithmicGradient;
 import logic.Complex;
 import logic.FractalFrame;
 import logic.FractalZoom;
+import optimizations.BurningShipKernel;
 import optimizations.ComplexPowerMandelbrotKernel;
 import optimizations.FractalKernel;
 import optimizations.MandelbrotKernel;
@@ -27,9 +29,11 @@ public class FractalNavigator {
 	private LogarithmicGradient deltaGradient = FractalZoom.DEFAULT_DELTA_RANGE.clone();
 	//private LogarithmicGradient iterationGradient = FractalZoom.DEFAULT_MAX_ITERATION_RANGE.clone();
 	
-	public FractalNavigator(int width, int height, Consumer<FractalFrame> frameUpdateCallback) {
+	public FractalNavigator(int width, int height, Consumer<FractalFrame> frameUpdateCallback, ColorGradient gradient) {
 		this.zoom = new FractalZoom(width, height);
-		//zoom.setFractal(new RealPowerMandelbrotKernel(2.5));
+		this.zoom.setGradient(gradient);
+//		zoom.setFractal(new BurningShipKernel());
+//		zoom.setFractal(new ComplexPowerMandelbrotKernel(2, 0.1));
 		this.frameUpdateCallback = frameUpdateCallback;
 		producer = new MyThreadPool();
 	}
@@ -58,6 +62,11 @@ public class FractalNavigator {
 		update();
 	}
 	
+	public void setGradient(ColorGradient gradient) {
+		zoom.setGradient(gradient);
+		update();
+	}
+	
 	public double getPercent() {
 		return percent;
 	}
@@ -76,6 +85,10 @@ public class FractalNavigator {
 
 	public void setZoom(FractalZoom zoom) {
 		this.zoom = zoom;
+	}
+	
+	public float getNorm() {
+		return 1/zoom.getMaxIterationGradient().getEnd().floatValue();
 	}
 	
 	public double getPercentFor(double delta) {

@@ -2,6 +2,7 @@ package logic;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -15,17 +16,10 @@ import com.aparapi.opencl.OpenCL;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 
-import colorGradients.GradientFactory;
-import colorGradients.HSBGradient;
-import colorGradients.RGBGradient;
 import fractals.Fractal;
 import fractals.FractalCeption;
 import fractals.MandelbrotSet;
-import gradient.Constant;
-import gradient.LinearGradient;
-import gradient.LogarithmicGradient;
-import gradient.MultiGradient;
-import gradient.Gradient;
+import gpuColorGradients.*;
 import gui.FractalNavigatorGUI;
 import optimizations.ComplexPowerMandelbrotKernel;
 import optimizations.FractalKernel;
@@ -60,11 +54,39 @@ public class main{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-//		FractalFrame f = new FractalFrame(new Complex(-.75, 0), 1500, 1500, 0.001, 4000);
+		
+		MultiGradient mg = new MultiGradient();
+		
+		ColorGradient g1 = GradientFactory.randomMixWarmAndCool(0.5f, 30);
+		ColorGradient g2 = GradientFactory.randomGradients(20);
+		ColorGradient g3 = GradientFactory.coolGradient();
+		g1.bounce(10);
+		g2.bounce(10);
+		g3.bounce(10);
+		
+		mg.addGradient(g1);
+//		mg.addGradient(g2);
+//		mg.addGradient(g3);
+		
+//		mg.loop(5);
+
+		//System.out.println(Arrays.toString(mg.toPrimitive()));
+		//	-0.3587077550979053, Im:-0.4723368233724736
+		new FractalNavigatorGUI(g2);
+		
+//		byte[] color = new byte[3];
+//		FractalKernel.saveToColor(-31869, 0, color);
+//		System.out.println(Arrays.toString(color));
+//		
+//		FractalFrame f = new FractalFrame(new Complex(-.75, 0.03), 50, 50, 0.00001, 3000, mg);
 //		
 //		FractalKernel m = new MandelbrotKernel(f);
 //		
-////		m.executeAll();
+//		m.executeAll();
+//		System.out.println(f.getData().length);
+//		System.out.println("helo????");
+//		ImageUtils.saveImage(f.toImage(), ImageUtils.getNextFileName("C:\\Users\\pedro\\Desktop\\MandelbrotStuff\\images/Mandelbrot.png"));
+		
 //		
 //		int inc = 100000;
 //		int passes = (int)Math.ceil((double)m.getSize() / inc);
@@ -84,7 +106,7 @@ public class main{
 //		} catch (InterruptedException e) {
 //			e.printStackTrace();
 //		}
-//		ImageUtils.saveImage(f.toImage(), ImageUtils.getNextFileName("C:\\Users\\pedro\\Desktop\\MandelbrotStuff\\images/Mandelbrot.png"));
+		
 //		
 		
 //		for(OpenCLDevice d : OpenCLDevice.listDevices(Device.TYPE.CPU)) {
@@ -99,41 +121,44 @@ public class main{
 		
 		//FractalZoomMP4.test();
 		
-		Gradient<Color> g = costumGradient();
-		g = GradientFactory.randomGradient(20, 1, .2);
-		//g = GradientFactory.hotAndColdGradient(10, 3, 1, 0.2);
-		new FractalNavigatorGUI(g);
+//		Gradient<Color> g = costumGradient();
+//		g = GradientFactory.randomGradient(20, 1, .2);
+//		//g = GradientFactory.hotAndColdGradient(10, 3, 1, 0.2);
+
+		
+		
+		
 	}
 	
-	public static Gradient<Color> costumGradient() {
-		Gradient<Color> g1 = new HSBGradient(.5, .75).loop(10);
-		Gradient<Color> g2 = new RGBGradient(.2, 0).loop(10);
-		Gradient<Color> g3 = new HSBGradient(.9, 1.2).loop(10);
-		MultiGradient<Color> g4 = new MultiGradient<>(g1, g2, g3, g2);
-		return g4.loop(3);
-	}
-	
-	public static Gradient<Color> costumGradient2() {
-		Gradient<Color> g1 = new HSBGradient(.7, .9).loop(4);
-		Gradient<Color> g2 = new HSBGradient(.9, .4).loop(4);
-		Gradient<Color> g3 = new HSBGradient(.4, .6).loop(4);
-		Gradient<Color> g4 = new HSBGradient(1.1, .9).loop(4);
-		Gradient<Color> g5 = new RGBGradient(.3, 0).loop(4);
-		Gradient<Color> g6 = new RGBGradient(1, 0.7).loop(4);
-		MultiGradient<Color> g7 = new MultiGradient<>(g1, g2, g3, g6, g5, g3, g4, g5, g6);
-		return g7.loop(3);
-	}
-	
-	public static Gradient<Color> costumGradient3() {
-		Gradient<Color> g1 = HSBGradient.hueAround(new Color(128, 0, 128)).loop(3);
-		Gradient<Color> g2 = RGBGradient.grayAround(0, 0.4).loop(3);
-		Gradient<Color> g3 = HSBGradient.hueAround(Color.blue).loop(3);
-		Gradient<Color> g4 = HSBGradient.hueAround(Color.orange).loop(3);
-		Gradient<Color> g5 = RGBGradient.grayAround(1, 0.4).loop(3);
-		Gradient<Color> g7 = HSBGradient.hueAround(Color.CYAN).loop(3);
-		Gradient<Color> g8 = HSBGradient.hueAround(Color.red).loop(3);
-		MultiGradient<Color> g9 = new MultiGradient<>(g1, g2, g3, g4, g5, g7, g5, g8, g5, g1);
-		return g9.loop(6);
-	}
+//	public static Gradient<Color> costumGradient() {
+//		Gradient<Color> g1 = new HSBGradient(.5, .75).loop(10);
+//		Gradient<Color> g2 = new RGBGradient(.2, 0).loop(10);
+//		Gradient<Color> g3 = new HSBGradient(.9, 1.2).loop(10);
+//		MultiGradient<Color> g4 = new MultiGradient<>(g1, g2, g3, g2);
+//		return g4.loop(3);
+//	}
+//	
+//	public static Gradient<Color> costumGradient2() {
+//		Gradient<Color> g1 = new HSBGradient(.7, .9).loop(4);
+//		Gradient<Color> g2 = new HSBGradient(.9, .4).loop(4);
+//		Gradient<Color> g3 = new HSBGradient(.4, .6).loop(4);
+//		Gradient<Color> g4 = new HSBGradient(1.1, .9).loop(4);
+//		Gradient<Color> g5 = new RGBGradient(.3, 0).loop(4);
+//		Gradient<Color> g6 = new RGBGradient(1, 0.7).loop(4);
+//		MultiGradient<Color> g7 = new MultiGradient<>(g1, g2, g3, g6, g5, g3, g4, g5, g6);
+//		return g7.loop(3);
+//	}
+//	
+//	public static Gradient<Color> costumGradient3() {
+//		Gradient<Color> g1 = HSBGradient.hueAround(new Color(128, 0, 128)).loop(3);
+//		Gradient<Color> g2 = RGBGradient.grayAround(0, 0.4).loop(3);
+//		Gradient<Color> g3 = HSBGradient.hueAround(Color.blue).loop(3);
+//		Gradient<Color> g4 = HSBGradient.hueAround(Color.orange).loop(3);
+//		Gradient<Color> g5 = RGBGradient.grayAround(1, 0.4).loop(3);
+//		Gradient<Color> g7 = HSBGradient.hueAround(Color.CYAN).loop(3);
+//		Gradient<Color> g8 = HSBGradient.hueAround(Color.red).loop(3);
+//		MultiGradient<Color> g9 = new MultiGradient<>(g1, g2, g3, g4, g5, g7, g5, g8, g5, g1);
+//		return g9.loop(6);
+//	}
 	
 }

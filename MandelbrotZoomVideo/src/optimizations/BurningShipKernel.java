@@ -1,26 +1,26 @@
 package optimizations;
 
-import logic.FractalFrame;
+import gpuColorGradients.MultiGradient;
 
 public class BurningShipKernel extends FractalKernel{
 
 	private final boolean[] absFlags;
 	
-	public BurningShipKernel(boolean[] absFlags) {
+	public BurningShipKernel(boolean absRE, boolean absIM) {
 		super();
-		this.absFlags = absFlags;
+		this.absFlags = new boolean[] {absRE, absIM};
 	}
 	
 	public BurningShipKernel() {
-		this(new boolean[] {true, true});
+		this(true, true);
 	}
 
 	@Override
 	public void run() {
-		int width = getGlobalSize(0);
-		int i = getGlobalId(0);
-		int j = getGlobalId(1);
-		int index = j * width + i;
+		int width = re.length;
+		int index = getGlobalId() + offset[0];
+		int i = index % width;
+		int j = index / width;
 		
 		double constantRE = re[i];
 		double constantIM = im[j];
@@ -41,7 +41,10 @@ public class BurningShipKernel extends FractalKernel{
 		}
 		
 		if(iterations == maxIterations[0]) {
-			chunkData[getGlobalId()] = maxIterations[0];
+			int in = getGlobalId() * 3;
+			chunkData[in + 0] = 0;
+			chunkData[in + 1] = 0;
+			chunkData[in + 2] = 0;
 		}else {
 			
 			aux = currentRE;
@@ -57,7 +60,11 @@ public class BurningShipKernel extends FractalKernel{
 			
 			float iterationScore = (float)(iterations + 1 - Math.log(Math.log(Math.sqrt(currentRE * currentRE + currentIM * currentIM))) * LOG2_RECIPROCAL[0]);
 			iterationScore =  iterationScore < 0 ? 0 : iterationScore;
-			chunkData[getGlobalId()] = iterationScore;
+			int rgb = MultiGradient.colorAt(iterationScore * norm[0], gradient);
+			int in = getGlobalId() * 3;
+			chunkData[in + 0] = (byte)(rgb & 0xFF);
+			chunkData[in + 1] = (byte)(rgb >> 8 & 0xFF);
+			chunkData[in + 2] = (byte)(rgb >> 16 & 0xFF);
 		}
 	}
 	

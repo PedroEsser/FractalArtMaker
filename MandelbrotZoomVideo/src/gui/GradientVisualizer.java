@@ -7,15 +7,15 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
 
-import colorGradients.ColorGradient;
+import gpuColorGradients.ColorGradient;
 import gradient.Gradient;
 import guiUtils.ImagePanel;
 
 public class GradientVisualizer extends ImagePanel{
 
-	private Gradient<Color> gradient;
+	private ColorGradient gradient;
 	
-	public GradientVisualizer(Gradient<Color> gradient) {
+	public GradientVisualizer(ColorGradient gradient) {
 		this.gradient = gradient;
 	}
 
@@ -25,7 +25,7 @@ public class GradientVisualizer extends ImagePanel{
 		Graphics g = this.img.getGraphics();
 		
 		int x = 0;
-		for(Color c : gradient.toDiscrete(this.img.getWidth())) {
+		for(Color c : gradient.toGradient().toDiscrete(this.img.getWidth())) {
 			g.setColor(c);
 			g.drawLine(x, 0, x++, this.img.getHeight());
 		}

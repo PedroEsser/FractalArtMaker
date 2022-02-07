@@ -18,11 +18,8 @@ public class GradientUtils {
 	public static double bounce(double percent) {
 		int p = floor(percent);
 		percent -= p;
-		if(p % 2 == 0) 
-			return percent;
-		return 1 - percent;
+		return p % 2 == 0 ? percent : 1 - percent;
 	}
-	
 	
 	public static double loop(double percent) {
 		return percent - floor(percent);

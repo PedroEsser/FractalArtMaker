@@ -13,8 +13,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
 
+import gradient.LogarithmicGradient;
 import guiUtils.JTuple;
 import guiUtils.LabelPanelTuple;
 import guiUtils.LabelValueTuple;
@@ -22,6 +24,7 @@ import logic.Complex;
 import logic.FractalZoom;
 import utils.ImageUtils;
 import video.FractalVideo;
+import video.FractalZoomFrameSaver;
 import video.FractalZoomMP4;
 
 public class VideoMaker extends JFrame{
@@ -69,7 +72,7 @@ public class VideoMaker extends JFrame{
 		
 		JButton b = new JButton("Choose Directory");
 		b.addActionListener(a -> chooseDiretory());
-		dir = new JTextField("C:\\Users\\pedro\\Desktop\\MandelbrotStuff\\mp4");
+		dir = new JTextField("C:\\Users\\pedro\\Desktop\\MandelbrotStuff");
 		JTuple dirTuple = new JTuple(b, dir);
 		mainPanel.add(dirTuple);
 		
@@ -109,6 +112,7 @@ public class VideoMaker extends JFrame{
 	private void renderToggle() {
 		if(video == null) {
 			String videoPath = ImageUtils.getNextFileName(dir.getText() + "/" + name.getText() + ".mp4");
+//			String videoPath = dir.getText() + "/" + name.getText();
 			try {
 				int fp = (int)fps.getValue();
 				double dur = duration.getValue();
@@ -118,6 +122,7 @@ public class VideoMaker extends JFrame{
 				zoom.setWidth((int)width.getValue());
 				zoom.setHeight((int)height.getValue());
 				video = new FractalZoomMP4(zoom, fp, dur, videoPath) {
+//				video = new FractalZoomFrameSaver(zoom, fp, dur, videoPath) {
 					@Override
 					public void encodeImage(BufferedImage img) {
 						super.encodeImage(img);
@@ -131,10 +136,10 @@ public class VideoMaker extends JFrame{
 						progress.setString("Video finished rendering!");
 					}
 				};
-				if(shift.getValue() != 0)
-					video.setGradientRange(p -> vis.getGradient().offset(p * shift.getValue()));
-				else
-					video.setGradient(vis.getGradient());
+//				if(shift.getValue() != 0)
+//					video.setGradientRange(p -> vis.getGradient().offset(p * shift.getValue()));
+//				else
+//					video.setGradient(vis.getGradient());
 				video.start();
 				renderToggle.setText("Pause");
 			} catch (Exception e) {

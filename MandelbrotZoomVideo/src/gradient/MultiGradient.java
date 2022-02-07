@@ -5,21 +5,21 @@ import java.util.ArrayList;
 
 public class MultiGradient<T> implements Gradient<T>{
 
-	private final ArrayList<RangeWeightTuple> ranges;
+	private final ArrayList<GradientWeightTuple> gradients;
 	private double sumWeights = 0;
 	
 	public MultiGradient() {
-		this.ranges = new ArrayList<>();
+		this.gradients = new ArrayList<>();
 	}
 	
-	public MultiGradient(Gradient<T>... ranges) {
+	public MultiGradient(Gradient<T>... gradients) {
 		this();
-		for(Gradient<T> r : ranges)
+		for(Gradient<T> r : gradients)
 			this.addGradient(r, 1);
 	}
 	
-	public void addGradient(Gradient<T> range, double weight) {
-		ranges.add(new RangeWeightTuple(range, weight));
+	public void addGradient(Gradient<T> gradient, double weight) {
+		gradients.add(new GradientWeightTuple(gradient, weight));
 		sumWeights += weight;
 	}
 	
@@ -30,7 +30,7 @@ public class MultiGradient<T> implements Gradient<T>{
 	@Override
 	public T valueAt(double percent) {
 		double aux = percent * sumWeights;
-		for(RangeWeightTuple rw : ranges) {
+		for(GradientWeightTuple rw : gradients) {
 			if(rw.weight >= aux) {
 				return rw.range.valueAt(aux / rw.weight);
 			}
@@ -41,17 +41,17 @@ public class MultiGradient<T> implements Gradient<T>{
 	
 	private double getSumWeights() {
 		double sum = 0;
-		for(RangeWeightTuple rw : ranges)
+		for(GradientWeightTuple rw : gradients)
 			sum += rw.weight;
 		return sum;
 	}
 	
-	private class RangeWeightTuple{
+	private class GradientWeightTuple{
 		
 		Gradient<T> range;
 		double weight;
 		
-		public RangeWeightTuple(Gradient<T> range, double weight) {
+		public GradientWeightTuple(Gradient<T> range, double weight) {
 			this.range = range;
 			this.weight = weight;
 		}

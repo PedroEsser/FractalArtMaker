@@ -17,7 +17,7 @@ import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.KeyStroke;
 
-import gradient.Gradient;
+import gpuColorGradients.ColorGradient;
 import guiUtils.ImagePanel;
 import logic.FractalFrame;
 
@@ -25,13 +25,13 @@ public class FractalVisualizer extends ImagePanel {
 	
 	private FractalNavigator navigator;
 	private FractalFrame frame;
-	private Gradient<Color> gradient = FractalFrame.DEFAULT_GRADIENT;
+	private ColorGradient gradient = FractalFrame.DEFAULT_GRADIENT;
 	private boolean showInfo;
 	
-	public FractalVisualizer(Gradient<Color> gradient) {
+	public FractalVisualizer(ColorGradient gradient) {
 		super();
 		this.gradient = gradient;
-		navigator = new FractalNavigator(0, 0, frame -> updateFrame(frame));
+		navigator = new FractalNavigator(0, 0, frame -> updateFrame(frame), gradient);
 		this.setMousePressCallback(e -> {
 			if (e.getButton() == MouseEvent.BUTTON1) {		//LEFT_CLICK
             	Point p = getPointOnImage(e.getPoint());
@@ -92,11 +92,11 @@ public class FractalVisualizer extends ImagePanel {
 		this.frame = frame;
 	}
 	
-	public void setGradient(Gradient<Color> gradient) {
+	public void setGradient(ColorGradient gradient) {
 		this.gradient = gradient;
 	}
 	
-	public Gradient<Color> getGradient() {
+	public ColorGradient getGradient() {
 		return gradient;
 	}
 	
@@ -105,8 +105,9 @@ public class FractalVisualizer extends ImagePanel {
 		update();
 	}
 	
-	public void updateGradient(Gradient<Color> gradient) {
+	public void updateGradient(ColorGradient gradient) {
 		this.gradient = gradient;
+		navigator.setGradient(gradient);
 		update();
 	}
 	
@@ -121,7 +122,7 @@ public class FractalVisualizer extends ImagePanel {
 	
 	public void update() {
 		if(frame != null) 
-			updateImage(frame.toImage(gradient, 1/navigator.getZoom().getMaxIterationGradient().getEnd().floatValue()));
+			updateImage(frame.toImage());
 	}
 
 	@Override

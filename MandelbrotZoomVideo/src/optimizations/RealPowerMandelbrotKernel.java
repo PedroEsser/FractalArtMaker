@@ -1,5 +1,8 @@
 package optimizations;
 
+import gpuColorGradients.ColorGradient;
+import gpuColorGradients.MultiGradient;
+
 public class RealPowerMandelbrotKernel extends FractalKernel{
 
 	private final double[] realPower;
@@ -34,7 +37,10 @@ public class RealPowerMandelbrotKernel extends FractalKernel{
 		}
 		
 		if(iterations == maxIterations[0]) {
-			chunkData[getGlobalId()] = maxIterations[0];
+			int in = getGlobalId() * 3;
+			chunkData[in + 0] = 0;
+			chunkData[in + 1] = 0;
+			chunkData[in + 2] = 0;
 		}else {
 			double angle = Math.atan2(currentIM, currentRE) * realPower[0];
 			radius = Math.pow(Math.sqrt(currentRE * currentRE + currentIM * currentIM), realPower[0]);
@@ -47,7 +53,11 @@ public class RealPowerMandelbrotKernel extends FractalKernel{
 			
 			float iterationScore = (float)(iterations + 1 - Math.log(Math.log(Math.sqrt(currentRE * currentRE + currentIM * currentIM))) * LOG2_RECIPROCAL[0]);
 			iterationScore =  iterationScore < 0 ? 0 : iterationScore;
-			chunkData[getGlobalId()] = iterationScore;
+			int rgb = MultiGradient.colorAt(iterationScore * norm[0], gradient);
+			int in = getGlobalId() * 3;
+			chunkData[in + 0] = (byte)(rgb & 0xFF);
+			chunkData[in + 1] = (byte)(rgb >> 8 & 0xFF);
+			chunkData[in + 2] = (byte)(rgb >> 16 & 0xFF);
 		}
 	}
 

@@ -12,7 +12,7 @@ import logic.FractalFrame;
 
 public class FractalProducer extends Thread {
 	
-	private static final int N_CONSUMERS = 4;
+	private static final int N_CONSUMERS = 2;
 	private final List<FractalConsumer> consumers;
 	public static final int DEFAULT_BUFFER_SIZE = 16;
 	private final int bufferSize;
@@ -55,14 +55,18 @@ public class FractalProducer extends Thread {
 	
 	@Override
 	public void run() {
-		for(FractalConsumer cons : consumers)
-			cons.start();
-		for(FractalConsumer cons : consumers)
+		FractalTask currentTask = buffer.getNextTask();
+		while(currentTask != null) {
+			FractalKernel kernel = currentTask.frame.getKernel();
 			try {
-				cons.join();
-			} catch (InterruptedException e) {
+				kernel.executeAll();
+				buffer.finished(currentTask);
+				currentTask = buffer.getNextTask();
+			}catch(Exception e) {
 				e.printStackTrace();
 			}
+		}
+		super.run();
 	}
 	
 	private class MyBuffer{
@@ -85,7 +89,7 @@ public class FractalProducer extends Thread {
 				return null;
 			while(buffer[bufferIndex(lowerBound)] == null)
 				try {
-					System.out.println("Waiting for frame, window size = " + windowSize());
+					//System.out.println("Waiting for frame, window size = " + windowSize());
 					wait();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
@@ -93,6 +97,7 @@ public class FractalProducer extends Thread {
 			FractalFrame f = buffer[bufferIndex(lowerBound)];
 			buffer[bufferIndex(lowerBound++)] = null;
 			notifyAll();
+			//System.out.println("Got frame " + lowerBound + ", window size = " + windowSize());
 			return f;
 		}
 		
@@ -108,7 +113,7 @@ public class FractalProducer extends Thread {
 				return null;
 			while(windowSize() == bufferSize)
 				try {
-					System.out.println("Waiting for task, window size = " + windowSize());
+					//System.out.println("Waiting for task, window size = " + windowSize());
 					wait();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
@@ -140,20 +145,7 @@ public class FractalProducer extends Thread {
 		
 		@Override
 		public void run() {
-			FractalTask currentTask = buffer.getNextTask();
-			while(currentTask != null) {
-				FractalKernel kernel = currentTask.frame.getKernel();
-				try {
-					//kernel.executeSome(Range.create(chunkSize));//Range.create(chunkSize)
-					//executeChunks(kernel);
-					kernel.executeAll();
-					buffer.finished(currentTask);
-					currentTask = buffer.getNextTask();
-				}catch(Exception e) {
-					e.printStackTrace();
-				}
-			}
-			super.run();
+			
 		}
 		
 	}
