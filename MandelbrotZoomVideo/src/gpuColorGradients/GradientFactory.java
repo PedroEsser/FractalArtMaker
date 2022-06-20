@@ -57,7 +57,6 @@ public class GradientFactory {
 	
 	public static MultiGradient randomSmoothHSBGradients(int n) {
 		MultiGradient mg = new MultiGradient();
-		n=2;
 		int lastHSB = rand.nextInt();
 		for(int i = 0 ; i < n ; i++) {
 			int newHSB = rand.nextInt();

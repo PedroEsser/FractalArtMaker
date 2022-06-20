@@ -22,19 +22,19 @@ public class BurningShipKernel extends FractalKernel{
 		double currentIM = 0;
 		double constantRE = topLeft[0] + this.delta[0] * i;
 		double constantIM = topLeft[1] + this.delta[0] * j;
-		
-		if(iterations > 1)
-			for(int a = 0 ; a < iterations ; a++) {
-				aux = currentRE;
-				currentRE = iterateRE(currentRE, currentIM) + constantRE;
-				currentIM = iterateIM(aux, currentIM) + constantIM;
-			}
+	
+		for(int a = 0 ; a < iterations ; a++) {
+			aux = currentRE;
+			currentRE = iterateRE(currentRE, currentIM) + constantRE;
+			currentIM = iterateIM(aux, currentIM) + constantIM;
+		}
 			
 		constantRE = currentRE;
 		constantIM = currentIM;
-		iterations = 0;
+		
 		currentRE = 0;
 		currentIM = 0;
+		iterations = 0;
 		
 		while(currentRE*currentRE + currentIM*currentIM <= 10 && iterations < maxIterations[0]) {
 			aux = currentRE;
@@ -56,29 +56,27 @@ public class BurningShipKernel extends FractalKernel{
 			iterations+=5;
 		}
 		
-		if(iterations >= maxIterations[0]) {
-			int in = (width * j + i) * 3;
-			data[in + 0] = 0;
-			data[in + 1] = 0;
-			data[in + 2] = 0;
-		}else {
-			float iterationScore = (float)(iterations + 1 - Math.log(Math.log(Math.sqrt(currentRE*currentRE + currentIM*currentIM))) * LOG2_RECIPROCAL[0]);
+		int rgb = 0;
+		if(iterations < maxIterations[0]) {
+			float iterationScore = (float)(iterations + 1 - log(log(sqrt(currentRE * currentRE + currentIM * currentIM)))/log(2));
 			iterationScore =  iterationScore < 0 ? 0 : iterationScore;
-			int rgb = MultiGradient.colorAt(iterationScore * norm[0], gradient);
-			FractalKernel.saveToColor(rgb, (width * j + i), data);
+			rgb = MultiGradient.colorAt(iterationScore * norm[0], gradient);
 		}
+		
+		i = (width * j + i) * 3;
+		data[i + 0] = (byte)(rgb & 0xFF);
+		data[i + 1] = (byte)(rgb >> 8 & 0xFF);
+		data[i + 2] = (byte)(rgb >> 16 & 0xFF);
 	}
 
 	@Override
 	public double iterateRE(double currentRE, double currentIM) {
-		double re = currentRE * currentRE - currentIM * currentIM;
-		return re;
+		return currentRE * currentRE - currentIM * currentIM;
 	}
 
 	@Override
 	public double iterateIM(double currentRE, double currentIM) {
-		double im = 2 * currentRE * currentIM;
-		return abs(im);
+		return abs(2 * currentRE * currentIM);
 	}
 	
 	public double abs(double d) {

@@ -69,25 +69,6 @@ public class MandelbrotKernel extends FractalKernel{
 			rgb = MultiGradient.colorAt(iterationScore * norm[0], gradient);
 		}
 		
-//		current[0] = 0;
-//		current[1] = 0;
-//		
-//		while(current[0] * current[0] + current[1] * current[1] <= escapeRadius[0] && iterations < maxIterations[0]) {
-//			iterate(current, constantRE, constantIM);
-//			iterate(current, constantRE, constantIM);
-//			iterate(current, constantRE, constantIM);
-//			iterate(current, constantRE, constantIM);
-//			iterate(current, constantRE, constantIM);
-//
-//			iterations+=5;
-//		}
-//		int rgb = 0;
-//		if(iterations < maxIterations[0]) {
-//			float iterationScore = (float)(iterations + 1 - log(log(sqrt(current[0] * current[0] + current[1] * current[1])))/log(2));
-//			iterationScore =  iterationScore < 0 ? 0 : iterationScore;
-//			rgb = MultiGradient.colorAt(iterationScore * norm[0], gradient);
-//		}
-		
 		i = (width * j + i) * 3;
 		data[i + 0] = (byte)(rgb & 0xFF);
 		data[i + 1] = (byte)(rgb >> 8 & 0xFF);
