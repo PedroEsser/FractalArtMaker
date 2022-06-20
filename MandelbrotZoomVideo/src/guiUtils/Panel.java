@@ -8,20 +8,25 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseWheelEvent;
 import java.util.function.Consumer;
 
 import javax.swing.JPanel;
 
 public abstract class Panel extends JPanel{
 
-	private Consumer<MouseEvent> mousePressCallback;
+	private Consumer<MouseEvent> mousePressCallback, mouseDraggedCallback;
+	private Consumer<MouseWheelEvent> mouseWheelCallBack;
 	
 	public Panel() {
 		super();
 		this.addMouseListener(getMouseAdapter());
+		this.addMouseMotionListener(getMouseMotionAdapter());
+		this.addMouseWheelListener(getMouseAdapter());
 	}
 	
-	abstract void myPaint(Graphics2D g);
+	protected abstract void myPaint(Graphics2D g);
 	
 	@Override
 	public void paint(Graphics g) {
@@ -31,6 +36,14 @@ public abstract class Panel extends JPanel{
 	
 	public void setMousePressCallback(Consumer<MouseEvent> mousePressCallback) {
 		this.mousePressCallback = mousePressCallback;
+	}
+	
+	public void setMouseDraggedCallback(Consumer<MouseEvent> mouseDraggedCallback) {
+		this.mouseDraggedCallback = mouseDraggedCallback;
+	}
+	
+	public void setMouseWheelCallback(Consumer<MouseWheelEvent> mouseWheelCallBack) {
+		this.mouseWheelCallBack = mouseWheelCallBack;
 	}
 	
 	public int getPanelWidth() {
@@ -51,11 +64,26 @@ public abstract class Panel extends JPanel{
 		return new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (mousePressCallback != null) {
+                if (mousePressCallback != null) 
                 	mousePressCallback.accept(e);
-                }
+            }
+            
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {
+            	if(mouseWheelCallBack != null)
+            		mouseWheelCallBack.accept(e);
             }
         };
+	}
+	
+	private MouseMotionAdapter getMouseMotionAdapter() {
+		return new MouseMotionAdapter() {
+			@Override
+            public void mouseDragged(MouseEvent e) {
+            	if (mouseDraggedCallback != null) 
+            		mouseDraggedCallback.accept(e);
+            }
+		};
 	}
 	
 }

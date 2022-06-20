@@ -9,6 +9,7 @@ import gradient.Gradient;
 public class MultiGradient extends ColorGradient{
 
 	private final ArrayList<GradientWeightTuple> gradients;
+	private float shift = 0;
 	private float sumWeights;
 	
 	public MultiGradient() {
@@ -19,7 +20,7 @@ public class MultiGradient extends ColorGradient{
 	public MultiGradient(ColorGradient... gradients) {
 		this();
 		for(ColorGradient r : gradients)
-			this.addGradient(r, 1);
+			this.addGradient(r);
 	}
 	
 	public void addGradient(ColorGradient gradient, float weight) {
@@ -32,18 +33,39 @@ public class MultiGradient extends ColorGradient{
 	}
 	
 	public static int colorAt(float percent, int[] gradient) {
-		percent = 1 - (1 - percent)*(1 - percent)*(1 - percent);
-		float p = 1  - ColorGradient.percentFor(percent, 0, gradient);
-		int index = 3;
+		if(percent != percent)
+			percent = 0;
+		percent += toMyFloat(gradient[3]);
+		percent = 2*percent - percent*percent;			// Squishing colors towards the start
+		float p = ColorGradient.percentFor(percent, 0, gradient);//
+		int index = 4;
 		float aux = p * toMyFloat(gradient[index++]);	// p * sumWeights
-		while(aux > 0) {
+		while(aux >= 0) {
 			float w = toMyFloat(gradient[index++]);
 			if(w >= aux)
 				return ColorGradient.genericColorAt(aux / w, index, gradient);
 			aux -= w;
-			index += 5;
+			index += 5;									//skipping gradient
 		}
 		return -1;
+	}
+	
+	public MultiGradient clone() {
+		MultiGradient clo = new MultiGradient();
+		clo.gradients.addAll(this.gradients);
+		clo.sumWeights = this.sumWeights;
+		clo.setShift(shift);
+		return clo;
+	}
+	
+	public void setShift(float shift) {
+		this.shift = shift;
+	}
+	
+	public MultiGradient shifted(float shift) {
+		MultiGradient shifted = this.clone();
+		shifted.setShift(shift);
+		return shifted;
 	}
 	
 	@Override
@@ -56,6 +78,7 @@ public class MultiGradient extends ColorGradient{
 		ArrayList<Integer> list = new ArrayList<Integer>();
 		for(int b : getBase())
 			list.add(b);
+		list.add(toMyInt(shift));
 		list.add(toMyInt(sumWeights));
 		for(GradientWeightTuple t : gradients) {
 			list.add(toMyInt(t.weight));
@@ -71,7 +94,7 @@ public class MultiGradient extends ColorGradient{
 		return result;
 	}
 	
-private class GradientWeightTuple{
+	private class GradientWeightTuple{
 		
 		ColorGradient gradient;
 		float weight;

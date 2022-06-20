@@ -7,14 +7,18 @@ public class RGBGradient extends ColorGradient{
 
 	private int rgbStart, rgbEnd;
 	
-	public RGBGradient(int rgbStart, int rgbEnd) {
+	public RGBGradient(Color start, Color end) {
 		super(RGB);
-		this.rgbStart = rgbStart;
-		this.rgbEnd = rgbEnd;
+		this.rgbStart = start.getRGB();
+		this.rgbEnd = end.getRGB();
 	}
 	
-	public RGBGradient(Color start, Color end) {
-		this(start.getRGB(), end.getRGB());
+	public RGBGradient(int startRed, int startGreen, int startBlue, int endRed, int endGreen, int endBlue) {
+		this(new Color(startRed, startGreen, startBlue), new Color(endRed, endGreen, endBlue));
+	}
+	
+	public RGBGradient(int startGray, int endGray) {
+		this(startGray, startGray, startGray, endGray, endGray, endGray);
 	}
 	
 	public RGBGradient() {

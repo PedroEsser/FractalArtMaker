@@ -3,10 +3,10 @@ package guiUtils;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
-public class LabelValueTuple extends JTuple<JLabel, JTextField>{
+public class LabelValueTuple extends LabelTuple<JTextField>{
 	
 	public LabelValueTuple(String label, double value) {
-		super(new JLabel(label), new JTextField(value + ""));
+		super(label, new JTextField(value + ""));
 	}
 	
 	public void setLabel(String label) {

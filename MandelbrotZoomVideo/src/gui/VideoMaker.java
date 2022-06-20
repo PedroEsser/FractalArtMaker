@@ -1,10 +1,7 @@
 package gui;
 
-import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -13,15 +10,15 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
-import javax.swing.filechooser.FileFilter;
 
-import gradient.LogarithmicGradient;
+import fractal.Complex;
+import fractal.FractalFrame;
+import fractal.FractalZoom;
+import gpuColorGradients.ColorGradient;
+import gpuColorGradients.MultiGradient;
 import guiUtils.JTuple;
-import guiUtils.LabelPanelTuple;
+import guiUtils.LabelTuple;
 import guiUtils.LabelValueTuple;
-import logic.Complex;
-import logic.FractalZoom;
 import utils.ImageUtils;
 import video.FractalVideo;
 import video.FractalZoomFrameSaver;
@@ -46,7 +43,7 @@ public class VideoMaker extends JFrame{
 		super("Video Maker");
 		this.vis = vis;
 		JPanel mainPanel = new JPanel();
-		mainPanel.setLayout(new GridLayout(8, 1, 10, 20));
+		mainPanel.setLayout(new GridLayout(8, 1, 10, 10));
 		
 		fps = new LabelValueTuple("Fps:", 30);
 		duration = new LabelValueTuple("Duration:", 50);
@@ -67,7 +64,7 @@ public class VideoMaker extends JFrame{
 		mainPanel.add(shift);
 		
 		visualizer = new GradientVisualizer(vis.getGradient());
-		JPanel panel = new LabelPanelTuple("Gradient: ", visualizer);
+		JPanel panel = new LabelTuple("Gradient: ", visualizer);
 		mainPanel.add(panel);
 		
 		JButton b = new JButton("Choose Directory");
@@ -119,10 +116,25 @@ public class VideoMaker extends JFrame{
 				int totalFrames = (int)(fp * dur);
 				progress.setMaximum(totalFrames);
 				FractalZoom zoom = vis.getNavigator().getZoom().clone();
-				zoom.setWidth((int)width.getValue());
-				zoom.setHeight((int)height.getValue());
-				video = new FractalZoomMP4(zoom, fp, dur, videoPath) {
-//				video = new FractalZoomFrameSaver(zoom, fp, dur, videoPath) {
+				zoom.setDimensions((int)width.getValue(), (int)height.getValue());
+				float offset = (float)shift.getValue();
+				MultiGradient gradient = vis.getGradient();
+				zoom.setColorGradient(p -> gradient.shifted((float)(p*offset)));
+//				FractalZoom zoomInOut = zoom.bounce();
+//				zoomInOut.setDimensions((int)width.getValue(), (int)height.getValue());
+//				zoomInOut.setNorm(zoom.getNorm());
+//				
+//				FractalZoom zoomOut = zoom.clone();
+//				zoomOut.setDeltaGradient(new LinearGradient(zoomInOut.getEnd().getDelta(), Math.PI*2+.5));
+//				zoomOut.setMaxIteration(100);
+//				zoomOut.setDimensions((int)width.getValue(), (int)height.getValue());
+//				zoomOut.setNorm(zoom.getNorm());
+//				
+//				MultiGradient<FractalFrame> z = new MultiGradient<FractalFrame>(zoomInOut);
+//				z.addGradient(zoomOut, 2);
+				
+//				video = new FractalZoomMP4(zoom, fp, dur, videoPath) {
+				video = new FractalZoomFrameSaver(zoom, fp, dur, videoPath) {
 					@Override
 					public void encodeImage(BufferedImage img) {
 						super.encodeImage(img);
@@ -136,10 +148,6 @@ public class VideoMaker extends JFrame{
 						progress.setString("Video finished rendering!");
 					}
 				};
-//				if(shift.getValue() != 0)
-//					video.setGradientRange(p -> vis.getGradient().offset(p * shift.getValue()));
-//				else
-//					video.setGradient(vis.getGradient());
 				video.start();
 				renderToggle.setText("Pause");
 			} catch (Exception e) {

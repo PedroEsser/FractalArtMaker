@@ -3,22 +3,21 @@ package video;
 import java.awt.image.BufferedImage;
 import java.util.Iterator;
 
+import fractal.FractalFrame;
 import gpuColorGradients.ColorGradient;
 import gpuColorGradients.HSBGradient;
 import gradient.Constant;
 import gradient.Gradient;
+import kernel.FractalProducer;
 
 import java.awt.Color;
 
-import logic.FractalFrame;
-import optimizations.FractalProducer;
 import utils.ImageUtils;
 
 public abstract class FractalVideo extends Thread{
 	
 	public static final int DEFAULT_FPS = 30;
 	public static final int DEFAULT_DURATION = 20;
-	public static final Gradient<ColorGradient> DEFAULT_GRADIENT_RANGE = new Constant<ColorGradient>(new HSBGradient());
 	
 	private final FractalProducer producer;
 	private final Gradient<FractalFrame> zoom;
@@ -36,13 +35,10 @@ public abstract class FractalVideo extends Thread{
 		this(zoom, DEFAULT_FPS, duration, filePath);
 	}
 	
-	public FractalVideo(Gradient<FractalFrame> zoom, Gradient<ColorGradient> gradientRange, String filePath) {
+	public FractalVideo(Gradient<FractalFrame> zoom, String filePath) {
 		this(zoom, DEFAULT_DURATION, filePath);
 	}
 	
-	public FractalVideo(Gradient<FractalFrame> zoom, String filePath) {
-		this(zoom, DEFAULT_GRADIENT_RANGE, filePath);
-	}
 	
 	public synchronized boolean togglePause() {
 		paused = !paused;

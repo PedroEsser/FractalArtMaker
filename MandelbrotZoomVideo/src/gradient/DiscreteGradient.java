@@ -5,35 +5,34 @@ import java.util.Iterator;
 public class DiscreteGradient<T> implements Iterable<T>{
 
 	private Gradient<T> range;
-	private double percentInc;
+	private int steps;
 	
 	public DiscreteGradient(Gradient<T> range, int steps) {
 		this.range = range;
-		this.percentInc = 1d / (steps - 1);
+		this.steps = steps;
 	}
 	
 	public T valueAt(int index) {
-		return range.valueAt(percentInc * index);
+		return range.valueAt((double)index / (steps-1));
 	}
 
 	@Override
 	public Iterator<T> iterator() {
-		return new RangeIterator();
+		return new GradientIterator();
 	}
 	
-	private class RangeIterator implements Iterator<T>{
+	private class GradientIterator implements Iterator<T>{
 
-		private double current = -percentInc;
+		private int current = 0;
 		
 		@Override
 		public boolean hasNext() {
-			return current <= (1 - percentInc);
+			return current < steps;
 		}
 
 		@Override
 		public T next() {
-			current += percentInc;
-			return range.valueAt(current);
+			return valueAt(current++);
 		}
 		
 	}

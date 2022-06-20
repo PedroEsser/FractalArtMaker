@@ -1,44 +1,60 @@
 package gui;
 
-import static guiUtils.GUIUtils.getContrastColor;
-
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 
+import features.Feature;
+import features.FractalOrbitVisualizer;
+import features.VisualFeature;
+import fractal.FractalFrame;
 import gpuColorGradients.ColorGradient;
+import gpuColorGradients.MultiGradient;
 import guiUtils.ImagePanel;
-import logic.FractalFrame;
 
 public class FractalVisualizer extends ImagePanel {
 	
 	private FractalNavigator navigator;
 	private FractalFrame frame;
-	private ColorGradient gradient = FractalFrame.DEFAULT_GRADIENT;
-	private boolean showInfo;
+	private final List<VisualFeature> features;
+	public final FractalOrbitVisualizer orbitVisualizer;
 	
-	public FractalVisualizer(ColorGradient gradient) {
+	public FractalVisualizer(MultiGradient gradient) {
 		super();
-		this.gradient = gradient;
+		this.features = new ArrayList<VisualFeature>();
+		this.orbitVisualizer = new FractalOrbitVisualizer(this);
+		this.features.add(orbitVisualizer);
 		navigator = new FractalNavigator(0, 0, frame -> updateFrame(frame), gradient);
+		this.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
 		this.setMousePressCallback(e -> {
-			if (e.getButton() == MouseEvent.BUTTON1) {		//LEFT_CLICK
-            	Point p = getPointOnImage(e.getPoint());
-            	navigator.move(p);
-            }
+			Point p = this.getPointOnImage(e.getPoint());
+			if (SwingUtilities.isLeftMouseButton(e)) 
+            	navigator.moveAndUpdate(p);
+            else if (SwingUtilities.isRightMouseButton(e)) 
+            	orbitVisualizer.orbitAt(p);
 		});
-		this.addMouseWheelListener(e -> navigator.zoom(e.getUnitsToScroll()));
+		this.setMouseDraggedCallback(e -> {
+			Point p = this.getPointOnImage(e.getPoint());
+			if (SwingUtilities.isRightMouseButton(e))
+            	orbitVisualizer.orbitAt(p);
+		});
+		this.setMouseWheelCallback(e -> {
+			Point p = this.getPointOnImage(e.getPoint());
+			//navigator.move(p);
+			navigator.zoom(e.getUnitsToScroll(), p);
+		});
+		//this.addMouseWheelListener(e -> navigator.zoom(e.getUnitsToScroll()));
+		this.addKeyStroke(KeyStroke.getKeyStroke("O"), "orbit", e -> orbitVisualizer.toggle());
 	}
 	
 	public void addKeyStroke(KeyStroke stroke, String actionName, Consumer<ActionEvent> action) {
@@ -51,53 +67,12 @@ public class FractalVisualizer extends ImagePanel {
 		});
 	}
 	
-	public FractalVisualizer() {
-		this(FractalFrame.DEFAULT_GRADIENT);
-	}
-	
-	@Override
-	protected void myPaint(Graphics2D g) {
-		super.myPaint(g);
-		showInfo(g);
-	}
-	
-	public void toggleInfo() {
-		showInfo = !showInfo;
-		repaint();
-	}
-	
-	private void showInfo(Graphics2D g) {
-		if(showInfo && frame != null){
-			g.setFont(new Font("Arial", Font.BOLD, 15));
-			g.setColor(Color.WHITE);
-			int y = 20;
-			for(String info : navigator.getInfo()) {
-				g.drawString(info, 5, y);
-				y+= 15;
-			}
-			drawCrosshair(g);
-		}
-	}
-	
-	private void drawCrosshair(Graphics2D g) {
-		int x = this.getPanelWidth() / 2;
-		int y = this.getPanelHeight() / 2;
-		Color colorXY = new Color(this.img.getRGB(x, y));
-		g.setColor(getContrastColor(colorXY));
-		g.fillRect(x - 10, y, 21, 1);
-		g.fillRect(x, y - 10, 1, 21);
-	}
-	
 	public void setFrame(FractalFrame frame) {
 		this.frame = frame;
 	}
-	
-	public void setGradient(ColorGradient gradient) {
-		this.gradient = gradient;
-	}
-	
-	public ColorGradient getGradient() {
-		return gradient;
+
+	public MultiGradient getGradient() {
+		return frame.getGradient();
 	}
 	
 	public void updateFrame(FractalFrame frame) {
@@ -105,8 +80,7 @@ public class FractalVisualizer extends ImagePanel {
 		update();
 	}
 	
-	public void updateGradient(ColorGradient gradient) {
-		this.gradient = gradient;
+	public void updateGradient(MultiGradient gradient) {
 		navigator.setGradient(gradient);
 		update();
 	}
@@ -121,8 +95,17 @@ public class FractalVisualizer extends ImagePanel {
 	}
 	
 	public void update() {
-		if(frame != null) 
-			updateImage(frame.toImage());
+		if(frame != null) {
+			BufferedImage newImg = frame.toImage();
+			for(VisualFeature f : features)
+				f.show(newImg);
+			updateImage(newImg);
+		}
+			
+	}
+	
+	public void addFeature(VisualFeature f) {
+		features.add(f);
 	}
 
 	@Override

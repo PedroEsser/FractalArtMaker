@@ -1,101 +1,98 @@
 package gui;
 
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
 
-import javax.swing.AbstractAction;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.KeyStroke;
 
-import gpuColorGradients.ColorGradient;
+import features.InfoFeature;
+import features.InitialterationsFeature;
 import gpuColorGradients.GradientFactory;
-import gradient.Gradient;
-import logic.Complex;
-import logic.FractalZoom;
 import utils.ImageUtils;
-import video.FractalVideo;
-import video.FractalZoomMP4;
+import static javax.swing.KeyStroke.getKeyStroke;
 
-public class FractalNavigatorGUI extends JFrame{
+
+public class FractalNavigatorGUI{
 
 	public static final Dimension DEFAULT_NAVIGATOR_SIZE = new Dimension(800, 600);
-	private ColorGradient gradient;
 	private final FractalVisualizer visualizer;
-	private MenuGUI menu;
-	private FractalVideo video;
+	private final InfoFeature info;
+	private final InitialterationsFeature init;
+	private MyFrame frame;
 	
-	private Thread loopGradient;
-	private double shift = 1;
-	
-//	private MandelbrotNavigator navigator; 
-	
-	public FractalNavigatorGUI(ColorGradient gradient) {
-		this.gradient = gradient;
-		this.visualizer = new FractalVisualizer(gradient);
+	public FractalNavigatorGUI() {
+		this.visualizer = new FractalVisualizer(GradientFactory.randomiseGradient());
+		info = new InfoFeature(this.visualizer);
+		init = new InitialterationsFeature(this.visualizer);
+		this.visualizer.addFeature(info);
+		this.frame = new MyFrame(false);
 		
-		this.setSize(DEFAULT_NAVIGATOR_SIZE);
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		this.add(visualizer);
-		setVisible(true);
 		addKeyStrokes();
-		//initializeGUI();
 	}
 	
 	public void addKeyStrokes() {
-		visualizer.addKeyStroke(KeyStroke.getKeyStroke("T"), "info", e -> visualizer.toggleInfo());
-		visualizer.addKeyStroke(KeyStroke.getKeyStroke("M"), "menu", e -> openMenu());
-		visualizer.addKeyStroke(KeyStroke.getKeyStroke("I"), "imageSave", e -> saveImage());
-		visualizer.addKeyStroke(KeyStroke.getKeyStroke("V"), "videoSave", e -> new VideoMaker(visualizer));
-		visualizer.addKeyStroke(KeyStroke.getKeyStroke("P"), "toggleVideo", e -> video.togglePause());
-		visualizer.addKeyStroke(KeyStroke.getKeyStroke("PLUS"), "incShift", e -> shift += .02);
-		visualizer.addKeyStroke(KeyStroke.getKeyStroke("MINUS"), "decShift", e -> shift -= .02);
-		visualizer.addKeyStroke(KeyStroke.getKeyStroke("G"), "gradient", e -> randomiseGradient());
+		visualizer.addKeyStroke(getKeyStroke("T"), "info", e -> info.toggle());
+		visualizer.addKeyStroke(getKeyStroke("M"), "menu", e -> new MenuGUI(this));
+		visualizer.addKeyStroke(getKeyStroke("I"), "imageSave", e -> new ImageSaver(visualizer));
+		visualizer.addKeyStroke(getKeyStroke("V"), "videoSave", e -> new VideoMaker(visualizer));
+		visualizer.addKeyStroke(getKeyStroke("G"), "gradient", e -> randomiseGradient());
+		visualizer.addKeyStroke(getKeyStroke("PLUS"), "increaseInitialIterations", e -> init.incInitialIterations());
+		visualizer.addKeyStroke(getKeyStroke("MINUS"), "decreaseInitialIterations", e -> init.decInitialIterations());
+		visualizer.addKeyStroke(getKeyStroke("F"), "fullScreen", e -> toggleFullscreen());
 		
 		for(int i = 0 ; i <= 9 ; i++) {
 			final int d = i;
-			visualizer.addKeyStroke(KeyStroke.getKeyStroke("" + d), "toPercent" + d, e -> goToPercent(d));
+			visualizer.addKeyStroke(getKeyStroke("" + d), "toPercent" + d, e -> goToPercent(d));
 		}
 			
 	}
 	
 	public void randomiseGradient() {
-		if(Math.random() < .5)
-			gradient = GradientFactory.randomMixWarmAndCool();
-		else
-			gradient = GradientFactory.randomGradients();
-		gradient.bounce(10);
-		visualizer.updateGradient(gradient);
-	}
-	
-	public boolean gradientLoopOn() {
-		return loopGradient != null && loopGradient.isAlive();
-	}
-	
-	public void openMenu() {
-		if(menu != null)
-			menu.dispose();
-		menu = new MenuGUI(this);
+		visualizer.updateGradient(GradientFactory.randomiseGradient());
 	}
 	
 	public void goToPercent(int d) {
 		visualizer.getNavigator().setPercent((double)d / 9);
 	}
 	
-	public void saveImage() {
-		ImageUtils.saveImage(visualizer.getImg(), ImageUtils.getNextFileName("C:\\Users\\pedro\\Desktop\\MandelbrotStuff\\images/Mandelbrot.png"));
+	public void toggleFullscreen() {
+		frame.dispose();
+		frame = new MyFrame(!frame.fullScreen);
 	}
-	
-	public ColorGradient getGradient() {
-		return gradient;
-	}
+//	
+//	public void saveImage() {
+//		ImageUtils.saveImage(visualizer.getImg(), ImageUtils.getNextFileName("C:\\Users\\pedro\\Desktop\\MandelbrotStuff\\images/Fractal.png"));
+//	}
 	
 	public FractalVisualizer getVisualizer() {
 		return visualizer;
+	}
+	
+	private class MyFrame extends JFrame{
+		
+		private boolean fullScreen;
+		
+		public MyFrame(boolean fullScreen) {
+			super();
+			this.fullScreen = fullScreen;
+			
+			this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			if(fullScreen) {
+				Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+			    this.setUndecorated(true);
+			    this.setSize(d.width, d.height);
+			}else {
+				this.setSize(DEFAULT_NAVIGATOR_SIZE);
+				this.setLocationRelativeTo(null);
+			}
+			
+			this.add(visualizer);
+			setVisible(true);
+		}
+		
 	}
 	
 }

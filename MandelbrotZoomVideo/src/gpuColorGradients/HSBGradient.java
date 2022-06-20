@@ -7,10 +7,14 @@ public class HSBGradient extends ColorGradient{
 
 	private final int hsbStart, hsbEnd;
 	
-	public HSBGradient(int hueStart, int hueEnd, int satStart, int satEnd, int briStart, int briEnd) {
+	public HSBGradient(int hsbStart, int hsbEnd) {
 		super(HSB);
-		this.hsbStart = toRGB(hueStart, satStart, briStart);
-		this.hsbEnd = toRGB(hueEnd, satEnd, briEnd);
+		this.hsbStart = hsbStart;
+		this.hsbEnd = hsbEnd;
+	}
+	
+	public HSBGradient(int hueStart, int hueEnd, int satStart, int satEnd, int briStart, int briEnd) {
+		this(toRGB(hueStart, satStart, briStart), toRGB(hueEnd, satEnd, briEnd));
 	}
 	
 	public HSBGradient(Color start, Color end) {
@@ -54,8 +58,7 @@ public class HSBGradient extends ColorGradient{
                 r = (int) (brightness * 255.0f + 0.5f);
                 g = (int) (t * 255.0f + 0.5f);
                 b = (int) (p * 255.0f + 0.5f);
-            }
-            else if(h == 1) {
+            }else if(h == 1) {
                 r = (int) (q * 255.0f + 0.5f);
                 g = (int) (brightness * 255.0f + 0.5f);
                 b = (int) (p * 255.0f + 0.5f);

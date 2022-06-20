@@ -9,10 +9,10 @@ import java.io.IOException;
 import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
 
+import fractal.FractalFrame;
 import gpuColorGradients.ColorGradient;
 import gradient.Constant;
 import gradient.Gradient;
-import logic.FractalFrame;
 import utils.GifSequenceWriter;
 
 public class FractalZoomGIF extends FractalVideo {

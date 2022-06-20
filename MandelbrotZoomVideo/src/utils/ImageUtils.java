@@ -101,7 +101,7 @@ public class ImageUtils {
 			if (index < id)
 				index = id;
 		}
-		return directory + "/" + name + (index + 1) + extension;
+		return directory + "/" + name + (index == 0 ? "" : (index + 1)) + extension;
 	}
 	
 	public static String getNextFileName(String fullPath) {

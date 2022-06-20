@@ -10,9 +10,22 @@ import org.jcodec.common.io.NIOUtils;
 import org.jcodec.common.io.SeekableByteChannel;
 import org.jcodec.common.model.Rational;
 
+import fractal.FractalFrame;
+
+//import org.jcodec.api.SequenceEncoder;
+//import org.jcodec.api.awt.AWTSequenceEncoder;
+//import org.jcodec.codecs.h264.H264Encoder;
+//import org.jcodec.codecs.pngawt.PNGEncoder;
+//import org.jcodec.common.Codec;
+//import org.jcodec.common.Format;
+//import org.jcodec.common.io.NIOUtils;
+//import org.jcodec.common.io.SeekableByteChannel;
+//import org.jcodec.common.model.Picture;
+//import org.jcodec.common.model.Rational;
+//import org.jcodec.scale.AWTUtil;
+
 import gradient.Constant;
 import gradient.Gradient;
-import logic.FractalFrame;
 
 public class FractalZoomMP4 extends FractalVideo{
 
@@ -22,6 +35,8 @@ public class FractalZoomMP4 extends FractalVideo{
 		super(zoom, fps, duration, filePath);
 		SeekableByteChannel out = NIOUtils.writableFileChannel(filePath);
 		encoder = new AWTSequenceEncoder(out, Rational.R(fps, 1));
+		
+		
 	}
 	
 	public FractalZoomMP4(FractalFrame frame, int fps, double duration, String filePath) throws FileNotFoundException, IOException {
@@ -32,6 +47,7 @@ public class FractalZoomMP4 extends FractalVideo{
 	public void encodeImage(BufferedImage img) {
 		try {
 			encoder.encodeImage(img);
+			//encoder.encodeNativeFrame(AWTUtil.fromBufferedImageRGB(img));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -15,33 +15,44 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
-import colorGradients.ColorGradient;
-import colorGradients.RGBGradient;
+import colorGradients_deprecated.ColorGradient;
+import colorGradients_deprecated.RGBGradient;
+import fractal.Complex;
+import fractal.FractalFrame;
+import fractal.FractalZoom;
 import gradient.LinearGradient;
 import gradient.Gradient;
 import guiUtils.JTuple;
-import guiUtils.LabelPanelTuple;
+import guiUtils.LabelOptionsTuple;
+import guiUtils.LabelTuple;
 import guiUtils.LabelValueTuple;
 import guiUtils.NumericGradientPanel;
-import logic.Complex;
-import logic.FractalFrame;
+import kernel.BurningShipKernel;
+import kernel.ComplexPowerMandelbrotKernel;
+import kernel.IntegerPowerMandelbrotKernel;
+import kernel.MandelTrig;
+import kernel.MandelbrotKernel;
+import kernel.RealPowerMandelbrotKernel;
 
 public class MenuGUI extends JFrame{
 
 	public static final Dimension DEFAULT_MENU_SIZE = new Dimension(800, 500);
 	private final FractalNavigatorGUI nav;
 	
+	private static String[] FRACTAL_VARIANTS = {"Mandelbrot", "IntegerPowerMandelbrot", "RealPowerMandelbrot", "ComplexPowerMandelbrot", "BurningShip", "MandelTrig"};
+	
 	LabelValueTuple iterations;
 	LabelValueTuple delta;
 	LabelValueTuple re;
 	LabelValueTuple im;
 	GradientVisualizer visualizer;
+	LabelOptionsTuple fractalTypes;
 	
 	public MenuGUI(FractalNavigatorGUI nav) {
 		super("Menu");
 		this.nav = nav;
 		JPanel mainPanel = new JPanel();
-		mainPanel.setLayout(new GridLayout(5, 1, 30, 20));
+		mainPanel.setLayout(new GridLayout(6, 1, 0, 8));
 		
 		iterations = new LabelValueTuple("Iterations:", 0);
 		mainPanel.add(iterations);
@@ -51,17 +62,23 @@ public class MenuGUI extends JFrame{
 		
 		re = new LabelValueTuple("Re:", 0);
 		im = new LabelValueTuple("Im:", 0);
+		re.setBorder(null);
+		im.setBorder(null);
 		
 		JPanel centerPanel = new JPanel();
 		centerPanel.setLayout(new GridLayout(1, 2, 20, 20));
 		centerPanel.add(re);
 		centerPanel.add(im);
-		JTuple centerTuple = new JTuple(new JLabel("Center:"), centerPanel);
+		LabelTuple<JPanel> centerTuple = new LabelTuple("Center:", centerPanel);
 		mainPanel.add(centerTuple);
 		
-		visualizer = new GradientVisualizer(nav.getGradient());
-		JPanel panel = new LabelPanelTuple("Gradient: ", visualizer);
+		visualizer = new GradientVisualizer(nav.getVisualizer().getGradient());
+		JPanel panel = new LabelTuple("Gradient: ", visualizer);
 		mainPanel.add(panel);
+		
+		fractalTypes = new LabelOptionsTuple("Fractal:", FRACTAL_VARIANTS);
+		fractalTypes.getRight().addActionListener(e -> handleFractalSelection());
+		mainPanel.add(fractalTypes);
 		
 		JButton updateButton = new JButton("Update");
 		updateButton.setFont(new Font("Arial", Font.BOLD, 20));
@@ -102,6 +119,25 @@ public class MenuGUI extends JFrame{
 		double im = this.im.getValue();
 		
 		nav.getVisualizer().getNavigator().setParameters(iterations, delta, re, -im);
+	}
+	
+	private void handleFractalSelection() {
+		String selected = fractalTypes.getRight().getSelectedItem().toString();
+		FractalZoom zoom = nav.getVisualizer().getNavigator().getZoom();
+		switch(selected) {
+		case "Mandelbrot":zoom.setFractal(new MandelbrotKernel());
+			break;
+		case "IntegerPowerMandelbrot":zoom.setFractal(new IntegerPowerMandelbrotKernel(3));
+			break;
+		case "RealPowerMandelbrot":zoom.setFractal(new RealPowerMandelbrotKernel(2.5));
+			break;
+		case "ComplexPowerMandelbrot":zoom.setFractal(new ComplexPowerMandelbrotKernel(2, 0.001));
+			break;
+		case "BurningShip":zoom.setFractal(new BurningShipKernel());
+			break;
+		case "MandelTrig":zoom.setFractal(new MandelTrig());
+			break;
+		}
 	}
 	
 }

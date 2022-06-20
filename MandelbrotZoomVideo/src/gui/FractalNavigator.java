@@ -4,18 +4,22 @@ import java.awt.Point;
 import java.text.DecimalFormat;
 import java.util.function.Consumer;
 
+import fractal.Complex;
+import fractal.ComplexGradient;
+import fractal.FractalFrame;
+import fractal.FractalZoom;
 import gpuColorGradients.ColorGradient;
+import gpuColorGradients.MultiGradient;
 import gradient.Gradient;
 import gradient.LinearGradient;
 import gradient.LogarithmicGradient;
-import logic.Complex;
-import logic.FractalFrame;
-import logic.FractalZoom;
-import optimizations.BurningShipKernel;
-import optimizations.ComplexPowerMandelbrotKernel;
-import optimizations.FractalKernel;
-import optimizations.MandelbrotKernel;
-import optimizations.RealPowerMandelbrotKernel;
+import kernel.BurningShipKernel;
+import kernel.ComplexPowerMandelbrotKernel;
+import kernel.FractalKernel;
+import kernel.IntegerPowerMandelbrotKernel;
+import kernel.MandelTrig;
+import kernel.MandelbrotKernel;
+import kernel.RealPowerMandelbrotKernel;
 
 public class FractalNavigator {
 
@@ -26,26 +30,39 @@ public class FractalNavigator {
 	private MyThreadPool producer;
 	private Consumer<FractalFrame> frameUpdateCallback;
 	
-	private LogarithmicGradient deltaGradient = FractalZoom.DEFAULT_DELTA_RANGE.clone();
-	//private LogarithmicGradient iterationGradient = FractalZoom.DEFAULT_MAX_ITERATION_RANGE.clone();
+	private LogarithmicGradient deltaGradient;
 	
-	public FractalNavigator(int width, int height, Consumer<FractalFrame> frameUpdateCallback, ColorGradient gradient) {
+	public FractalNavigator(int width, int height, Consumer<FractalFrame> frameUpdateCallback, MultiGradient gradient) {
 		this.zoom = new FractalZoom(width, height);
+		this.deltaGradient = FractalZoom.DEFAULT_DELTA_GRADIENT.clone();
 		this.zoom.setGradient(gradient);
-//		zoom.setFractal(new BurningShipKernel());
-//		zoom.setFractal(new ComplexPowerMandelbrotKernel(2, 0.1));
+		
 		this.frameUpdateCallback = frameUpdateCallback;
 		producer = new MyThreadPool();
 	}
 	
-	private synchronized void workAndUpdate(FractalFrame nextFrame) {
+	private void workAndUpdate(FractalFrame nextFrame) {
 		producer.workOn(nextFrame);
+	}
+	
+	public void workAndUpdate() {
+		producer.workOn(frame);
 	}
 	
 	public void resize(int width, int height) {
 		zoom.setWidth(width);
 		zoom.setHeight(height);
 		setPercent(percent);
+	}
+	
+	public void zoom(int units, Point p) {
+		Complex c = frame.toComplex(p.x, p.y);
+		percent = percent - units * PERCENT_STEP;
+		FractalFrame nextFrame = zoom.valueAt(percent);
+		Point nextP = nextFrame.toPoint(c);
+		Point diff = new Point(nextP.x - p.x, nextP.y - p.y);
+		zoom.setCenter(nextFrame.toComplex(nextFrame.getWidth()/2 + diff.x, nextFrame.getHeight()/2 + diff.y));
+		update();
 	}
 	
 	public void zoom(int units) {
@@ -62,7 +79,7 @@ public class FractalNavigator {
 		update();
 	}
 	
-	public void setGradient(ColorGradient gradient) {
+	public void setGradient(MultiGradient gradient) {
 		zoom.setGradient(gradient);
 		update();
 	}
@@ -72,9 +89,13 @@ public class FractalNavigator {
 	}
 	
 	public void move(Point p) {
-		Complex newCenter = frame.toComplex(p);
+		Complex newCenter = frame.toComplex(p.x, p.y);
 		System.out.println(newCenter);
 		zoom.setCenter(newCenter);
+	}
+	
+	public void moveAndUpdate(Point p) {
+		move(p);
 		FractalFrame nextFrame = zoom.valueAt(percent);
 		workAndUpdate(nextFrame);
 	}
@@ -85,10 +106,6 @@ public class FractalNavigator {
 
 	public void setZoom(FractalZoom zoom) {
 		this.zoom = zoom;
-	}
-	
-	public float getNorm() {
-		return 1/zoom.getMaxIterationGradient().getEnd().floatValue();
 	}
 	
 	public double getPercentFor(double delta) {
@@ -105,8 +122,16 @@ public class FractalNavigator {
 	
 	public void setParameters(double maxIterations, double delta, double re, double im) {
 		double percent = deltaGradient.getPercentFor(delta);
+		Gradient<Double> maxIGradient = zoom.getMaxIterationGradient();
+		double maxIterRatio = maxIterations / maxIGradient.valueAt(percent);
+		Gradient<Double> maxIter = new LinearGradient(maxIGradient.getStart() * maxIterRatio, maxIGradient.getEnd() * maxIterRatio);
+//		if(percent > 0) 
+//			maxIter = new LinearGradient(Math.min(40, maxIterations), maxIterations, percent);
+//		else 
+//			maxIter = new LinearGradient(Math.min(40, maxIterations), zoom.getMaxIterationGradient().getEnd());
+		
 		zoom.setCenter(new Complex(re, im));
-		zoom.setMaxIterationGradient(new LinearGradient(40, maxIterations, percent).truncateBelow(0));
+		zoom.setMaxIterationGradient(maxIter.truncateBelow(0));
 		setPercent(percent);
 	}
 	
@@ -127,7 +152,7 @@ public class FractalNavigator {
 		
 		private MyThread current, next;
 		
-		void workOn(FractalFrame nextFrame) {
+		private synchronized void workOn(FractalFrame nextFrame) {
 			if(current == null) {
 				current = new MyThread(nextFrame);
 				current.start();
@@ -139,7 +164,6 @@ public class FractalNavigator {
 		
 		private class MyThread extends Thread{
 			
-			private static final int chunk_size = 1 << 18;
 			private FractalFrame nextFrame;
 			private boolean cancelled;
 			
@@ -149,14 +173,8 @@ public class FractalNavigator {
 			}
 			
 			void workAndUpdate(FractalFrame nextFrame) {
-//				int current = 0;
-//				FractalKernel kernel = nextFrame.getKernel();
-//				while(!cancelled && current < kernel.getSize()) {
-//					FractalKernel k = kernel.copy(current);
-//					k.executeSome(chunk_size);
-//					current += chunk_size;
-//				}
-				nextFrame.getKernel().executeAll();
+				nextFrame.calculateAll();
+				
 				if(!cancelled) {
 					frame = nextFrame;
 					frameUpdateCallback.accept(frame);

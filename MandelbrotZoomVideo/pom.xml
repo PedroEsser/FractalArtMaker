@@ -17,6 +17,7 @@
     </plugins>
   </build>
   <dependencies>
+  
   	<dependency>
   		<groupId>org.jcodec</groupId>
   		<artifactId>jcodec</artifactId>
@@ -37,7 +38,7 @@
 	<dependency>
 	    <groupId>com.aparapi</groupId>
 	    <artifactId>aparapi</artifactId>
-	    <version>1.9.0</version>
+	    <version>3.0.0</version>
 	</dependency>
 	
 	<!-- <dependency>
