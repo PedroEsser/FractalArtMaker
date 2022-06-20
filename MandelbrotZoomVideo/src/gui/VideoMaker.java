@@ -133,8 +133,8 @@ public class VideoMaker extends JFrame{
 //				MultiGradient<FractalFrame> z = new MultiGradient<FractalFrame>(zoomInOut);
 //				z.addGradient(zoomOut, 2);
 				
-//				video = new FractalZoomMP4(zoom, fp, dur, videoPath) {
-				video = new FractalZoomFrameSaver(zoom, fp, dur, videoPath) {
+				video = new FractalZoomMP4(zoom, fp, dur, videoPath) {
+//				video = new FractalZoomFrameSaver(zoom, fp, dur, videoPath) {
 					@Override
 					public void encodeImage(BufferedImage img) {
 						super.encodeImage(img);
