@@ -7,9 +7,10 @@ You can find examples of the art produced by this software on my youtube channel
 
 # Key bindings
 
-[M] Open menu
-[T] Toggle HUD
-[G] Randomise gradient
-[0-9] different zoom levels
-[I] Save Image
-[V] Create Video
+- [M] Open menu
+- [T] Toggle HUD
+- [I] Save Image
+- [V] Create Video
+- [F] Toggle fullscreen
+- [G] Randomise gradient
+- [0-9] different zoom levels
