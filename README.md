@@ -9,8 +9,10 @@ You can find examples of the art produced by this software on my youtube channel
 
 - [M] Open menu
 - [T] Toggle HUD
+- [RIGHT-CLICK] Visualize orbit
+- [O] Toggle orbit
+- [F] Toggle fullscreen
 - [I] Save Image
 - [V] Create Video
-- [F] Toggle fullscreen
 - [G] Randomise gradient
 - [0-9] different zoom levels
