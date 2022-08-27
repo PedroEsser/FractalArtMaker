@@ -1,17 +1,14 @@
 package gui;
 
 import java.awt.Dimension;
-import java.awt.GraphicsEnvironment;
-import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
 
 import javax.swing.JFrame;
-import javax.swing.KeyStroke;
 
+import features.FractalParameterToggler;
 import features.InfoFeature;
-import features.InitialterationsFeature;
 import gpuColorGradients.GradientFactory;
-import utils.ImageUtils;
 import static javax.swing.KeyStroke.getKeyStroke;
 
 
@@ -20,13 +17,13 @@ public class FractalNavigatorGUI{
 	public static final Dimension DEFAULT_NAVIGATOR_SIZE = new Dimension(800, 600);
 	private final FractalVisualizer visualizer;
 	private final InfoFeature info;
-	private final InitialterationsFeature init;
+	public final FractalParameterToggler toggler;
 	private MyFrame frame;
 	
 	public FractalNavigatorGUI() {
-		this.visualizer = new FractalVisualizer(GradientFactory.randomiseGradient());
-		info = new InfoFeature(this.visualizer);
-		init = new InitialterationsFeature(this.visualizer);
+		this.visualizer = new FractalVisualizer(this);
+		this.info = new InfoFeature(this);
+		this.toggler = new FractalParameterToggler(this);
 		this.visualizer.addFeature(info);
 		this.frame = new MyFrame(false);
 		
@@ -39,8 +36,12 @@ public class FractalNavigatorGUI{
 		visualizer.addKeyStroke(getKeyStroke("I"), "imageSave", e -> new ImageSaver(visualizer));
 		visualizer.addKeyStroke(getKeyStroke("V"), "videoSave", e -> new VideoMaker(visualizer));
 		visualizer.addKeyStroke(getKeyStroke("G"), "gradient", e -> randomiseGradient());
-		visualizer.addKeyStroke(getKeyStroke("PLUS"), "increaseInitialIterations", e -> init.incInitialIterations());
-		visualizer.addKeyStroke(getKeyStroke("MINUS"), "decreaseInitialIterations", e -> init.decInitialIterations());
+		visualizer.addKeyStroke(getKeyStroke("RIGHT"), "toggleRightParameter", e -> toggler.toggleRight());
+		visualizer.addKeyStroke(getKeyStroke("LEFT"), "toggleLeftParameter", e -> toggler.toggleLeft());
+		visualizer.addKeyStroke(getKeyStroke("UP"), "incParameter", e -> toggler.inc());
+		visualizer.addKeyStroke(getKeyStroke("DOWN"), "decParameter", e -> toggler.dec());
+//		visualizer.addKeyStroke(getKeyStroke("PLUS"), "increaseInitialIterations", e -> init.incInitialIterations());
+//		visualizer.addKeyStroke(getKeyStroke("MINUS"), "decreaseInitialIterations", e -> init.decInitialIterations());
 		visualizer.addKeyStroke(getKeyStroke("F"), "fullScreen", e -> toggleFullscreen());
 		
 		for(int i = 0 ; i <= 9 ; i++) {
@@ -62,11 +63,7 @@ public class FractalNavigatorGUI{
 		frame.dispose();
 		frame = new MyFrame(!frame.fullScreen);
 	}
-//	
-//	public void saveImage() {
-//		ImageUtils.saveImage(visualizer.getImg(), ImageUtils.getNextFileName("C:\\Users\\pedro\\Desktop\\MandelbrotStuff\\images/Fractal.png"));
-//	}
-	
+
 	public FractalVisualizer getVisualizer() {
 		return visualizer;
 	}
@@ -80,10 +77,9 @@ public class FractalNavigatorGUI{
 			this.fullScreen = fullScreen;
 			
 			this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			if(fullScreen) {
-				Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+			if(fullScreen) { 
 			    this.setUndecorated(true);
-			    this.setSize(d.width, d.height);
+			    this.setSize(Toolkit.getDefaultToolkit().getScreenSize());
 			}else {
 				this.setSize(DEFAULT_NAVIGATOR_SIZE);
 				this.setLocationRelativeTo(null);

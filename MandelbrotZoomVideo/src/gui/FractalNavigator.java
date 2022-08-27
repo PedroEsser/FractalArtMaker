@@ -2,24 +2,27 @@ package gui;
 
 import java.awt.Point;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
-import fractal.Complex;
-import fractal.ComplexGradient;
 import fractal.FractalFrame;
 import fractal.FractalZoom;
+import fractalKernels.BurningShipKernel;
+import fractalKernels.ComplexPowerMandelbrotKernel;
+import fractalKernels.FractalKernel;
+import fractalKernels.FractalParameter;
+import fractalKernels.IntegerPowerMandelbrotKernel;
+import fractalKernels.MandelTrig;
+import fractalKernels.MandelbrotKernel;
+import fractalKernels.RealPowerMandelbrotKernel;
+import fractals_deprecated.Complex;
+import fractals_deprecated.ComplexGradient;
 import gpuColorGradients.ColorGradient;
 import gpuColorGradients.MultiGradient;
 import gradient.Gradient;
 import gradient.LinearGradient;
 import gradient.LogarithmicGradient;
-import kernel.BurningShipKernel;
-import kernel.ComplexPowerMandelbrotKernel;
-import kernel.FractalKernel;
-import kernel.IntegerPowerMandelbrotKernel;
-import kernel.MandelTrig;
-import kernel.MandelbrotKernel;
-import kernel.RealPowerMandelbrotKernel;
 
 public class FractalNavigator {
 
@@ -50,8 +53,7 @@ public class FractalNavigator {
 	}
 	
 	public void resize(int width, int height) {
-		zoom.setWidth(width);
-		zoom.setHeight(height);
+		zoom.setDimensions(width, height);
 		setPercent(percent);
 	}
 	
@@ -120,30 +122,27 @@ public class FractalNavigator {
 		this.frame = frame;
 	}
 	
-	public void setParameters(double maxIterations, double delta, double re, double im) {
+	public void setParameters(double maxIterations, double delta, double re, double im, FractalKernel fractal) {
 		double percent = deltaGradient.getPercentFor(delta);
 		Gradient<Double> maxIGradient = zoom.getMaxIterationGradient();
 		double maxIterRatio = maxIterations / maxIGradient.valueAt(percent);
-		Gradient<Double> maxIter = new LinearGradient(maxIGradient.getStart() * maxIterRatio, maxIGradient.getEnd() * maxIterRatio);
-//		if(percent > 0) 
-//			maxIter = new LinearGradient(Math.min(40, maxIterations), maxIterations, percent);
-//		else 
-//			maxIter = new LinearGradient(Math.min(40, maxIterations), zoom.getMaxIterationGradient().getEnd());
+		Gradient<Double> maxIter = new LogarithmicGradient(maxIGradient.getStart() * maxIterRatio, maxIGradient.getEnd() * maxIterRatio);
 		
 		zoom.setCenter(new Complex(re, im));
 		zoom.setMaxIterationGradient(maxIter.truncateBelow(0));
+		zoom.setFractal(fractal);
 		setPercent(percent);
 	}
 	
-	public String[] getInfo() {
-		String[] info = new String[4];
+	public List<String> getInfo() {
+		ArrayList<String> info = new ArrayList<>();
 		Complex center = frame.getCenter();
 		Gradient<Double> deltas = this.zoom.getDeltaGradient();
 		double zoom = deltas.getStart() / deltas.valueAt(percent);
-		info[0] = "Re: " + center.getRe();
-		info[1] = "Im: " + -center.getIm();
-		info[2] = "Zoom : " + new DecimalFormat("0.#####E0").format(zoom);
-		info[3] = "Iterations : " + frame.getMaxIterations();
+		info.add("Re: " + center.getRe());
+		info.add("Im: " + -center.getIm());
+		info.add("Zoom: " + new DecimalFormat("0.#####E0").format(zoom));
+		info.add("Iterations: " + frame.getMaxIterations());
 		
 		return info;
 	}

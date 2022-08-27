@@ -1,17 +1,15 @@
 package video;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JProgressBar;
 
 import fractal.FractalFrame;
-import gpuColorGradients.ColorGradient;
-import gpuColorGradients.HSBGradient;
-import gradient.Constant;
+import fractalKernels.FractalProducer;
 import gradient.Gradient;
-import kernel.FractalProducer;
-
-import java.awt.Color;
-
 import utils.ImageUtils;
 
 public abstract class FractalVideo extends Thread{
@@ -20,25 +18,25 @@ public abstract class FractalVideo extends Thread{
 	public static final int DEFAULT_DURATION = 20;
 	
 	private final FractalProducer producer;
-	private final Gradient<FractalFrame> zoom;
 	public final int totalFrames;
+	protected final int fps;
 	protected int currentFrame;
 	private boolean paused = false;
+	protected JProgressBar progress;
+	private final List<PostProcessing> postProcessings = new ArrayList<>();
 
-	public FractalVideo(Gradient<FractalFrame> zoom, int fps, double duration, String filePath) {
-		this.zoom = zoom;
+	public FractalVideo(Gradient<FractalFrame> zoom, int fps, double duration, String filePath, JProgressBar progress) {
+		this.fps = fps;
 		this.totalFrames = (int)(fps * duration);
 		this.producer = new FractalProducer(zoom, this.totalFrames);
+		this.progress = progress;
+		addPostProcessing(new FadePostProcessing(2));
 	}
 	
-	public FractalVideo(Gradient<FractalFrame> zoom, double duration, String filePath) {
-		this(zoom, DEFAULT_FPS, duration, filePath);
+	public void cancel() {
+		producer.cancel();
+		this.interrupt();
 	}
-	
-	public FractalVideo(Gradient<FractalFrame> zoom, String filePath) {
-		this(zoom, DEFAULT_DURATION, filePath);
-	}
-	
 	
 	public synchronized boolean togglePause() {
 		paused = !paused;
@@ -54,38 +52,23 @@ public abstract class FractalVideo extends Thread{
 	public void run() {
 		long timeStamp = System.currentTimeMillis();
 		
-		if(zoom instanceof Constant) {
-//			FractalFrame frame = zoom.getStart();
-//			frame.calculateAll();
-//			for(ColorGradient gradient : gradientRange.toDiscrete(totalFrames)) {
-//				this.encodeImage(frame.toImage());
-//				currentFrame++;
-//			}
-		}else {			
-			producer.start();
-			FractalFrame current = producer.getNextFrame();
-			while(current != null) {
-				long t = System.currentTimeMillis();
-				BufferedImage result = current.toImage();
-//				System.out.println(System.currentTimeMillis() - t + " millis passed coloring image");
-//				t = System.currentTimeMillis();
-				this.encodeImage(result);
-//				System.out.println(System.currentTimeMillis() - t + " millis TO ENCODE");
-				currentFrame++;
-				current = producer.getNextFrame();
-			}
-//
-//			for(FractalFrame frame : zoom.toDiscrete(totalFrames)) {
-//				produceAndWait(frame);
-//				this.encodeImage(frame.toImage(gradientIterator.next(), norm));
-//				currentFrame++;
-//			}
+		producer.start();
+		FractalFrame current = producer.getNextFrame();
+		while(current != null) {
+			BufferedImage result = current.toImage();
+			this.applyPostProcessing(result);
+			this.encodeImage(result);
+			progress.setString("Frame " + currentFrame + " of " + totalFrames + " rendered.");
+			progress.setValue(currentFrame);
+			currentFrame++;
+			current = producer.getNextFrame();
 		}
 		
-		
-		long timeDiff = System.currentTimeMillis() - timeStamp;
-		System.out.println("Time elapsed: " + secondsConversion(timeDiff / 1000));
-		finished();
+		if(!producer.cancelled()) {
+			finished();
+			long timeDiff = System.currentTimeMillis() - timeStamp;
+			progress.setString("Time elapsed: " + secondsConversion(timeDiff / 1000));
+		}
 	}
 	
 	public static String secondsConversion(long seconds) {
@@ -95,8 +78,43 @@ public abstract class FractalVideo extends Thread{
 		return hours + "h " + minutes + "m " + secondsString + "s";
 	}
 	
+	public void addPostProcessing(PostProcessing pp) {
+		postProcessings.add(pp);
+	}
+	
+	private void applyPostProcessing(BufferedImage img) {
+		for(PostProcessing pp : postProcessings)
+			pp.doProcessing(img);
+	}
+	
 	public abstract void encodeImage(BufferedImage img);
 	
 	public abstract void finished();
+	
+	private class FadePostProcessing implements PostProcessing{
+
+		private final int fadingFrames;
+		
+		public FadePostProcessing(double fadeTime) {
+			this.fadingFrames = (int)(fadeTime*fps);
+		}
+		
+		@Override
+		public void doProcessing(BufferedImage img) {
+			int framesLeft = totalFrames - currentFrame;
+			if(framesLeft < fadingFrames) {
+				double percent = (double)framesLeft/fadingFrames;
+				ImageUtils.processImage(img, c -> fadedColor(c, percent));
+			}
+		}
+		
+		private Color fadedColor(Color c, double percentFade) {
+			int r = (int)(c.getRed() * percentFade);
+			int g = (int)(c.getGreen() * percentFade);
+			int b = (int)(c.getBlue() * percentFade);
+			return new Color(r, g, b);
+		}
+		
+	}
 	
 }

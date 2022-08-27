@@ -2,19 +2,20 @@ package features;
 
 import java.awt.image.BufferedImage;
 
+import gui.FractalNavigatorGUI;
 import gui.FractalVisualizer;
 
 public class SingleUseFeature extends VisualFeature{
 
-	public SingleUseFeature(FractalVisualizer vis) {
-		super(vis);
+	public SingleUseFeature(FractalNavigatorGUI gui) {
+		super(gui);
 	}
 
 	protected boolean used = false;
 	
 	public void activate() {
 		used = false;
-		this.vis.update();
+		this.gui.getVisualizer().update();
 	}
 	
 	@Override

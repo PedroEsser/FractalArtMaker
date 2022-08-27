@@ -25,4 +25,10 @@ public class LabelValueTuple extends LabelTuple<JTextField>{
 		return Double.parseDouble(this.getRight().getText());
 	}
 	
+	@Override
+	public void setEnabled(boolean enabled) {
+		super.setEnabled(enabled);
+		getRight().setEditable(false);
+	}
+	
 }

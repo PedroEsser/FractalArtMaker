@@ -5,16 +5,19 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
+import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import gpuColorGradients.ColorGradient;
+import gpuColorGradients.ThreeChannelGradient;
+import gradient.Gradient;
 import guiUtils.ImagePanel;
 
 public class GradientVisualizer extends ImagePanel{
 
-	private ColorGradient gradient;
+	private Gradient<Color> gradient;
 	
-	public GradientVisualizer(ColorGradient gradient) {
+	public GradientVisualizer(Gradient<Color> gradient) {
 		this.gradient = gradient;
 	}
 	
@@ -24,7 +27,7 @@ public class GradientVisualizer extends ImagePanel{
 			Graphics g = this.img.getGraphics();
 			
 			int x = 0;
-			for(Color c : gradient.toGradient().toDiscrete(this.img.getWidth())) {
+			for(Color c : gradient.toDiscrete(this.img.getWidth())) {
 				g.setColor(c);
 				g.drawLine(x, 0, x++, this.img.getHeight());
 			}
@@ -33,13 +36,21 @@ public class GradientVisualizer extends ImagePanel{
 		}).start();
 	}
 	
-	public ColorGradient getGradient() {
+	public Gradient<Color> getGradient() {
 		return gradient;
 	}
 
 	@Override
 	protected void myResize() {
 		paintImage();
+	}
+	
+	public static void showcase(Gradient<Color> gradient) {
+		JFrame f = new JFrame();
+		f.setSize(800, 200);
+		f.setLocationRelativeTo(null);
+		f.add(new GradientVisualizer(gradient));
+		f.setVisible(true);
 	}
 	
 }

@@ -3,6 +3,7 @@ package gui;
 import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import features.FractalOrbitVisualizer;
 import features.VisualFeature;
 import fractal.FractalFrame;
 import gpuColorGradients.ColorGradient;
+import gpuColorGradients.GradientFactory;
 import gpuColorGradients.MultiGradient;
 import guiUtils.ImagePanel;
 
@@ -29,16 +31,16 @@ public class FractalVisualizer extends ImagePanel {
 	private final List<VisualFeature> features;
 	public final FractalOrbitVisualizer orbitVisualizer;
 	
-	public FractalVisualizer(MultiGradient gradient) {
+	public FractalVisualizer(FractalNavigatorGUI gui) {
 		super();
 		this.features = new ArrayList<VisualFeature>();
-		this.orbitVisualizer = new FractalOrbitVisualizer(this);
+		this.orbitVisualizer = new FractalOrbitVisualizer(gui);
 		this.features.add(orbitVisualizer);
-		navigator = new FractalNavigator(0, 0, frame -> updateFrame(frame), gradient);
+		navigator = new FractalNavigator(0, 0, frame -> updateFrame(frame), GradientFactory.randomiseGradient());
 		this.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
 		this.setMousePressCallback(e -> {
 			Point p = this.getPointOnImage(e.getPoint());
-			if (SwingUtilities.isLeftMouseButton(e)) 
+			if (SwingUtilities.isMiddleMouseButton(e)) 
             	navigator.moveAndUpdate(p);
             else if (SwingUtilities.isRightMouseButton(e)) 
             	orbitVisualizer.orbitAt(p);
@@ -49,16 +51,16 @@ public class FractalVisualizer extends ImagePanel {
             	orbitVisualizer.orbitAt(p);
 		});
 		this.setMouseWheelCallback(e -> {
-			Point p = this.getPointOnImage(e.getPoint());
-			//navigator.move(p);
-			navigator.zoom(e.getUnitsToScroll(), p);
+//			Point p = this.getPointOnImage(e.getPoint());-1.0120864027672762
+//			navigator.zoom(e.getUnitsToScroll(), p);-4.4355735998857025E-6
+			navigator.zoom(e.getUnitsToScroll());
 		});
-		//this.addMouseWheelListener(e -> navigator.zoom(e.getUnitsToScroll()));
 		this.addKeyStroke(KeyStroke.getKeyStroke("O"), "orbit", e -> orbitVisualizer.toggle());
+		update();
 	}
 	
 	public void addKeyStroke(KeyStroke stroke, String actionName, Consumer<ActionEvent> action) {
-		this.getInputMap(JComponent.WHEN_FOCUSED).put(stroke, actionName);
+		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(stroke, actionName);
 		this.getActionMap().put(actionName, new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -67,17 +69,8 @@ public class FractalVisualizer extends ImagePanel {
 		});
 	}
 	
-	public void setFrame(FractalFrame frame) {
-		this.frame = frame;
-	}
-
 	public MultiGradient getGradient() {
-		return frame.getGradient();
-	}
-	
-	public void updateFrame(FractalFrame frame) {
-		this.frame = frame;
-		update();
+		return navigator.getFrame().getGradient();
 	}
 	
 	public void updateGradient(MultiGradient gradient) {
@@ -85,13 +78,9 @@ public class FractalVisualizer extends ImagePanel {
 		update();
 	}
 	
-	public void produceAndUpdateFrame(FractalFrame frame) {
-		frame.calculateAll();
-		updateFrame(frame);
-	}
-	
-	public void produceAndUpdateFrame() {
-		produceAndUpdateFrame(new FractalFrame(WIDTH, HEIGHT));
+	public void updateFrame(FractalFrame frame) {
+		this.frame = frame;
+		update();
 	}
 	
 	public void update() {
@@ -101,7 +90,6 @@ public class FractalVisualizer extends ImagePanel {
 				f.show(newImg);
 			updateImage(newImg);
 		}
-			
 	}
 	
 	public void addFeature(VisualFeature f) {
@@ -118,7 +106,7 @@ public class FractalVisualizer extends ImagePanel {
 	}
 	
 	public FractalFrame getFrame() {
-		return frame;
+		return navigator.getFrame();
 	}
 	
 }

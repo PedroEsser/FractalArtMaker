@@ -51,4 +51,11 @@ public class JTuple<L extends JComponent, R extends JComponent> extends JPanel{
 		return right;
 	}
 	
+	@Override
+	public void setEnabled(boolean enabled) {
+		super.setEnabled(enabled);
+		this.left.setEnabled(enabled);
+		this.right.setEnabled(enabled);
+	}
+	
 }

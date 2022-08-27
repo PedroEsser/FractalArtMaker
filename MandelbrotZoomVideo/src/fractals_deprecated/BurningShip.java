@@ -1,7 +1,5 @@
 package fractals_deprecated;
 
-import fractal.Complex;
-
 public class BurningShip extends Fractal{
 
 	@Override

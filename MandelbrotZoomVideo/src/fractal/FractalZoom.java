@@ -1,23 +1,21 @@
 package fractal;
 
-import fractals_deprecated.Fractal;
-import fractals_deprecated.MandelbrotSet;
-import gpuColorGradients.ColorGradient;
+import fractalKernels.FractalKernel;
+import fractals_deprecated.Complex;
 import gpuColorGradients.HSBGradient;
 import gpuColorGradients.MultiGradient;
 import gradient.Constant;
 import gradient.LinearGradient;
 import gradient.LogarithmicGradient;
-import gradient.NumericGradient;
-import kernel.FractalKernel;
 import gradient.Gradient;
 
 public class FractalZoom implements Gradient<FractalFrame>{
 
 	public static final Gradient<FractalKernel> DEFAULT_FRACTAL_GRADIENT = new Constant<FractalKernel>(FractalFrame.DEFAULT_FRACTAL);
-	public static final LogarithmicGradient DEFAULT_DELTA_GRADIENT = new LogarithmicGradient(0.01, 1E-16);
-	public static final Gradient<Double> DEFAULT_MAX_ITERATION_GRADIENT = new LinearGradient(20, 1000).truncateBelow(0);
+	public static final LogarithmicGradient DEFAULT_DELTA_GRADIENT = new LogarithmicGradient(2E-2, 1E-16);
+	public static final Gradient<Double> DEFAULT_MAX_ITERATION_GRADIENT = new LogarithmicGradient(20, 1000).truncateBelow(0);
 	public static final Gradient<MultiGradient> DEFAULT_COLOR_GRADIENT = new Constant<MultiGradient>(new MultiGradient(new HSBGradient()));
+	
 	
 	private int width, height;
 	private float norm;
@@ -30,8 +28,7 @@ public class FractalZoom implements Gradient<FractalFrame>{
 	public FractalZoom(Gradient<Complex> centerGradient, int width, int height, Gradient<Double> deltaGradient, 
 						Gradient<Double> maxIterationGradient, Gradient<FractalKernel> fractalGradient, Gradient<MultiGradient> colorGradient) {
 		this.centerGradient = centerGradient;
-		this.width = width;
-		this.height = height;
+		setDimensions(width, height);
 		this.deltaGradient = deltaGradient;
 		this.maxIterationGradient = maxIterationGradient;
 		this.fractalGradient = fractalGradient;
@@ -60,7 +57,7 @@ public class FractalZoom implements Gradient<FractalFrame>{
 	}
 	
 	public FractalZoom(int width, int height) {
-		this(new Complex(), width, height, DEFAULT_DELTA_GRADIENT, DEFAULT_MAX_ITERATION_GRADIENT);
+		this(new Complex(), width, height);
 	}
 	
 	@Override
@@ -119,17 +116,9 @@ public class FractalZoom implements Gradient<FractalFrame>{
 		return fractalGradient;
 	}
 	
-	public void setWidth(int width) {
-		this.width = width;
-	}
-
-	public void setHeight(int height) {
-		this.height = height;
-	}
-	
 	public void setDimensions(int width, int height) {
-		this.setWidth(width);
-		this.setHeight(height);
+		this.width = width;
+		this.height = height;
 	}
 	
 	public void setCenterGradient(Gradient<Complex> centerGradient) {
@@ -142,6 +131,7 @@ public class FractalZoom implements Gradient<FractalFrame>{
 
 	public void setMaxIterationGradient(Gradient<Double> maxIterationGradient) {
 		this.maxIterationGradient = maxIterationGradient;
+		this.norm = 1 / maxIterationGradient.getEnd().floatValue();
 	}
 	
 	public void setFractalGradient(Gradient<FractalKernel> fractalGradient) {
@@ -174,6 +164,13 @@ public class FractalZoom implements Gradient<FractalFrame>{
 	
 	public int maxIterationsAt(double percent) {
 		return maxIterationGradient.valueAt(percent).intValue();
+	}
+	
+	public FractalZoom rescale(double scale) {
+		Gradient<Double> newDeltaGradient = deltaGradient.transform(d -> d/scale);
+		int newWidth = (int)(width * scale);
+		int newHeight = (int)(height * scale);
+		return new FractalZoom(centerGradient, newWidth, newHeight, newDeltaGradient, maxIterationGradient, fractalGradient, colorGradient);
 	}
 	
 }

@@ -2,8 +2,6 @@ package fractals_deprecated;
 
 import java.util.Iterator;
 
-import fractal.Complex;
-
 public class FractalCeption extends Fractal{
 	
 	private int cIterations = 0;

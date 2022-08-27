@@ -35,7 +35,7 @@ public class ImageSaver  extends JFrame{
 		mainPanel.add(height);
 		
 		JButton b = new JButton("Choose Directory");
-		JTextField dir = new JTextField("C:\\Users\\pedro\\Desktop\\MandelbrotStuff\\images");
+		JTextField dir = new JTextField("D:\\MandelbrotStuff\\images");
 		b.addActionListener(a -> {
 			JFileChooser chooser = new JFileChooser();
 			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);

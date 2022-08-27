@@ -41,11 +41,5 @@
 	    <version>3.0.0</version>
 	</dependency>
 	
-	<!-- <dependency>
-	   <groupId>com.github.hoary.javaav</groupId>
-	   <artifactId>JavaAV</artifactId>
-	   <version>0.1</version>
-	</dependency> -->
-	
   </dependencies>
 </project>

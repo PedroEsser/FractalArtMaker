@@ -8,11 +8,12 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.awt.image.SampleModel;
 
+import fractalKernels.FractalKernel;
+import fractalKernels.MandelbrotKernel;
+import fractals_deprecated.Complex;
 import gpuColorGradients.ColorGradient;
 import gpuColorGradients.HSBGradient;
 import gpuColorGradients.MultiGradient;
-import kernel.FractalKernel;
-import kernel.MandelbrotKernel;
 import utils.Rectangle;
 
 public class FractalFrame {
@@ -32,17 +33,21 @@ public class FractalFrame {
 	private final int width, height;
 	private float norm;
 	
-	public FractalFrame(Complex center, int width, int height, double delta, int maxIterations, MultiGradient gradient, FractalKernel fractal, float norm) {
+	public FractalFrame(Complex center, int width, int height, double delta, int maxIterations, MultiGradient gradient, FractalKernel fractal, float norm, byte[] data) {
 		this.fractal = fractal;
 		this.gradient = gradient;
 		this.center = center;
-		this.data = new byte[width * height * 3];
+		this.data = data;
 		this.width = width;
 		this.height = height;
 		this.delta = delta;
 		this.maxIterations = maxIterations;
 		this.norm = norm;
 		fractal.setFrame(this);
+	}
+	
+	public FractalFrame(Complex center, int width, int height, double delta, int maxIterations, MultiGradient gradient, FractalKernel fractal, float norm) {
+		this(center, width, height, delta, maxIterations, gradient, fractal, norm, new byte[width * height * 3]);
 	}
 	
 	public FractalFrame(Complex center, int width, int height, double delta, int maxIterations, MultiGradient gradient) {

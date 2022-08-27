@@ -46,24 +46,26 @@ public abstract class ColorGradient {
 		return p -> new Color(genericColorAt((float)p, 0, toPrimitive()));
 	}
 	
-	public void loop(float start, float end) {
+	public ColorGradient loop(float start, float end) {
 		this.type |= LOOP_MASK;
 		this.start = start;
 		this.range = end - start;
+		return this;
 	}
 	
-	public void bounce(float start, float end) {
+	public ColorGradient bounce(float start, float end) {
 		this.type &= ~LOOP_MASK;
 		this.start = start;
 		this.range = end - start;
+		return this;
 	}
 	
-	public void loop(float end) {
-		loop(0, end);
+	public ColorGradient loop(float end) {
+		return loop(0, end);
 	}
 	
-	public void bounce(float end) {
-		bounce(0, end);
+	public ColorGradient bounce(float end) {
+		return bounce(0, end);
 	}
 	
 	public void setStart(float start) {

@@ -21,8 +21,8 @@ public class HSBGradient extends ColorGradient{
 		super(HSB);
 		float[] hsbStarta = Color.RGBtoHSB(start.getRed(), start.getGreen(), start.getBlue(), null);
 		float[] hsbEnda = Color.RGBtoHSB(end.getRed(), end.getGreen(), end.getBlue(), null);
-		this.hsbStart = toRGB(to255(hsbStarta[0]), to255(hsbStarta[1]), to255(hsbStarta[2]));
-		this.hsbEnd = toRGB(to255(hsbEnda[0]), to255(hsbEnda[1]), to255(hsbEnda[2]));
+		this.hsbStart = toRGB(fromFloatTo255(hsbStarta[0]), fromFloatTo255(hsbStarta[1]), fromFloatTo255(hsbStarta[2]));
+		this.hsbEnd = toRGB(fromFloatTo255(hsbEnda[0]), fromFloatTo255(hsbEnda[1]), fromFloatTo255(hsbEnda[2]));
 	}
 	
 	public HSBGradient() {

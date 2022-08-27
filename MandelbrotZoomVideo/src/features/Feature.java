@@ -3,18 +3,19 @@ package features;
 import java.awt.image.BufferedImage;
 
 import fractal.FractalFrame;
+import gui.FractalNavigatorGUI;
 import gui.FractalVisualizer;
 
 public abstract class Feature {
 
-	protected final FractalVisualizer vis;
+	protected final FractalNavigatorGUI gui;
 	
-	public Feature(FractalVisualizer vis) {
-		this.vis = vis;
+	public Feature(FractalNavigatorGUI gui) {
+		this.gui = gui;
 	}
 	
 	protected FractalFrame getCurrentFrame() {
-		return this.vis.getFrame();
+		return this.gui.getVisualizer().getFrame();
 	}
 	
 }

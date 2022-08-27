@@ -2,8 +2,6 @@ package fractals_deprecated;
 
 import java.util.Iterator;
 
-import fractal.Complex;
-
 public abstract class Fractal{
 
 	public static final double DEFAULT_ESCAPE_RADIUS_SQUARED = 4;

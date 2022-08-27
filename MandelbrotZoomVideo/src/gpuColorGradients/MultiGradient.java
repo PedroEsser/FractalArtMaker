@@ -9,7 +9,7 @@ import gradient.Gradient;
 public class MultiGradient extends ColorGradient{
 
 	private final ArrayList<GradientWeightTuple> gradients;
-	private float shift = 0;
+	private float offset = 0;
 	private float sumWeights;
 	
 	public MultiGradient() {
@@ -35,8 +35,7 @@ public class MultiGradient extends ColorGradient{
 	public static int colorAt(float percent, int[] gradient) {
 		if(percent != percent)
 			percent = 0;
-		percent += toMyFloat(gradient[3]);
-		percent = 2*percent - percent*percent;			// Squishing colors towards the start
+		percent += toMyFloat(gradient[3]);					//shift
 		float p = ColorGradient.percentFor(percent, 0, gradient);//
 		int index = 4;
 		float aux = p * toMyFloat(gradient[index++]);	// p * sumWeights
@@ -51,21 +50,21 @@ public class MultiGradient extends ColorGradient{
 	}
 	
 	public MultiGradient clone() {
-		MultiGradient clo = new MultiGradient();
-		clo.gradients.addAll(this.gradients);
-		clo.sumWeights = this.sumWeights;
-		clo.setShift(shift);
-		return clo;
+		MultiGradient clone = new MultiGradient();
+		clone.gradients.addAll(this.gradients);
+		clone.sumWeights = this.sumWeights;
+		clone.setOffset(offset);
+		return clone;
 	}
 	
-	public void setShift(float shift) {
-		this.shift = shift;
+	public void setOffset(float offset) {
+		this.offset = offset;
 	}
 	
-	public MultiGradient shifted(float shift) {
-		MultiGradient shifted = this.clone();
-		shifted.setShift(shift);
-		return shifted;
+	public MultiGradient offseted(float offset) {
+		MultiGradient offseted = this.clone();
+		offseted.setOffset(offset);
+		return offseted;
 	}
 	
 	@Override
@@ -78,7 +77,7 @@ public class MultiGradient extends ColorGradient{
 		ArrayList<Integer> list = new ArrayList<Integer>();
 		for(int b : getBase())
 			list.add(b);
-		list.add(toMyInt(shift));
+		list.add(toMyInt(offset));
 		list.add(toMyInt(sumWeights));
 		for(GradientWeightTuple t : gradients) {
 			list.add(toMyInt(t.weight));

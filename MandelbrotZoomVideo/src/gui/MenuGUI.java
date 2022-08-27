@@ -2,11 +2,14 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import java.nio.charset.MalformedInputException;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -17,42 +20,51 @@ import javax.swing.SwingConstants;
 
 import colorGradients_deprecated.ColorGradient;
 import colorGradients_deprecated.RGBGradient;
-import fractal.Complex;
 import fractal.FractalFrame;
 import fractal.FractalZoom;
+import fractalKernels.BurningShipKernel;
+import fractalKernels.ComplexPowerMandelbrotKernel;
+import fractalKernels.FeatherFractal;
+import fractalKernels.FractalKernel;
+import fractalKernels.FractalParameter;
+import fractalKernels.HybridFractal;
+import fractalKernels.IntegerPowerMandelbrotKernel;
+import fractalKernels.MandelTrig;
+import fractalKernels.MandelbrotKernel;
+import fractalKernels.RealPowerMandelbrotKernel;
+import fractals_deprecated.Complex;
 import gradient.LinearGradient;
 import gradient.Gradient;
+import guiUtils.FractalParameterGUI;
 import guiUtils.JTuple;
 import guiUtils.LabelOptionsTuple;
 import guiUtils.LabelTuple;
 import guiUtils.LabelValueTuple;
 import guiUtils.NumericGradientPanel;
-import kernel.BurningShipKernel;
-import kernel.ComplexPowerMandelbrotKernel;
-import kernel.IntegerPowerMandelbrotKernel;
-import kernel.MandelTrig;
-import kernel.MandelbrotKernel;
-import kernel.RealPowerMandelbrotKernel;
+import scala.annotation.meta.param;
 
 public class MenuGUI extends JFrame{
 
 	public static final Dimension DEFAULT_MENU_SIZE = new Dimension(800, 500);
 	private final FractalNavigatorGUI nav;
 	
-	private static String[] FRACTAL_VARIANTS = {"Mandelbrot", "IntegerPowerMandelbrot", "RealPowerMandelbrot", "ComplexPowerMandelbrot", "BurningShip", "MandelTrig"};
+	private static String[] FRACTAL_VARIANTS = {"Mandelbrot", "Integer Power Mandelbrot", "Real Power Mandelbrot", 
+			"Complex Power Mandelbrot", "Burning Ship", "MandelTrig", "Feather Fractal", "Hybrid Fractal"};
 	
+	JPanel mainPanel;
 	LabelValueTuple iterations;
 	LabelValueTuple delta;
 	LabelValueTuple re;
 	LabelValueTuple im;
 	GradientVisualizer visualizer;
 	LabelOptionsTuple fractalTypes;
+	JPanel parameters;
 	
 	public MenuGUI(FractalNavigatorGUI nav) {
 		super("Menu");
 		this.nav = nav;
-		JPanel mainPanel = new JPanel();
-		mainPanel.setLayout(new GridLayout(6, 1, 0, 8));
+		mainPanel = new JPanel();
+		mainPanel.setLayout(new GridLayout(7, 1, 0, 8));
 		
 		iterations = new LabelValueTuple("Iterations:", 0);
 		mainPanel.add(iterations);
@@ -77,8 +89,14 @@ public class MenuGUI extends JFrame{
 		mainPanel.add(panel);
 		
 		fractalTypes = new LabelOptionsTuple("Fractal:", FRACTAL_VARIANTS);
-		fractalTypes.getRight().addActionListener(e -> handleFractalSelection());
+		FractalKernel fractal = nav.getVisualizer().getNavigator().getFrame().getKernel();
+		fractalTypes.setOption(fractal.getName());
+		fractalTypes.getRight().addActionListener(e -> fillParameters(getSelectedFractal()));
 		mainPanel.add(fractalTypes);
+		
+		parameters = new JPanel();
+		fillParameters(nav.getVisualizer().getFrame().getKernel());
+		mainPanel.add(parameters);
 		
 		JButton updateButton = new JButton("Update");
 		updateButton.setFont(new Font("Arial", Font.BOLD, 20));
@@ -118,25 +136,41 @@ public class MenuGUI extends JFrame{
 		double re = this.re.getValue();
 		double im = this.im.getValue();
 		
-		nav.getVisualizer().getNavigator().setParameters(iterations, delta, re, -im);
+		nav.getVisualizer().getNavigator().setParameters(iterations, delta, re, -im, getFractal());
 	}
 	
-	private void handleFractalSelection() {
-		String selected = fractalTypes.getRight().getSelectedItem().toString();
-		FractalZoom zoom = nav.getVisualizer().getNavigator().getZoom();
+	private void fillParameters(FractalKernel kernel) {
+		parameters.removeAll();
+		List<FractalParameter> pars = kernel.getFractalParameters();
+		parameters.setLayout(new GridLayout(pars.size(), 1, 0, 4));
+		pars.forEach(p -> {
+			FractalParameterGUI par = new FractalParameterGUI(p);
+			parameters.add(par);
+		});
+		mainPanel.repaint();
+	}
+	
+	private FractalKernel getFractal() {
+		FractalKernel fractal = getSelectedFractal();
+		for(Component c: parameters.getComponents()) {
+			FractalParameterGUI parGUI = (FractalParameterGUI)c;
+			fractal.editParameter(parGUI.getParameter());
+		}
+		return fractal;
+	}
+	
+	private FractalKernel getSelectedFractal() {
+		String selected = fractalTypes.getSelectedOption();
 		switch(selected) {
-		case "Mandelbrot":zoom.setFractal(new MandelbrotKernel());
-			break;
-		case "IntegerPowerMandelbrot":zoom.setFractal(new IntegerPowerMandelbrotKernel(3));
-			break;
-		case "RealPowerMandelbrot":zoom.setFractal(new RealPowerMandelbrotKernel(2.5));
-			break;
-		case "ComplexPowerMandelbrot":zoom.setFractal(new ComplexPowerMandelbrotKernel(2, 0.001));
-			break;
-		case "BurningShip":zoom.setFractal(new BurningShipKernel());
-			break;
-		case "MandelTrig":zoom.setFractal(new MandelTrig());
-			break;
+			case "Mandelbrot":					return new MandelbrotKernel();
+			case "Integer Power Mandelbrot":	return new IntegerPowerMandelbrotKernel();
+			case "Real Power Mandelbrot":		return new RealPowerMandelbrotKernel();
+			case "Complex Power Mandelbrot":	return new ComplexPowerMandelbrotKernel();
+			case "Burning Ship":				return new BurningShipKernel();
+			case "MandelTrig":					return new MandelTrig();
+			case "Feather Fractal":				return new FeatherFractal();
+			case "Hybrid Fractal":				return new HybridFractal();
+			default: 							return null;
 		}
 	}
 	

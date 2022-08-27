@@ -1,11 +1,12 @@
 package features;
 
+import gui.FractalNavigatorGUI;
 import gui.FractalVisualizer;
 
 public abstract class ToggleFeature extends VisualFeature{
 
-	public ToggleFeature(FractalVisualizer vis) {
-		super(vis);
+	public ToggleFeature(FractalNavigatorGUI gui) {
+		super(gui);
 	}
 
 	protected boolean toggle = false;
@@ -16,7 +17,7 @@ public abstract class ToggleFeature extends VisualFeature{
 	
 	public void toggle(boolean toggle) {
 		this.toggle = toggle;
-		this.vis.update();
+		this.gui.getVisualizer().update();
 	}
 	
 	public void toggle() {
