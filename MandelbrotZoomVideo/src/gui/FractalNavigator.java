@@ -18,7 +18,6 @@ import fractalKernels.MandelbrotKernel;
 import fractalKernels.RealPowerMandelbrotKernel;
 import fractals_deprecated.Complex;
 import fractals_deprecated.ComplexGradient;
-import gpuColorGradients.ColorGradient;
 import gpuColorGradients.MultiGradient;
 import gradient.Gradient;
 import gradient.LinearGradient;

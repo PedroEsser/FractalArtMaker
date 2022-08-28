@@ -17,7 +17,6 @@ import javax.swing.filechooser.FileFilter;
 import fractal.FractalFrame;
 import fractal.FractalZoom;
 import fractals_deprecated.Complex;
-import gpuColorGradients.ColorGradient;
 import gpuColorGradients.MultiGradient;
 import guiUtils.JTuple;
 import guiUtils.LabelOptionsTuple;
@@ -74,7 +73,7 @@ public class VideoMaker extends JFrame{
 		shift = new LabelValueTuple("Shift:", 0);
 		mainPanel.add(shift);
 		
-		visualizer = new GradientVisualizer(vis.getGradient());
+		visualizer = new GradientVisualizer(vis.getGradient().toGradient());
 		JPanel panel = new LabelTuple("Gradient: ", visualizer);
 		mainPanel.add(panel);
 		

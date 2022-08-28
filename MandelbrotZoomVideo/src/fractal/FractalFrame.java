@@ -11,16 +11,15 @@ import java.awt.image.SampleModel;
 import fractalKernels.FractalKernel;
 import fractalKernels.MandelbrotKernel;
 import fractals_deprecated.Complex;
-import gpuColorGradients.ColorGradient;
-import gpuColorGradients.HSBGradient;
 import gpuColorGradients.MultiGradient;
+import gpuColorGradients.ThreeChannelGradient;
 import utils.Rectangle;
 
 public class FractalFrame {
 
 	public static final FractalKernel DEFAULT_FRACTAL = new MandelbrotKernel();
 	public static final int DEFAULT_MAX_ITERATIONS = 200;
-	public static final MultiGradient DEFAULT_GRADIENT = new MultiGradient(new HSBGradient());
+	public static final MultiGradient DEFAULT_GRADIENT = new MultiGradient(new ThreeChannelGradient());
 	private static final double DEFAULT_DELTA = 0.01;
 	public static int BELONG_COLOR = 0;		// rgb for the color BLACK
 	

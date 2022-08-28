@@ -1,6 +1,5 @@
 package video;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,8 +10,6 @@ import javax.imageio.stream.ImageOutputStream;
 import javax.swing.JProgressBar;
 
 import fractal.FractalFrame;
-import gpuColorGradients.ColorGradient;
-import gradient.Constant;
 import gradient.Gradient;
 import utils.GifSequenceWriter;
 

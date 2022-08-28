@@ -84,7 +84,7 @@ public class MenuGUI extends JFrame{
 		LabelTuple<JPanel> centerTuple = new LabelTuple("Center:", centerPanel);
 		mainPanel.add(centerTuple);
 		
-		visualizer = new GradientVisualizer(nav.getVisualizer().getGradient());
+		visualizer = new GradientVisualizer(nav.getVisualizer().getGradient().toGradient());
 		JPanel panel = new LabelTuple("Gradient: ", visualizer);
 		mainPanel.add(panel);
 		

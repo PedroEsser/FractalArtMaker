@@ -1,6 +1,5 @@
 package fractalKernels;
 
-import fractals_deprecated.Complex;
 import gpuColorGradients.MultiGradient;
 
 public class FeatherFractal extends FractalKernel {
@@ -109,7 +108,7 @@ public class FeatherFractal extends FractalKernel {
 		if(iterations < maxIterations) {
 			float iterationScore = (float)(iterations + 1 - log(log(sqrt(currentRE * currentRE + currentIM * currentIM)))/log(2));	// log magic makes gradient smooth :)
 			iterationScore =  iterationScore < 0 ? 0 : iterationScore;
-			rgb = MultiGradient.colorAt(iterationScore * norm, gradient);
+			rgb = MultiGradient.colorAtPercent(iterationScore * norm, gradient);
 		}
 		i = (width * j + i) * 3;
 		data[i + 0] = (byte)(rgb & 0xFF);

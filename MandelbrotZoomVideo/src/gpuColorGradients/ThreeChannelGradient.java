@@ -5,7 +5,7 @@ import java.awt.Color;
 
 import gradient.Gradient;
 
-public class ThreeChannelGradient extends ColorGradientV2{
+public class ThreeChannelGradient extends ColorGradient{
 
 	public static final int DATA_SIZE = 8;	//header, range, 3x start, 3x range
 	public static final int HSB_BIT = 0x00000002;
@@ -54,17 +54,17 @@ public class ThreeChannelGradient extends ColorGradientV2{
 		return ((int)gradient[index] & HSB_BIT) != 0;
 	}
 	
-	public static float getNthChannelAtPercent(float percent, int n, float[] gradient, int index) {
+	public static float nthChannelAtPercent(float percent, int n, float[] gradient, int index) {
 		float c = gradient[index+2 + n] + percent * gradient[index+5 + n];
 		return c == 1 ? 1 : looped(c);
 	}
 	
-	public static int getColorAtPercent(float percent, float[] gradient, int index) {
+	public static int colorAtPercent(float percent, float[] gradient, int index) {
 		float p = calculatePercent(percent, gradient, index);
-		float channel0 = getNthChannelAtPercent(p, 0, gradient, index);
-		float channel1 = getNthChannelAtPercent(p, 1, gradient, index);
-		float channel2 = getNthChannelAtPercent(p, 2, gradient, index);
-		if(isHSB(gradient, index))
+		float channel0 = nthChannelAtPercent(p, 0, gradient, index);
+		float channel1 = nthChannelAtPercent(p, 1, gradient, index);
+		float channel2 = nthChannelAtPercent(p, 2, gradient, index);
+		if(((int)gradient[index] & HSB_BIT) != 0)
 			return hsbColor(channel0, channel1, channel2);
 		return rgbColor(channel0, channel1, channel2);
 	}
@@ -129,7 +129,7 @@ public class ThreeChannelGradient extends ColorGradientV2{
 	
 	@Override
 	public Gradient<Color> toGradient() {
-		return p -> new Color(getColorAtPercent((float)p, gradient, 0));
+		return p -> new Color(colorAtPercent((float)p, gradient, 0));
 	}
 	
 }

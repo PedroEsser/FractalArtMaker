@@ -2,14 +2,11 @@ package gui;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
-import gpuColorGradients.ColorGradient;
-import gpuColorGradients.ThreeChannelGradient;
 import gradient.Gradient;
 import guiUtils.ImagePanel;
 
@@ -47,6 +44,7 @@ public class GradientVisualizer extends ImagePanel{
 	
 	public static void showcase(Gradient<Color> gradient) {
 		JFrame f = new JFrame();
+		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		f.setSize(800, 200);
 		f.setLocationRelativeTo(null);
 		f.add(new GradientVisualizer(gradient));

@@ -7,7 +7,6 @@ import com.aparapi.Kernel;
 import com.aparapi.Range;
 
 import fractal.FractalFrame;
-
 import gpuColorGradients.MultiGradient;
 
 public abstract class FractalKernel extends Kernel {
@@ -17,7 +16,7 @@ public abstract class FractalKernel extends Kernel {
 	private FractalFrame frame;
 	protected double topLeftRE, topLeftIM, delta;
 	protected byte[] data;
-	protected int[] gradient;
+	protected float[] gradient;
 	protected int maxIterations, width;
 	protected float norm;
 	protected int pre_iterations = 1;
@@ -44,7 +43,7 @@ public abstract class FractalKernel extends Kernel {
 		this.topLeftIM = frame.complexAt(0, 0)[1];
 		this.delta = frame.getDelta();
 		this.maxIterations = frame.getMaxIterations();
-		this.gradient = frame.getGradient().toPrimitive();
+		this.gradient = frame.getGradient().getGradientData();
 		this.norm = frame.getNorm();
 	}
 	
@@ -104,10 +103,10 @@ public abstract class FractalKernel extends Kernel {
 	public int getColor(int iterations, double[] complex) {
 		float iterationScore = (float)(iterations + 1 - Math.log(Math.log(Math.sqrt(complex[0]*complex[0] + complex[1]*complex[1]))) / log(2));
 		iterationScore =  iterationScore < 0 ? 0 : iterationScore;
-		return MultiGradient.colorAt(iterationScore * norm, gradient);
+		return MultiGradient.colorAtPercent(iterationScore * norm, gradient);
 	}
 	
-	public static void saveToColor(int rgb, int index, byte[] data) {
+	public static void saveColor(int rgb, int index, byte[] data) {
 		index = index * 3;
 		data[index + 0] = (byte)(rgb & 0xFF);
 		data[index + 1] = (byte)(rgb >> 8 & 0xFF);

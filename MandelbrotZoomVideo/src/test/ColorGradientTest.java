@@ -9,12 +9,12 @@ import javax.swing.JFrame;
 import org.junit.jupiter.api.Test;
 
 import gpuColorGradients.GradientUtils;
-import gpuColorGradients.MultiGradientV2;
+import gpuColorGradients.MultiGradient;
 import gpuColorGradients.ThreeChannelGradient;
 import gui.GradientVisualizer;
 
 import static gpuColorGradients.GradientUtils.*;
-import static gpuColorGradients.MultiGradientV2.*;
+import static gpuColorGradients.MultiGradient.*;
 import static gpuColorGradients.ThreeChannelGradient.*;
 
 public class ColorGradientTest {
@@ -39,12 +39,12 @@ public class ColorGradientTest {
 		gradient.setRGB();
 		assertFalse(ThreeChannelGradient.isHSB(g, 0));
 		
-		assertAlmostEqual(0.375f, getNthChannelAtPercent(0.75f, 0, g, 0));
-		assertAlmostEqual(0.875f, getNthChannelAtPercent(0.75f, 1, g, 0));
-		assertAlmostEqual(0.75f, getNthChannelAtPercent(0.75f, 2, g, 0));
+		assertAlmostEqual(0.375f, nthChannelAtPercent(0.75f, 0, g, 0));
+		assertAlmostEqual(0.875f, nthChannelAtPercent(0.75f, 1, g, 0));
+		assertAlmostEqual(0.75f, nthChannelAtPercent(0.75f, 2, g, 0));
 		
-		assertEquals(0x005fdfbf, getColorAtPercent(0.75f, g, 0));
-		assertEquals(0x00bf7f00, getColorAtPercent(0, g, 0));
+		assertEquals(0x005fdfbf, ThreeChannelGradient.colorAtPercent(0.75f, g, 0));
+		assertEquals(0x00bf7f00, ThreeChannelGradient.colorAtPercent(0, g, 0));
 		
 		gradient.bounce(1.3f);
 		assertAlmostEqual(0.7f, calculatePercent(1, g, 0));
@@ -58,7 +58,7 @@ public class ColorGradientTest {
 		ThreeChannelGradient g1 = new ThreeChannelGradient(0f, 0.5f, 0.75f, -0.5f, 0.5f, -1f).setRGB();
 		ThreeChannelGradient g2 = new ThreeChannelGradient(0.75f, 0.5f, 0, -0.5f, 0.5f, 1f).setRGB();
 		
-		MultiGradientV2 multi = (MultiGradientV2)new MultiGradientV2(g1, g2).offseted(0.25f).bounce(2);
+		MultiGradient multi = (MultiGradient)new MultiGradient(g1, g2).offseted(0.25f).bounce(2);
 		float[] gradient = multi.getGradientData();
 		
 		assertAlmostEqual(0.25f, getOffset(gradient));
@@ -69,14 +69,14 @@ public class ColorGradientTest {
 		
 		assertAlmostEqual(0.75f, calculatePercent(0.75f/2, gradient, 0));
 		
-		assertEquals(0x005fdfbf, getColorAtPercent(0.75f, gradient, 14));
-		assertEquals(0x005fdfbf, colorAtPercent(7f/16, gradient));
-		assertEquals(0x00bf7f00, colorAtPercent(0.5f, gradient));
+		assertEquals(0x005fdfbf, ThreeChannelGradient.colorAtPercent(0.75f, gradient, 14));
+		assertEquals(0x005fdfbf, MultiGradient.colorAtPercent(7f/16, gradient));
+		assertEquals(0x00bf7f00, MultiGradient.colorAtPercent(0.5f, gradient));
 		
-		MultiGradientV2 m = new MultiGradientV2(g2);
+		MultiGradient m = new MultiGradient(g2);
 		float[] g = m.getGradientData();
 		float p = (float)Math.random();
-		assertEquals(colorAtPercent(p, g), getColorAtPercent(p, g2.getGradientData(), 0));
+		assertEquals(colorAtPercent(p, g), ThreeChannelGradient.colorAtPercent(p, g2.getGradientData(), 0));
 	}
 	
 	public static void assertAlmostEqual(float expected, float actual) {

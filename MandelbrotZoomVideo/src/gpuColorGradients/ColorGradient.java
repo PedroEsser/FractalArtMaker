@@ -1,115 +1,55 @@
 package gpuColorGradients;
 
+import static gpuColorGradients.GradientUtils.*;
+
 import java.awt.Color;
 
 import gradient.Gradient;
-import static gpuColorGradients.GradientUtils.*;
 
 public abstract class ColorGradient {
 	
-	private int type;
-	private float start, range;
+	public static final int LOOP_BIT = 0x00000001;
 	
-	public ColorGradient(int type, float start, float end, boolean isLoop) {
-		this.type = type;
-		if(isLoop) 
-			loop(start, end);
-		else 
-			bounce(start, end);
+	protected float[] gradient;
+	
+	public ColorGradient(int dataSize, boolean loop, float range) {
+		gradient = new float[dataSize];
+		if(loop)
+			loop(range);
+		else
+			bounce(range);
 	}
 	
-	public ColorGradient(int type) {
-		this(type, 0, 1, false);
-	}
-	
-	public abstract int[] toPrimitive();
-	
-	protected int[] getBase() {
-		int[] base = new int[3];
-		base[0] = type;
-		base[1] = toMyInt(start);
-		base[2] = toMyInt(range);
-		return base;
-	}
-	
-	protected int[] concatBase(int[] arr) {
-		int[] result = new int[arr.length + 3];
-		result[0] = type;
-		result[1] = toMyInt(start);
-		result[2] = toMyInt(range);
-		for(int i = 0 ; i < arr.length ; i++)
-			result[3 + i] = arr[i];
-		return result;
-	}
-	
-	public Gradient<Color> toGradient(){
-		return p -> new Color(genericColorAt((float)p, 0, toPrimitive()));
-	}
-	
-	public ColorGradient loop(float start, float end) {
-		this.type |= LOOP_MASK;
-		this.start = start;
-		this.range = end - start;
+	public ColorGradient loop(float range) {
+		gradient[0] = (int)gradient[0] | LOOP_BIT;
+		gradient[1] = range;
 		return this;
 	}
 	
-	public ColorGradient bounce(float start, float end) {
-		this.type &= ~LOOP_MASK;
-		this.start = start;
-		this.range = end - start;
+	public ColorGradient bounce(float range) {
+		gradient[0] = (int)gradient[0] & ~LOOP_BIT;
+		gradient[1] = range;
 		return this;
 	}
 	
-	public ColorGradient loop(float end) {
-		return loop(0, end);
+	public float[] getGradientData() {
+		return gradient;
 	}
 	
-	public ColorGradient bounce(float end) {
-		return bounce(0, end);
+	
+	public static boolean isLoop(float[] gradient, int index) {
+		return ((int)gradient[index] & LOOP_BIT) != 0;
 	}
 	
-	public void setStart(float start) {
-		this.start = start;
+	public static float getRange(float[] gradient, int index) {
+		return gradient[index + 1];
 	}
 	
-	public void setEnd(float end) {
-		this.range = end - start;
+	public static float calculatePercent(float percent, float[] gradient, int index) {
+		float p = percent * gradient[index + 1];
+		return ((int)gradient[index] & LOOP_BIT) != 0 ? looped(p) : bounced(p);
 	}
 	
-	public static ColorGradient constant(int rgb) {
-		return new RGBGradient(rgb, rgb);
-	}
-	
-	public static float percentFor(float p, int index, int[] gradient) {
-		float start = toMyFloat(gradient[index + 1]);
-		float range = toMyFloat(gradient[index + 2]);
-		float percent = start + range * p;
-		if((gradient[index] & LOOP_MASK) != 0) 
-			return looped(percent);
-		return bounced(percent);
-	}
-	
-	public static int genericColorAt(float percent, int index, int[] gradient) {
-		int type = gradient[index] & TYPE_MASK;
-		float p = percentFor(percent, index, gradient);
-		index += 3;
-		
-		if(type == RGB) 		return RGBGradient.colorAt1(p, index, gradient);
-		if(type == HSB) 		return HSBGradient.colorAt2(p, index, gradient);
-		
-		return -1;
-	}
-
-	public static final int RGB = 0;
-	public static final int HSB = 1;
-	public static final int MULTI = 2;
-	public static final int TYPE_MASK = 0x000000ff;
-	public static final int LOOP_MASK = 0x80000000;
-	
-	public static boolean isLoop(int type) {
-		return (type & LOOP_MASK) != 0;
-	}
-	
-	public static final int MASK = 0xFF;
+	public abstract Gradient<Color> toGradient();
 	
 }

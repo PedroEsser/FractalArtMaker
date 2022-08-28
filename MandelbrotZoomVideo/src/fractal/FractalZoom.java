@@ -2,8 +2,8 @@ package fractal;
 
 import fractalKernels.FractalKernel;
 import fractals_deprecated.Complex;
-import gpuColorGradients.HSBGradient;
 import gpuColorGradients.MultiGradient;
+import gpuColorGradients.ThreeChannelGradient;
 import gradient.Constant;
 import gradient.LinearGradient;
 import gradient.LogarithmicGradient;
@@ -14,7 +14,7 @@ public class FractalZoom implements Gradient<FractalFrame>{
 	public static final Gradient<FractalKernel> DEFAULT_FRACTAL_GRADIENT = new Constant<FractalKernel>(FractalFrame.DEFAULT_FRACTAL);
 	public static final LogarithmicGradient DEFAULT_DELTA_GRADIENT = new LogarithmicGradient(2E-2, 1E-16);
 	public static final Gradient<Double> DEFAULT_MAX_ITERATION_GRADIENT = new LogarithmicGradient(20, 1000).truncateBelow(0);
-	public static final Gradient<MultiGradient> DEFAULT_COLOR_GRADIENT = new Constant<MultiGradient>(new MultiGradient(new HSBGradient()));
+	public static final Gradient<MultiGradient> DEFAULT_COLOR_GRADIENT = new Constant<MultiGradient>(FractalFrame.DEFAULT_GRADIENT);
 	
 	
 	private int width, height;
