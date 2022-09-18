@@ -21,4 +21,8 @@ public class LabelTuple<T extends JComponent> extends JTuple<JLabel, T>{
 		return l;
 	}
 	
+	public void setText(String text) {
+		getLeft().setText(text);
+	}
+	
 }

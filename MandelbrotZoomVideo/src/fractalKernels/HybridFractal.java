@@ -4,19 +4,26 @@ import gpuColorGradients.MultiGradient;
 
 public class HybridFractal extends FractalKernel{
 
-	private double multiplier = 0.5;
-	private double power = 2;
+	private double lightAngle;
+	private double h;
+	private int modOffset = 0;
+	private double morphPower;
 	
 	public HybridFractal() {
 		super();
-		addParameter("multiplier", 0.5, 0.01);
-		addParameter("power", 2, 0.001);
+		addParameter("angle", 0, 0.0625);
+		addParameter("h", 1.5, 0.0625);
+		addParameter("mod offset", 0, 1);
+		addParameter("C morph power", 1, 1d/16);
+		
 	}
 	
 	@Override
 	protected void loadParameterValues() {
-		this.multiplier = getParameter("multiplier").getValue();
-		this.power = getParameter("power").getValue();
+		this.lightAngle = getParameter("angle").getValue();
+		this.h = getParameter("h").getValue();
+		this.modOffset = getParameter("mod offset").getValueAsInt();
+		this.morphPower = getParameter("C morph power").getValue();
 		super.loadParameterValues();
 	}
 	
@@ -36,56 +43,106 @@ public class HybridFractal extends FractalKernel{
 	}
 
 	@Override
-	public void run() {		
-		int width = this.width;
-		
-		int i = getGlobalId(0);
-		int j = getGlobalId(1);
-		
+	public void run() {
 		int iterations = pre_iterations;
 		
-		double currentRE = 0;
-		double currentIM = 0;
-		double constantRE = topLeftRE + this.delta * i;
-		double constantIM = topLeftIM + this.delta * j;
-		double angle = 0;
-		double radius = 0;
-		double p = 0;
+		double constantRE = topLeftRE + this.delta * getGlobalId(0);
+		double constantIM = topLeftIM + this.delta * getGlobalId(1);
 		
-		for(int a = 0 ; a < iterations ; a++) {
-			p = power + (a%mod * multiplier);
-			angle = Math.atan2(currentIM, currentRE) * p;
-			radius = Math.pow(currentRE * currentRE + currentIM * currentIM, p/2);
-			currentRE = Math.cos(angle) * radius + constantRE;
-			currentIM = Math.sin(angle) * radius + constantIM;
+		double aux = 0;
+		double dCRE = 0;
+		double dCIM = 0;
+		double reflection = 0;
+		double uRE = 0;
+		double uIM = 0;
+			
+		double zRE = 0;
+		double zIM = 0;
+		
+		aux = atan2(constantIM, constantRE) * morphPower;
+		uRE = pow(constantRE * constantRE + constantIM * constantIM, morphPower/2);
+		constantRE = cos(aux) * uRE;
+		constantIM = sin(aux) * uRE;
+		
+		if(iterations > 1) {
+			for(int a = 0 ; a < iterations ; a++) {
+				aux = zRE;
+				zRE = zRE * zRE - zIM * zIM + constantRE;
+				zIM = 2 * aux * zIM + constantIM;
+			}
+			constantRE = zRE;
+			constantIM = zIM;
 		}
 		
-		constantRE = currentRE;
-		constantIM = currentIM;
-			
-		currentRE = 0;
-		currentIM = 0;
-		iterations = 0;
 		
-		while(radius <= escapeRadius && iterations < maxIterations) {
-			p = power + (iterations%mod * multiplier);
-			angle = Math.atan2(currentIM, currentRE) * p;
-			radius = Math.pow(currentRE * currentRE + currentIM * currentIM, p/2);
-			currentRE = Math.cos(angle) * radius + constantRE;
-			currentIM = abs(Math.sin(angle) * radius + constantIM);
-
+		iterations = 0;
+		zRE = 0;
+		zIM = 0;
+		int i = 0;
+		int m = 0;
+		
+		while(zRE * zRE + zIM * zIM < escapeRadius && iterations < maxIterations) {
+			uRE = zRE;
+			uIM = zIM;
+			//	U = Zo
+			aux = zRE;
+			zRE = zRE * zRE - zIM * zIM;
+			zIM = 2 * aux * zIM;
+			//	Z = Zo^2
+			m = (iterations + modOffset) % mod;
+			for(i = 0 ; i < m ; i++) {
+				aux = uRE;
+				uRE = zRE * uRE - zIM * uIM;
+				uIM = aux * zIM + uIM * zRE;
+				
+				aux = zRE;
+				zRE = zRE * zRE - zIM * zIM;
+				zIM = 2 * aux * zIM;
+			}
+			i = (1 << (m + 1));//	i = 2^(m+1)
+			// 	U = Zo^(i - 1)
+			//	Z = Zo^(i)
+			
+			aux = dCRE;
+			dCRE = i * (dCRE * uRE - dCIM * uIM) + 1;
+			dCIM = i * (aux * uIM + dCIM * uRE);		//dC = i * dC * Zo^(i - 1) + 1
+			
+			zRE += constantRE;
+			zIM += constantIM;
+			
 			iterations+=1;
 		}
 		int rgb = 0;
 		if(iterations < maxIterations) {
-			float iterationScore = (float)(iterations + 1 - log(log(sqrt(currentRE * currentRE + currentIM * currentIM)))/log(2));	// log magic makes gradient smooth :)
+			float iterationScore = (float)(iterations + 1 - log(log(zRE * zRE + zIM * zIM)/(log(2)*2))/log(1 << mod));
 			iterationScore =  iterationScore < 0 ? 0 : iterationScore;
 			rgb = MultiGradient.colorAtPercent(iterationScore * norm, gradient);
+			aux = dCRE*dCRE + dCIM*dCIM;
+			uRE = (zRE * dCRE + zIM * dCIM)/aux;
+			uIM = (-zRE * dCIM + zIM * dCRE)/aux;			//u = Z / dC
+			
+			aux = Math.sqrt(uRE*uRE + uIM*uIM);
+			uRE /= aux;
+			uIM /= aux;									//u = u/abs(u)
+			
+			aux = 2 * Math.PI * lightAngle;
+			zRE = cos(aux);
+			zIM = sin(aux);
+			reflection = uRE * zRE + uIM * zIM + h;	//reflection = dot(u, v) + h2
+			reflection /= (1 + h);
+			
+			if(reflection < 0)
+				reflection = 0;
 		}
-		i = (width * j + i) * 3;
-		data[i + 0] = (byte)(rgb & 0xFF);
-		data[i + 1] = (byte)(rgb >> 8 & 0xFF);
-		data[i + 2] = (byte)(rgb >> 16 & 0xFF);
+		
+		int r = (int)(reflection * (rgb >> 0 & 0xFF));
+		int g = (int)(reflection * (rgb >> 8 & 0xFF));
+		int b = (int)(reflection * (rgb >> 16 & 0xFF));
+		
+		i = (width * getGlobalId(1) + getGlobalId(0)) * 3;
+		data[i + 0] = (byte)r;
+		data[i + 1] = (byte)g;
+		data[i + 2] = (byte)b;
 	}
 
 }

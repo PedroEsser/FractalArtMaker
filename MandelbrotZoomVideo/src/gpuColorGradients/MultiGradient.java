@@ -1,13 +1,12 @@
 package gpuColorGradients;
 
 import java.awt.Color;
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import gradient.Gradient;
 
-import static gpuColorGradients.GradientUtils.*;
-
-public class MultiGradient extends ColorGradient{
+public class MultiGradient extends ColorGradient implements Serializable{
 
 	private final ArrayList<GradientWeightTuple> gradients;
 	
@@ -17,6 +16,10 @@ public class MultiGradient extends ColorGradient{
 		this.gradients = new ArrayList<GradientWeightTuple>();
 		for(ThreeChannelGradient g : gradients)
 			addGradient(g);
+	}
+	
+	public MultiGradient(boolean loop, float range, float offset) {
+		this(loop, range, offset, new ThreeChannelGradient[] {});
 	}
 	
 	public MultiGradient(ThreeChannelGradient... gradients) {
@@ -38,6 +41,10 @@ public class MultiGradient extends ColorGradient{
 	
 	public void addGradient(ThreeChannelGradient gradient) {
 		addGradient(gradient, 1);
+	}
+	
+	public boolean removeGradient(ThreeChannelGradient gradient) {
+		return gradients.remove(findTuple(gradient));
 	}
 	
 	public void updateGradientData() {
@@ -65,8 +72,73 @@ public class MultiGradient extends ColorGradient{
 		return gradient[2];
 	}
 	
+	public float getOffset() {
+		return getOffset(this.gradient);
+	}
+	
+	public ThreeChannelGradient getNthGradient(int n) {
+		return gradients.get(n).gradient;
+	}
+	
+	public float getModifiedPercent(float percent) {
+		percent += getOffset();
+		float p = calculatePercent(percent, gradient, 0);
+		return p * getWeightSum();
+	}
+	
+	public int getIndexForGradientAt(float percent) {
+		float p = getModifiedPercent(percent);
+		for(int i = 0 ; i < gradients.size() ; i++) {
+			GradientWeightTuple gw = gradients.get(i);
+			if(gw.weight > p)
+				return i;
+			p -= gw.weight;
+		}
+		return -1;
+	}
+	
+	public ThreeChannelGradient getGradientAtIndex(int index) {
+		return gradients.get(index).gradient;
+	}
+	
+	public int getNumberOfGradients() {
+		return gradients.size();
+	}
+	
+	public float[] getIntervalForGradient(ThreeChannelGradient gradient) {
+		float[] range = new float[] {0, 0};
+		for(GradientWeightTuple gw : gradients) {
+			if(gw.gradient == gradient){
+				range[1] = (range[0] + gw.weight)/getWeightSum();
+				range[0] /= getWeightSum();
+				return range;
+			}
+			range[0] += gw.weight;
+		}
+		return null;
+	}
+	
+	private GradientWeightTuple findTuple(ThreeChannelGradient g) {
+		for(GradientWeightTuple gw : gradients)
+			if(gw.gradient == g)
+				return gw;
+		return null;
+	}
+	
+	public void setWeightForGradient(ThreeChannelGradient g, float weight) {
+		findTuple(g).weight = weight;
+	}
+	
+	public float getWeightForGradient(ThreeChannelGradient g) {
+		return findTuple(g).weight;
+	}
+	
 	public static float getWeightSum(float[] gradient) {
 		return gradient[3];
+	}
+	
+	public float getWeightSum() {
+		return getWeightSum(gradient);
 	}
 	
 	public static int colorAtPercent(float percent, float[] gradient) {
@@ -103,6 +175,15 @@ public class MultiGradient extends ColorGradient{
 	}
 	
 	@Override
+	public MultiGradient copy() {
+		MultiGradient copy = new MultiGradient(isLoop(gradient, 0), getRange(gradient, 0), LOOP_BIT);
+		copy.offseted(getOffset());
+		for(GradientWeightTuple gw : gradients)
+			copy.addGradient(gw.gradient.copy(), gw.weight);
+		return copy;
+	}
+	
+	@Override
 	public Gradient<Color> toGradient() {
 		updateGradientData();
 		return p -> new Color(colorAtPercent((float)p, gradient));
@@ -118,6 +199,11 @@ public class MultiGradient extends ColorGradient{
 			this.weight = weight;
 		}
 		
+	}
+
+	@Override
+	public Color colorAt(double percent) {
+		return new Color(colorAtPercent((float)percent, gradient));
 	}
 
 }

@@ -2,6 +2,8 @@ package gpuColorGradients;
 
 import java.util.Random;
 
+import gradient.Gradient;
+
 public class GradientFactory {
 
 	private static Random rand = new Random();
@@ -115,14 +117,23 @@ public class GradientFactory {
 //		return result;
 //	}
 	
-	public static ThreeChannelGradient darkOrLightGradientV2(boolean toDark) {
-		return new ThreeChannelGradient(rand.nextFloat(), 1, toDark ? 0 : 1, rand.nextFloat()*2 - 1, toDark ? 0 : -1, toDark ? 1 : 0);
+	
+	public static ThreeChannelGradient darkOrLightGradientV2(boolean toDark, float startHue, float rangeHue) {
+		return new ThreeChannelGradient(startHue, 1, toDark ? 0 : 1, rangeHue, toDark ? 0 : -1, toDark ? 1 : 0);
 	}
 	
-	public static MultiGradient testV2(int n) {
+	public static ThreeChannelGradient darkOrLightGradientV2(boolean toDark, float hue) {
+		return darkOrLightGradientV2(toDark, hue, 0);
+	}
+	
+	public static ThreeChannelGradient darkOrLightGradientV2(boolean toDark) {
+		return darkOrLightGradientV2(toDark, rand.nextFloat(), rand.nextFloat()*2 - 1);
+	}
+	
+	public static MultiGradient testV2(int n, int loops, double percentDark, boolean constantHue) {
 		MultiGradient result = new MultiGradient();
 		for(int i = 0 ; i < n ; i++) {
-			result.addGradient(darkOrLightGradientV2(rand.nextBoolean()).bounce(2*(1+rand.nextInt(5))));
+			result.addGradient((constantHue ? darkOrLightGradientV2(rand.nextFloat() < percentDark, rand.nextFloat()) : darkOrLightGradientV2(rand.nextFloat() < percentDark)).loop(loops));
 		}
 		return result;
 	}
@@ -130,7 +141,8 @@ public class GradientFactory {
 	public static MultiGradient randomiseGradient() {
 		MultiGradient result;
 //		if(rand.nextDouble() < 1d/3)
-			result = testV2((int)(Math.random() * Math.random() * 80) + 1);
+			//result = testV2((int)(Math.random() * 150) + 10, 25, false, true);
+			result = testV2(10, 60, .5, true);
 //		if(rand.nextBoolean())
 //			result = GradientFactory.randomSmoothHSBGradients(rand.nextInt(100)+1);
 //		else

@@ -16,6 +16,10 @@ public class DiscreteGradient<T> implements Iterable<T>{
 		return range.valueAt((double)index / (steps-1));
 	}
 
+	public int getSteps() {
+		return steps;
+	}
+	
 	@Override
 	public Iterator<T> iterator() {
 		return new GradientIterator();

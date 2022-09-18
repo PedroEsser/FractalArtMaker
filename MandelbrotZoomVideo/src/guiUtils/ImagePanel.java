@@ -32,16 +32,16 @@ public abstract class ImagePanel extends Panel {
 	@Override
 	protected void myPaint(Graphics2D g) {
 		if(needsResizing()) {
-			myResize();
+			myResize(g);
 			return;
 		}
 		g.drawImage(img, 0, 0, null);
 	}
 	
-	protected boolean needsResizing() {
+	public boolean needsResizing() {
 		return this.getImg() == null || this.getPanelWidth() != this.getImg().getWidth() || this.getPanelHeight() != this.getImg().getHeight();
 	}
 	
-	protected abstract void myResize();
+	protected abstract void myResize(Graphics2D g);
 	
 }

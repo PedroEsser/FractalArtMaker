@@ -21,7 +21,8 @@ import fractals_deprecated.ComplexGradient;
 import gpuColorGradients.MultiGradient;
 import gradient.Gradient;
 import gradient.LinearGradient;
-import gradient.LogarithmicGradient;
+import gradient.ExponentialGradient;
+import gradient.NumericGradient;
 
 public class FractalNavigator {
 
@@ -32,7 +33,7 @@ public class FractalNavigator {
 	private MyThreadPool producer;
 	private Consumer<FractalFrame> frameUpdateCallback;
 	
-	private LogarithmicGradient deltaGradient;
+	private ExponentialGradient deltaGradient;
 	
 	public FractalNavigator(int width, int height, Consumer<FractalFrame> frameUpdateCallback, MultiGradient gradient) {
 		this.zoom = new FractalZoom(width, height);
@@ -121,14 +122,10 @@ public class FractalNavigator {
 		this.frame = frame;
 	}
 	
-	public void setParameters(double maxIterations, double delta, double re, double im, FractalKernel fractal) {
+	public void setParameters(Gradient<Double> maxIterations, double delta, double re, double im, FractalKernel fractal) {
 		double percent = deltaGradient.getPercentFor(delta);
-		Gradient<Double> maxIGradient = zoom.getMaxIterationGradient();
-		double maxIterRatio = maxIterations / maxIGradient.valueAt(percent);
-		Gradient<Double> maxIter = new LogarithmicGradient(maxIGradient.getStart() * maxIterRatio, maxIGradient.getEnd() * maxIterRatio);
-		
 		zoom.setCenter(new Complex(re, im));
-		zoom.setMaxIterationGradient(maxIter.truncateBelow(0));
+		zoom.setMaxIterationGradient(p -> Math.max(0, maxIterations.valueAt(p)));
 		zoom.setFractal(fractal);
 		setPercent(percent);
 	}
@@ -136,14 +133,24 @@ public class FractalNavigator {
 	public List<String> getInfo() {
 		ArrayList<String> info = new ArrayList<>();
 		Complex center = frame.getCenter();
-		Gradient<Double> deltas = this.zoom.getDeltaGradient();
+		ExponentialGradient deltas = (ExponentialGradient)this.zoom.getDeltaGradient();
+		
 		double zoom = deltas.getStart() / deltas.valueAt(percent);
 		info.add("Re: " + center.getRe());
 		info.add("Im: " + -center.getIm());
-		info.add("Zoom: " + new DecimalFormat("0.#####E0").format(zoom));
+		info.add("Zoom: " + new DecimalFormat("0.#####E0").format(zoom) + " (" + new DecimalFormat("0.#####").format(percent*100) + "%)");
 		info.add("Iterations: " + frame.getMaxIterations());
+		info.add("Gradient offset: " + new DecimalFormat("0.#####").format(frame.getGradient().getOffset()));
 		
 		return info;
+	}
+	
+	public double zoomToDelta(double zoom) {
+		return this.zoom.getDeltaGradient().getStart() / zoom;
+	}
+	
+	public double deltaToZoom(double delta) {
+		return this.zoom.getDeltaGradient().getStart() / delta;
 	}
 	
 	private class MyThreadPool{

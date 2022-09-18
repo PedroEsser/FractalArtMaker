@@ -57,17 +57,17 @@ public class MandelTrig extends MandelbrotKernel {
 		iterations = 0;
 		
 		while(currentRE * currentRE + currentIM * currentIM <= 16 && iterations < maxIterations) {
-//			aux = currentRE;
-//			currentRE = iterateRE(currentRE, currentIM, constantRE, constantIM);
-//			currentIM = iterateIM(aux, currentIM, constantRE, constantIM);
-			angle = atan2(currentIM, currentRE);
-			lnR = log(sqrt(currentRE * currentRE + currentIM * currentIM));
-			radius = exp(lnR * powerRE - powerIM * angle);
-			newAngle = lnR * powerIM + powerRE * angle;
-			currentRE = cos(newAngle) * radius + constantRE;
-			currentIM = sin(newAngle) * radius + constantIM;
-			currentRE = tan(currentRE);
-			currentIM = cos(currentIM) + sin(currentIM);
+			aux = currentRE;
+			currentRE = iterateRE(currentRE, currentIM, constantRE, constantIM);
+			currentIM = iterateIM(aux, currentIM, constantRE, constantIM);
+//			angle = atan2(currentIM, currentRE);
+//			lnR = log(sqrt(currentRE * currentRE + currentIM * currentIM));
+//			radius = exp(lnR * powerRE - powerIM * angle);
+//			newAngle = lnR * powerIM + powerRE * angle;
+//			currentRE = cos(newAngle) * radius + constantRE;
+//			currentIM = sin(newAngle) * radius + constantIM;
+//			currentRE = tan(currentRE);
+//			currentIM = cos(currentIM) + sin(currentIM);
 			
 			iterations+=1;
 		}

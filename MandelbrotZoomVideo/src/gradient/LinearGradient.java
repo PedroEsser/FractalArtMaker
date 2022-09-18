@@ -31,5 +31,10 @@ public class LinearGradient implements NumericGradient{
 	public LinearGradient clone(){
 		return new LinearGradient(start, this.getEnd());
 	}
+
+	@Override
+	public double getPercentFor(double value) {
+		return (value - start)/range;
+	}
 	
 }

@@ -6,16 +6,15 @@ import gpuColorGradients.MultiGradient;
 import gpuColorGradients.ThreeChannelGradient;
 import gradient.Constant;
 import gradient.LinearGradient;
-import gradient.LogarithmicGradient;
+import gradient.ExponentialGradient;
 import gradient.Gradient;
 
 public class FractalZoom implements Gradient<FractalFrame>{
 
 	public static final Gradient<FractalKernel> DEFAULT_FRACTAL_GRADIENT = new Constant<FractalKernel>(FractalFrame.DEFAULT_FRACTAL);
-	public static final LogarithmicGradient DEFAULT_DELTA_GRADIENT = new LogarithmicGradient(2E-2, 1E-16);
-	public static final Gradient<Double> DEFAULT_MAX_ITERATION_GRADIENT = new LogarithmicGradient(20, 1000).truncateBelow(0);
+	public static final ExponentialGradient DEFAULT_DELTA_GRADIENT = new ExponentialGradient(2E-2, 1E-16);
+	public static final Gradient<Double> DEFAULT_MAX_ITERATION_GRADIENT = new ExponentialGradient(30, 2000).truncateBelow(0);
 	public static final Gradient<MultiGradient> DEFAULT_COLOR_GRADIENT = new Constant<MultiGradient>(FractalFrame.DEFAULT_GRADIENT);
-	
 	
 	private int width, height;
 	private float norm;
@@ -41,11 +40,11 @@ public class FractalZoom implements Gradient<FractalFrame>{
 	}
 	
 	public FractalZoom(Complex center, int width, int height, double initialDelta, double finalDelta, int initialMaxIteration, int finalMaxIteration) {
-		this(center, width, height, new LogarithmicGradient(initialDelta, finalDelta), new LinearGradient(initialMaxIteration, finalMaxIteration));
+		this(center, width, height, new ExponentialGradient(initialDelta, finalDelta), new LinearGradient(initialMaxIteration, finalMaxIteration));
 	}
 	
 	public FractalZoom(Complex center, int width, int height, double initialDelta, double finalDelta) {
-		this(center, width, height, new LogarithmicGradient(initialDelta, finalDelta));
+		this(center, width, height, new ExponentialGradient(initialDelta, finalDelta));
 	}
 	
 	public FractalZoom(Complex center, int width, int height, Gradient<Double> deltaGradient) {

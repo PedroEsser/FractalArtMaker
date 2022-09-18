@@ -2,10 +2,11 @@ package gpuColorGradients;
 import static gpuColorGradients.GradientUtils.*;
 
 import java.awt.Color;
+import java.io.Serializable;
 
 import gradient.Gradient;
 
-public class ThreeChannelGradient extends ColorGradient{
+public class ThreeChannelGradient extends ColorGradient implements Serializable{
 
 	public static final int DATA_SIZE = 8;	//header, range, 3x start, 3x range
 	public static final int HSB_BIT = 0x00000002;
@@ -26,6 +27,10 @@ public class ThreeChannelGradient extends ColorGradient{
 		gradient[5] = range1;
 		gradient[6] = range2;
 		gradient[7] = range3;
+	}
+	
+	public ThreeChannelGradient(ThreeChannelGradient g) {
+		super(g);
 	}
 	
 	public ThreeChannelGradient(boolean isHSB, float start1, float start2, float start3, float range1, float range2, float range3) {
@@ -54,9 +59,29 @@ public class ThreeChannelGradient extends ColorGradient{
 		return ((int)gradient[index] & HSB_BIT) != 0;
 	}
 	
+	public boolean isHSB() {
+		return isHSB(gradient, 0);
+	}
+	
 	public static float nthChannelAtPercent(float percent, int n, float[] gradient, int index) {
 		float c = gradient[index+2 + n] + percent * gradient[index+5 + n];
 		return c == 1 ? 1 : looped(c);
+	}
+	
+	public void setNthChannelStart(int n, float value) {
+		gradient[2 + n] = value;
+	}
+	
+	public void setNthChannelRange(int n, float value) {
+		gradient[5 + n] = value;
+	}
+	
+	public float getNthChannelStart(int n) {
+		return gradient[2 + n];
+	}
+	
+	public float getNthChannelRange(int n) {
+		return gradient[5 + n];
 	}
 	
 	public static int colorAtPercent(float percent, float[] gradient, int index) {
@@ -130,6 +155,16 @@ public class ThreeChannelGradient extends ColorGradient{
 	@Override
 	public Gradient<Color> toGradient() {
 		return p -> new Color(colorAtPercent((float)p, gradient, 0));
+	}
+
+	@Override
+	public ThreeChannelGradient copy() {
+		return new ThreeChannelGradient(this);
+	}
+	
+	@Override
+	public Color colorAt(double percent) {
+		return new Color(colorAtPercent((float)percent, gradient, 0));
 	}
 	
 }

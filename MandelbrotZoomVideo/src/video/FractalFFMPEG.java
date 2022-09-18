@@ -50,7 +50,7 @@ public class FractalFFMPEG extends FractalFrameSaver {
 	public void finished() {
 		String audioCommand = audioFilePath == null ? "" : " -i \"" + audioFilePath + "\" -shortest";
 		String command = "ffmpeg -y -framerate " + fps + " -i " + folderPath
-				+ "\\Frame%05d.png" + audioCommand + " -c:v libx264 -pix_fmt yuv420p -crf 17 " + folderPath + ".mp4";
+				+ "\\Frame%05d.png" + audioCommand + " -c:v libx264 -pix_fmt yuv420p -crf 20 " + folderPath + ".mp4";
 		
 		//System.out.println("Command: " + command);
 		try {

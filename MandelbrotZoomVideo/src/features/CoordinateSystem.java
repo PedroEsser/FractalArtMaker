@@ -20,7 +20,6 @@ public class CoordinateSystem{
 	private static final Font font = new Font("Arial", Font.PLAIN, 12);
 
 	public static void drawCoordinateSystem(BufferedImage img, FractalFrame f) {
-		Graphics2D g = img.createGraphics();
 		double inc = bestIncrement(f.getDelta());
 		drawHorizontal(img, f, inc);
 		drawVertical(img, f, inc);
@@ -29,6 +28,7 @@ public class CoordinateSystem{
 	private static void drawHorizontal(BufferedImage img, FractalFrame f, double inc) {
 		double im = Math.floor(f.yToImag(0) / inc) * inc;
 		int y = f.imagToY(im);
+		int pixelInc = (int)(inc/f.getDelta());
 		Graphics g = img.getGraphics();
 		while(y < f.getHeight()) {
 			g.setColor(new Color(255,  255,  255, 80));
@@ -37,13 +37,14 @@ public class CoordinateSystem{
 			Point coordY = new Point(x, y);
 			writeCoord(im, coordY, img);
 			im += inc;
-			y = f.imagToY(im);
+			y += pixelInc;
 		}
 	}
 	
 	private static void drawVertical(BufferedImage img, FractalFrame f, double inc) {
 		double re = Math.floor(f.xToReal(0) / inc) * inc;
 		int x = f.realToX(re);
+		int pixelInc = (int)(inc/f.getDelta());
 		Graphics g = img.getGraphics();
 		while(x < f.getWidth()) {
 			g.setColor(new Color(255,  255,  255, 80));
@@ -51,7 +52,7 @@ public class CoordinateSystem{
 			Point coordX = new Point(x, img.getHeight() - 12);
 			writeCoord(re, coordX, img);
 			re += inc;
-			x = f.realToX(re);
+			x += pixelInc;
 		}
 	}
 	

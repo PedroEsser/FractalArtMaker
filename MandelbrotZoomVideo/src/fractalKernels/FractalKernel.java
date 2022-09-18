@@ -1,5 +1,6 @@
 package fractalKernels;
 
+import java.awt.dnd.peer.DropTargetPeer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,12 +24,14 @@ public abstract class FractalKernel extends Kernel {
 	protected double escapeRadius = 100;
 	
 	protected int mod = 1;
+	protected int modOffset = 0;
 	
 	public FractalKernel() {
 		super();
 		addParameter("Pre Iterations", 1, 1);
-		addParameter("Escape Radius", 100, 0.1);
+		addParameter("Escape Radius", 100, 10);
 		addParameter("mod", 1, 1);
+		addParameter("Mod Offset", 0, 1);
 	}
 	
 	public FractalKernel(FractalFrame frame) {
@@ -89,7 +92,6 @@ public abstract class FractalKernel extends Kernel {
 	
 	public void executeAll() {
 		//assert frame == null : "No FractalFrame has been set to this Kernel!";
-			
 		long t = System.currentTimeMillis();
 		loadParameterValues();
 		data = frame.getData();
@@ -123,6 +125,7 @@ public abstract class FractalKernel extends Kernel {
 		this.pre_iterations = this.getParameter("Pre Iterations").getValueAsInt();
 		this.escapeRadius = this.getParameter("Escape Radius").getValue();
 		this.mod = getParameter("mod").getValueAsInt();
+		this.modOffset = getParameter("Mod Offset").getValueAsInt();
 	}
 	
 	public static double amplitudeSquared(double[] complex) {

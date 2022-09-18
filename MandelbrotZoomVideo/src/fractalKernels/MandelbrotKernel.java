@@ -5,7 +5,6 @@ import gpuColorGradients.MultiGradient;
 
 public class MandelbrotKernel extends FractalKernel{
 	
-	
 	public MandelbrotKernel() {
 		super();
 	}

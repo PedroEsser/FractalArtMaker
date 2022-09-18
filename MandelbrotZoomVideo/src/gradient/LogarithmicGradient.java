@@ -2,35 +2,20 @@ package gradient;
 
 public class LogarithmicGradient implements NumericGradient{
 
-	private final double start, base;
-	
-	public LogarithmicGradient(double start, double end, double percent) {
-		this.start = start;
-		this.base = Math.pow(end/start, 1 / percent);
-	}
+	private final LinearGradient range;
 	
 	public LogarithmicGradient(double start, double end) {
-		this(start, end, 1);
+		range = new LinearGradient(Math.exp(start), Math.exp(end));
+	}
+	
+	@Override
+	public Double valueAt(double percent) {
+		return Math.log(range.valueAt(percent));
 	}
 
+	@Override
 	public double getPercentFor(double value) {
-		double aux = value / start;
-		return Math.log(aux)/Math.log(base);
+		return 0;
 	}
-	
-	@Override
-	public LogarithmicGradient scale(double scalar) {
-		return new LogarithmicGradient(start * scalar, this.getEnd() * scalar);
-	}
-	
-	@Override
-	public LogarithmicGradient clone(){
-		return new LogarithmicGradient(start, this.getEnd());
-	}
-	
-	@Override 
-	public Double valueAt(double percent) {
-		return start * Math.pow(base, percent);
-	}
-	
+
 }

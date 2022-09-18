@@ -33,7 +33,7 @@ public class InfoFeature extends ToggleFeature{
 				g.drawString(par.name + ": " + par.getValue(), 5, y);
 				y+= 15;
 			}
-			//drawCrosshair(img);
+			drawCrosshair(img);
 			CoordinateSystem.drawCoordinateSystem(img, getCurrentFrame());
 		}
 	}

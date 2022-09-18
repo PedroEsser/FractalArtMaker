@@ -20,6 +20,10 @@ public abstract class ColorGradient {
 			bounce(range);
 	}
 	
+	public ColorGradient(ColorGradient g) {
+		gradient = g.gradient.clone();
+	}
+	
 	public ColorGradient loop(float range) {
 		gradient[0] = (int)gradient[0] | LOOP_BIT;
 		gradient[1] = range;
@@ -36,6 +40,13 @@ public abstract class ColorGradient {
 		return gradient;
 	}
 	
+	public boolean isLoop() {
+		return isLoop(gradient, 0);
+	}
+	
+	public float getRange() {
+		return getRange(gradient, 0);
+	}
 	
 	public static boolean isLoop(float[] gradient, int index) {
 		return ((int)gradient[index] & LOOP_BIT) != 0;
@@ -49,6 +60,10 @@ public abstract class ColorGradient {
 		float p = percent * gradient[index + 1];
 		return ((int)gradient[index] & LOOP_BIT) != 0 ? looped(p) : bounced(p);
 	}
+	
+	public abstract ColorGradient copy();
+	
+	public abstract Color colorAt(double percent);
 	
 	public abstract Gradient<Color> toGradient();
 	

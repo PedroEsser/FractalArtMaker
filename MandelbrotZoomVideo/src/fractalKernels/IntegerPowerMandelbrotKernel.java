@@ -4,7 +4,7 @@ import gpuColorGradients.MultiGradient;
 
 public class IntegerPowerMandelbrotKernel extends FractalKernel {
 
-	private int power;
+	protected int power;
 	
 	public IntegerPowerMandelbrotKernel(int power) {
 		super();

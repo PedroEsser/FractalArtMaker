@@ -1,6 +1,7 @@
 package gui;
 
 import java.awt.Cursor;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
@@ -35,16 +36,16 @@ public class FractalVisualizer extends ImagePanel {
 		navigator = new FractalNavigator(0, 0, frame -> updateFrame(frame), GradientFactory.randomiseGradient());
 		this.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
 		this.setMousePressCallback(e -> {
-			Point p = this.getPointOnImage(e.getPoint());
+			Point p = this.getPointOnPanel(e.getPoint());
 			if (SwingUtilities.isMiddleMouseButton(e)) 
-            	navigator.moveAndUpdate(p);
+				orbitVisualizer.orbitAt(p);
             else if (SwingUtilities.isRightMouseButton(e)) 
-            	orbitVisualizer.orbitAt(p);
+            	navigator.moveAndUpdate(p);
 		});
 		this.setMouseDraggedCallback(e -> {
-			Point p = this.getPointOnImage(e.getPoint());
-			if (SwingUtilities.isRightMouseButton(e))
-            	orbitVisualizer.orbitAt(p);
+			Point p = this.getPointOnPanel(e.getPoint());
+			if (SwingUtilities.isMiddleMouseButton(e)) 
+				orbitVisualizer.orbitAt(p);
 		});
 		this.setMouseWheelCallback(e -> {
 //			Point p = this.getPointOnImage(e.getPoint());-1.0120864027672762
@@ -82,8 +83,9 @@ public class FractalVisualizer extends ImagePanel {
 	public void update() {
 		if(frame != null) {
 			BufferedImage newImg = frame.toImage();
-			for(VisualFeature f : features)
+			for(VisualFeature f : features) 
 				f.show(newImg);
+				
 			updateImage(newImg);
 		}
 	}
@@ -93,7 +95,7 @@ public class FractalVisualizer extends ImagePanel {
 	}
 
 	@Override
-	protected void myResize() {
+	protected void myResize(Graphics2D g) {
 		navigator.resize(this.getPanelWidth(), this.getPanelHeight());
 	}
 	

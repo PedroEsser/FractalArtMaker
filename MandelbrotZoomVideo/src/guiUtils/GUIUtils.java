@@ -1,27 +1,23 @@
 package guiUtils;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsEnvironment;
-import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
+import java.text.DecimalFormat;
+import java.util.function.Consumer;
+
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
 
 public class GUIUtils {
 
-	public static double X_SCALING;
-	public static double Y_SCALING;
+	public static final Font DEFAULT_FONT = new Font("Arial", Font.BOLD, 16);
 	
-	private static void adjustScalings() {
-		GraphicsConfiguration asdf = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
-		AffineTransform asfd2 = asdf.getDefaultTransform();
-		X_SCALING = asfd2.getScaleX();
-		Y_SCALING = asfd2.getScaleY();
-	}
-	
-	public static Graphics2D ignoredWindowsScaleGraphics(Graphics g) {
-		adjustScalings();
+	public static Graphics2D getGraphicsIgnoringScaling(Graphics g) {
 		final Graphics2D g2d = (Graphics2D) g;
 		final AffineTransform t = g2d.getTransform();
 		t.setToScale(1, 1);
@@ -34,12 +30,61 @@ public class GUIUtils {
 		return l >= 128 ? Color.black : Color.white;
 	}
 	
-//	public static Color getContrastColor(Color color) {
-//		float[] hsb = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
-//		hsb[0] = (hsb[0] + .5f) % 1;
-//		hsb[1] = 1;
-//		hsb[2] = 1 - hsb[2];
-//		return new Color(Color.HSBtoRGB(hsb[0], hsb[1], hsb[2]));
-//	}
+	public static String prettyDouble(double d, int decimals) {
+		return String.format("%." + decimals + "f", d);
+	}
+	
+	public static String prettyDouble(double d) {
+		return prettyDouble(d, 5);
+	}
+	
+	public static boolean areAlmostEqual(double maxError, double... vals) {
+		for(int i = 0 ; i < vals.length - 1 ; i++) {
+			for(int j = i+1 ; i < vals.length ; i++) {
+				double dist = Math.abs(vals[i] - vals[j]);
+				if(dist > 1e-06)
+					return false;
+			}
+		}
+		return true;
+	}
+	
+	public static double roundIfCloseToMultipleOf(double value, double m, double maxDiff) {
+		double sign = value < 0 ? -1 : 1;
+		value = Math.abs(value);
+		int quotient = (int)(value / m);
+		double mod = value - quotient * m;
+		if(mod < maxDiff)
+			return quotient * m * sign;
+		if(m - mod < maxDiff)
+			return (quotient + 1) * m * sign;
+		return value * sign;
+	}
+	
+	public static double roundIfCloseToMultipleOf(double value, double m) {
+		return roundIfCloseToMultipleOf(value, m, 1e-05);
+	}
+	
+	public static JButton button(String name, Consumer<ActionEvent> action) {
+		JButton b = new JButton(name);
+		b.setFont(DEFAULT_FONT);
+		b.addActionListener(e -> action.accept(e));
+		return b;
+	}
+	
+	public static JLabel label(String name, Font font) {
+		JLabel b = new JLabel(name);
+		b.setHorizontalAlignment(SwingConstants.CENTER);
+		b.setFont(font);
+		return b;
+	}
+	
+	public static JLabel label(String name, int fontSize) {
+		return label(name, new Font("Arial", Font.BOLD, fontSize));
+	}
+	
+	public static JLabel label(String name) {
+		return label(name, DEFAULT_FONT);
+	}
 	
 }

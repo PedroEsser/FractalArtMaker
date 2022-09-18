@@ -4,7 +4,7 @@ import gpuColorGradients.MultiGradient;
 
 public class RealPowerMandelbrotKernel extends FractalKernel{
 
-	private double power;
+	protected double power;
 	
 	public RealPowerMandelbrotKernel(double power) {
 		super();

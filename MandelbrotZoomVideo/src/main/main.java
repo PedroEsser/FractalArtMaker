@@ -1,25 +1,14 @@
 package main;
 
-import java.util.Arrays;
-
-import javax.swing.JFrame;
 import javax.swing.UIManager;
 
 import com.aparapi.Range;
-import com.aparapi.device.Device;
-import com.aparapi.device.OpenCLDevice;
-import com.aparapi.internal.kernel.KernelManager;
-import com.aparapi.internal.opencl.OpenCLKernel;
-import com.aparapi.internal.opencl.OpenCLPlatform;
 import com.formdev.flatlaf.FlatDarkLaf;
 
 import gpuColorGradients.GradientFactory;
-import gpuColorGradients.MultiGradient;
-import gpuColorGradients.ThreeChannelGradient;
+import gpuColorGradients.GradientFactoryGUI;
+import gpuColorGradients.GradientLoader;
 import gui.FractalNavigatorGUI;
-import gui.GradientVisualizer;
-
-
 
 public class main {
 
@@ -30,15 +19,11 @@ public class main {
 			e.printStackTrace();
 		}
 
-//		GenericGradient a = new GenericGradient(false, 0, 0.5f, 0, 1f, -1f, 0.3f);
-//		a.test(0.2f);
-//		a.loop(0.5f, 2.5f);
-//		a.test(0.2f);
+//		Engine.startEngine();
 		
 		new FractalNavigatorGUI();
-//		new Mandelbrot64();
 		
-		//GradientVisualizer.showcase(GradientFactory.testV2(5).toGradient());
+		//new GradientFactoryGUI(GradientFactory.testV2(5, 1, .5, false));
 		
 //		String source = "int index(int x, int y, int width) {\n"
 //				+ "  return width*y + x;\n"
