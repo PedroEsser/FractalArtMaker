@@ -39,9 +39,22 @@ public class MultiGradientEditor extends GradientEditor{
 	}
 	
 	@Override
+	public void setGradient(ColorGradient gradient) {
+		assert gradient instanceof MultiGradient;
+		super.setGradient(gradient);
+		offsetParameter.setValue(((MultiGradient)gradient).getOffset());
+		selectedIndex = -1;
+	}
+	
+	@Override
 	protected void addVisualizer() {
 		visualizer = new MyVisualizer(gradient);
 		this.addComponent(visualizer, 5);
+	}
+	
+	public void addGradient(ThreeChannelGradient g) {
+		getGradient().addGradient(g);
+		selectGradient(getGradient().getNumberOfGradients()-1);
 	}
 	
 	public ThreeChannelGradient getSelectedGradient() {

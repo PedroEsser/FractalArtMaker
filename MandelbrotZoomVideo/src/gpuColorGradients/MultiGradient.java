@@ -76,10 +76,6 @@ public class MultiGradient extends ColorGradient implements Serializable{
 		return getOffset(this.gradient);
 	}
 	
-	public ThreeChannelGradient getNthGradient(int n) {
-		return gradients.get(n).gradient;
-	}
-	
 	public float getModifiedPercent(float percent) {
 		percent += getOffset();
 		float p = calculatePercent(percent, gradient, 0);
@@ -189,8 +185,9 @@ public class MultiGradient extends ColorGradient implements Serializable{
 		return p -> new Color(colorAtPercent((float)p, gradient));
 	}
 	
-	private class GradientWeightTuple{
+	class GradientWeightTuple implements Serializable{
 		
+		private static final long serialVersionUID = 1L;
 		ThreeChannelGradient gradient;
 		float weight;
 		

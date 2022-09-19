@@ -22,6 +22,7 @@ public class main {
 //		Engine.startEngine();
 		
 		new FractalNavigatorGUI();
+
 		
 		//new GradientFactoryGUI(GradientFactory.testV2(5, 1, .5, false));
 		

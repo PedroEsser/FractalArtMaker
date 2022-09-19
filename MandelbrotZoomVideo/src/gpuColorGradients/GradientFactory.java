@@ -3,6 +3,7 @@ package gpuColorGradients;
 import java.util.Random;
 
 import gradient.Gradient;
+import static gpuColorGradients.GradientUtils.*;
 
 public class GradientFactory {
 
@@ -117,23 +118,26 @@ public class GradientFactory {
 //		return result;
 //	}
 	
-	
-	public static ThreeChannelGradient darkOrLightGradientV2(boolean toDark, float startHue, float rangeHue) {
-		return new ThreeChannelGradient(startHue, 1, toDark ? 0 : 1, rangeHue, toDark ? 0 : -1, toDark ? 1 : 0);
+	public static ThreeChannelGradient mettalicGradient(float startHue, float rangeHue) {
+		return new ThreeChannelGradient(looped(startHue), 1, 0, rangeHue, -1, 1);
 	}
 	
-	public static ThreeChannelGradient darkOrLightGradientV2(boolean toDark, float hue) {
-		return darkOrLightGradientV2(toDark, hue, 0);
+	public static ThreeChannelGradient darkOrLightGradient(boolean toDark, float startHue, float rangeHue) {
+		return new ThreeChannelGradient(looped(startHue), 1, toDark ? 0 : 1, rangeHue, toDark ? 0 : -1, toDark ? 1 : 0);
 	}
 	
-	public static ThreeChannelGradient darkOrLightGradientV2(boolean toDark) {
-		return darkOrLightGradientV2(toDark, rand.nextFloat(), rand.nextFloat()*2 - 1);
+	public static ThreeChannelGradient darkOrLightGradient(boolean toDark, float hue) {
+		return darkOrLightGradient(toDark, hue, 0);
+	}
+	
+	public static ThreeChannelGradient darkOrLightGradient(boolean toDark) {
+		return darkOrLightGradient(toDark, rand.nextFloat(), rand.nextFloat()*2 - 1);
 	}
 	
 	public static MultiGradient testV2(int n, int loops, double percentDark, boolean constantHue) {
 		MultiGradient result = new MultiGradient();
 		for(int i = 0 ; i < n ; i++) {
-			result.addGradient((constantHue ? darkOrLightGradientV2(rand.nextFloat() < percentDark, rand.nextFloat()) : darkOrLightGradientV2(rand.nextFloat() < percentDark)).loop(loops));
+			result.addGradient((constantHue ? darkOrLightGradient(rand.nextFloat() < percentDark, rand.nextFloat()) : darkOrLightGradient(rand.nextFloat() < percentDark)).loop(loops));
 		}
 		return result;
 	}

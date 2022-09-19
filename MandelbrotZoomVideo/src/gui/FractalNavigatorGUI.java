@@ -13,6 +13,7 @@ import javax.swing.JLabel;
 import features.FractalParameterToggler;
 import features.InfoFeature;
 import gpuColorGradients.GradientFactory;
+import gpuColorGradients.GradientFactoryGUI;
 import gpuColorGradients.MultiGradient;
 
 import static javax.swing.KeyStroke.getKeyStroke;
@@ -41,7 +42,7 @@ public class FractalNavigatorGUI{
 		visualizer.addKeyStroke(getKeyStroke("M"), "menu", e -> new MenuGUI(this));
 		visualizer.addKeyStroke(getKeyStroke("I"), "imageSave", e -> new ImageSaver(visualizer));
 		visualizer.addKeyStroke(getKeyStroke("V"), "videoSave", e -> new VideoMaker(visualizer));
-		visualizer.addKeyStroke(getKeyStroke("G"), "gradient", e -> randomiseGradient());
+		visualizer.addKeyStroke(getKeyStroke("G"), "gradient", e -> new GradientFactoryGUI(visualizer.getGradient()).setUpdateCallback(g -> visualizer.updateGradient(g)));
 		visualizer.addKeyStroke(getKeyStroke("RIGHT"), "toggleRightParameter", e -> toggler.toggleRight());
 		visualizer.addKeyStroke(getKeyStroke("LEFT"), "toggleLeftParameter", e -> toggler.toggleLeft());
 		visualizer.addKeyStroke(getKeyStroke("UP"), "incParameter", e -> toggler.inc());

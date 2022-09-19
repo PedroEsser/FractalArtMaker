@@ -3,10 +3,11 @@ package gpuColorGradients;
 import static gpuColorGradients.GradientUtils.*;
 
 import java.awt.Color;
+import java.io.Serializable;
 
 import gradient.Gradient;
 
-public abstract class ColorGradient {
+public abstract class ColorGradient implements Serializable {
 	
 	public static final int LOOP_BIT = 0x00000001;
 	

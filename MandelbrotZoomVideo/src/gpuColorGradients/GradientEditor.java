@@ -47,6 +47,7 @@ public abstract class GradientEditor extends Weighted1DPanel{
 		loopToggle = button(gradient != null && gradient.isLoop() ? "Loop" : "Bounce", e -> {
 			loopToggle.setText(loopSelected() ? "Bounce" : "Loop");
 			updateGradient();
+			System.out.println("load");
 		});
 		rangePanel.addComponent(loopToggle, .5);
 		
@@ -61,6 +62,7 @@ public abstract class GradientEditor extends Weighted1DPanel{
 		this.gradient = gradient;
 		rangeParameter.setValue(gradient.getRange());
 		loopToggle.setText(gradient.isLoop() ? "Loop" : "Bounce");
+		visualizer.setGradient(gradient);
 	}
 	
 	protected void updateGradient(){

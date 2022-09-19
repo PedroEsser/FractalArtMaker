@@ -1,6 +1,7 @@
 package guiUtils;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -11,6 +12,9 @@ import java.util.function.Consumer;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
 
 public class GUIUtils {
@@ -72,6 +76,10 @@ public class GUIUtils {
 		return b;
 	}
 	
+	public static JButton button(String name) {
+		return button(name, a -> {});
+	}
+	
 	public static JLabel label(String name, Font font) {
 		JLabel b = new JLabel(name);
 		b.setHorizontalAlignment(SwingConstants.CENTER);
@@ -85,6 +93,10 @@ public class GUIUtils {
 	
 	public static JLabel label(String name) {
 		return label(name, DEFAULT_FONT);
+	}
+	
+	public static String popup(Component parentComponent, String message, String title) {
+		return JOptionPane.showInputDialog(parentComponent, message, title, JOptionPane.OK_CANCEL_OPTION);
 	}
 	
 }

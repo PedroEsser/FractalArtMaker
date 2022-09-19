@@ -30,8 +30,9 @@ public class GradientFactoryGUI extends JFrame{
 		this.editor = new MultiGradientEditor(gradient.copy());
 		this.editor.setSelectCallback(g -> gradientSelected(g));
 		Weighted1DPanel actionsPanel = new Weighted1DPanel();
+		actionsPanel.addComponent(button("Save", e -> handleSave()));
 		actionsPanel.addComponent(button("New", e -> addGradient()));
-		actionsPanel.addComponent(button("Load", e -> new GradientLoader(gradient)));
+		actionsPanel.addComponent(button("Load", e -> GradientLoader.open(this)));
 		actionsPanel.addComponent(button("Remove", e -> editor.removeSelectedGradient()));
 		
 		this.editor.addComponent(actionsPanel, 0.5);
@@ -45,7 +46,8 @@ public class GradientFactoryGUI extends JFrame{
 		
 		mainPanel.addComponent(bottomPanel, 1);
 		mainPanel.addComponent(button("Update", a -> updateCallback.accept(editor.getGradient().copy())));
-		gradientSelected(null);
+		deselectGradient();
+		
 		
 		this.add(mainPanel);
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -57,6 +59,10 @@ public class GradientFactoryGUI extends JFrame{
 	
 	public GradientFactoryGUI(ThreeChannelGradient gradient) {
 		this(new MultiGradient(gradient));
+	}
+	
+	private void deselectGradient() {
+		gradientSelected(null);
 	}
 	
 	private void gradientSelected(ThreeChannelGradient g) {
@@ -85,9 +91,17 @@ public class GradientFactoryGUI extends JFrame{
 		selectLabel.setText(g == null ? "No Selecion" : "Selected Gradient");
 	}
 	
-	private void addGradient(ThreeChannelGradient g) {
-		editor.getGradient().addGradient(g);
-		editor.updateGradient();
+	public MultiGradientEditor getEditor() {
+		return editor;
+	}
+	
+	public void setGradient(MultiGradient g) {
+		editor.setGradient(g);
+		deselectGradient();
+	}
+	
+	public void addGradient(ThreeChannelGradient g) {
+		editor.addGradient(g);
 	}
 	
 	private void addGradient() {
@@ -96,6 +110,11 @@ public class GradientFactoryGUI extends JFrame{
 	
 	public void setUpdateCallback(Consumer<MultiGradient> updateCallback) {
 		this.updateCallback = updateCallback;
+	}
+	
+	private void handleSave() {
+		String name = popup(this, "Name your Gradient", "Save Gradient");
+		GradientLoader.addGradientEntry(name, editor.getGradient().copy());
 	}
 	
 }
