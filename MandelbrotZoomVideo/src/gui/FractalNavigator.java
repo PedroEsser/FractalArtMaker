@@ -26,7 +26,7 @@ import gradient.NumericGradient;
 
 public class FractalNavigator {
 
-	private static double PERCENT_STEP = 0.002;
+	private static double PERCENT_STEP = 0.0015;
 	private double percent = 0;
 	private FractalZoom zoom;
 	private FractalFrame frame;

@@ -13,8 +13,23 @@ import gui.FractalVisualizer;
 
 public class InfoFeature extends ToggleFeature{
 
+	private static final String[] keyBindings = new String[] {
+			"[T] Toggle HUD",
+			"[M] Open menu",
+			"[RIGHT-CLICK] Center",
+			"[MIDDLE-CLICK] Visualize orbit",
+			"[SCROLL] Zoom",
+			"[O] Toggle orbit",
+			"[F] Toggle fullscreen",
+			"[I] Save Image",
+			"[V] Create Video",
+			"[G] Edit gradient",
+			"[0-9] Different zoom levels"
+	};
+	
 	public InfoFeature(FractalNavigatorGUI gui) {
 		super(gui);
+		toggle = true;
 	}
 
 	@Override
@@ -32,6 +47,11 @@ public class InfoFeature extends ToggleFeature{
 				g.setColor(gui.toggler.getSelectedParameter().t.equals(par.name) ? Color.RED : Color.WHITE);
 				g.drawString(par.name + ": " + par.getValue(), 5, y);
 				y+= 15;
+			}
+			y = img.getHeight() - keyBindings.length * 18;
+			for(String key : keyBindings) {
+				g.drawString(key, 5, y);
+				y+= 18;
 			}
 			drawCrosshair(img);
 			CoordinateSystem.drawCoordinateSystem(img, getCurrentFrame());
