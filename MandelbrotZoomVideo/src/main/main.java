@@ -5,9 +5,6 @@ import javax.swing.UIManager;
 import com.aparapi.Range;
 import com.formdev.flatlaf.FlatDarkLaf;
 
-import gpuColorGradients.GradientFactory;
-import gpuColorGradients.GradientFactoryGUI;
-import gpuColorGradients.GradientLoader;
 import gui.FractalNavigatorGUI;
 
 public class main {

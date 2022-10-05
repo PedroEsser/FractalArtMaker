@@ -33,7 +33,7 @@ public class FractalVisualizer extends ImagePanel {
 		this.features = new ArrayList<VisualFeature>();
 		this.orbitVisualizer = new FractalOrbitVisualizer(gui);
 		this.features.add(orbitVisualizer);
-		navigator = new FractalNavigator(0, 0, frame -> updateFrame(frame), GradientFactory.randomiseGradient());
+		navigator = new FractalNavigator(0, 0, frame -> updateFrame(frame));
 		this.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
 		this.setMousePressCallback(e -> {
 			Point p = this.getPointOnPanel(e.getPoint());

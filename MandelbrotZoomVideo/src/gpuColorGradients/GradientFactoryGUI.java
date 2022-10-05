@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.util.function.Consumer;
 
 import javax.swing.BorderFactory;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
@@ -19,6 +20,7 @@ public class GradientFactoryGUI extends JFrame{
 	private Weighted1DPanel mainPanel;
 	private Weighted1DPanel bottomPanel;
 	private LabelValueTuple weightParameter;
+	private JCheckBox updateUI;
 	private ThreeChannelGradientEditor selectedGradientEditor;
 	private JLabel selectLabel;
 	private Consumer<MultiGradient> updateCallback;
@@ -27,13 +29,23 @@ public class GradientFactoryGUI extends JFrame{
 		super();
 		mainPanel = new Weighted1DPanel(false, 5, 0, 5, 0);
 		
-		this.editor = new MultiGradientEditor(gradient.copy());
+		this.editor = new MultiGradientEditor(gradient.copy()) {
+			@Override
+			protected void updateGradient() {
+				super.updateGradient();
+				if(updateUI.isSelected())
+					updateCallback.accept(editor.getGradient().copy());
+			}
+		};
 		this.editor.setSelectCallback(g -> gradientSelected(g));
 		Weighted1DPanel actionsPanel = new Weighted1DPanel();
 		actionsPanel.addComponent(button("Save", e -> handleSave()));
 		actionsPanel.addComponent(button("New", e -> addGradient()));
 		actionsPanel.addComponent(button("Load", e -> GradientLoader.open(this)));
 		actionsPanel.addComponent(button("Remove", e -> editor.removeSelectedGradient()));
+		updateUI = new JCheckBox("Update UI", false);
+		updateUI.setFont(DEFAULT_FONT);
+		actionsPanel.addComponent(updateUI);
 		
 		this.editor.addComponent(actionsPanel, 0.5);
 		mainPanel.addComponent(editor, 2);
@@ -88,8 +100,13 @@ public class GradientFactoryGUI extends JFrame{
 		
 		bottomPanel.addComponent(selectedGradientEditor, 1);
 		bottomPanel.updateUI();
-		selectLabel.setText(g == null ? "No Selecion" : "Selected Gradient");
+		selectLabel.setText(g == null ? "No Selection" : "Selected Gradient");
 	}
+	
+	
+	//  Z = Z^2 + C
+	
+	
 	
 	public MultiGradientEditor getEditor() {
 		return editor;

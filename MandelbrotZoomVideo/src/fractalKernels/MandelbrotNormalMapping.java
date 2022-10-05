@@ -23,6 +23,8 @@ public class MandelbrotNormalMapping extends MandelbrotKernel{
 		super.loadParameterValues();
 	}
 	
+	//	https://www.math.univ-toulouse.fr/~cheritat/wiki-draw/index.php/Mandelbrot_set#Variation:_.28partial.29_antialias_effect_without_oversampling
+	
 	@Override
 	public void run() {		
 		int width = this.width;
@@ -41,7 +43,6 @@ public class MandelbrotNormalMapping extends MandelbrotKernel{
 		
 		double dCRE = 0;
 		double dCIM = 0;
-		
 		double uRE = 0;
 		double uIM = 0;
 		

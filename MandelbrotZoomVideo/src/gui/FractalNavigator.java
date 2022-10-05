@@ -35,10 +35,9 @@ public class FractalNavigator {
 	
 	private ExponentialGradient deltaGradient;
 	
-	public FractalNavigator(int width, int height, Consumer<FractalFrame> frameUpdateCallback, MultiGradient gradient) {
+	public FractalNavigator(int width, int height, Consumer<FractalFrame> frameUpdateCallback) {
 		this.zoom = new FractalZoom(width, height);
 		this.deltaGradient = FractalZoom.DEFAULT_DELTA_GRADIENT.clone();
-		this.zoom.setGradient(gradient);
 		
 		this.frameUpdateCallback = frameUpdateCallback;
 		producer = new MyThreadPool();
@@ -122,11 +121,11 @@ public class FractalNavigator {
 		this.frame = frame;
 	}
 	
-	public void setParameters(Gradient<Double> maxIterations, double delta, double re, double im, FractalKernel fractal) {
+	public void setParameters(Gradient<Double> maxIterations, double delta, double re, double im, FractalZoom zoom) {
 		double percent = deltaGradient.getPercentFor(delta);
 		zoom.setCenter(new Complex(re, im));
 		zoom.setMaxIterationGradient(p -> Math.max(0, maxIterations.valueAt(p)));
-		zoom.setFractal(fractal);
+		this.zoom = zoom;
 		setPercent(percent);
 	}
 	

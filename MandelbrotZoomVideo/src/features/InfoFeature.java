@@ -29,7 +29,7 @@ public class InfoFeature extends ToggleFeature{
 				y+= 15;
 			}
 			for(FractalParameter par : getCurrentFrame().getKernel().getFractalParameters()) {
-				g.setColor(gui.toggler.getSelectedParameter() == par ? Color.RED : Color.WHITE);
+				g.setColor(gui.toggler.getSelectedParameter().t.equals(par.name) ? Color.RED : Color.WHITE);
 				g.drawString(par.name + ": " + par.getValue(), 5, y);
 				y+= 15;
 			}

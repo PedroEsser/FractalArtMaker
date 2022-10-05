@@ -142,17 +142,17 @@ public class GradientFactory {
 		return result;
 	}
 	
-	public static MultiGradient randomiseGradient() {
-		MultiGradient result;
-//		if(rand.nextDouble() < 1d/3)
-			//result = testV2((int)(Math.random() * 150) + 10, 25, false, true);
-			result = testV2(10, 60, .5, true);
-//		if(rand.nextBoolean())
-//			result = GradientFactory.randomSmoothHSBGradients(rand.nextInt(100)+1);
-//		else
-//			result = randomMixWarmAndCool(0.2, rand.nextInt(200)+1);
-		//result.bounce((float)(Math.random() * Math.random() * 8) + 1);
-		return result;
-	}
+//	public static MultiGradient randomiseGradient() {
+//		MultiGradient result;
+////		if(rand.nextDouble() < 1d/3)
+//			//result = testV2((int)(Math.random() * 150) + 10, 25, false, true);
+//			result = testV2(10, 60, .5, true);
+////		if(rand.nextBoolean())
+////			result = GradientFactory.randomSmoothHSBGradients(rand.nextInt(100)+1);
+////		else
+////			result = randomMixWarmAndCool(0.2, rand.nextInt(200)+1);
+//		//result.bounce((float)(Math.random() * Math.random() * 8) + 1);
+//		return result;
+//	}
 	
 }

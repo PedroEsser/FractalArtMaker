@@ -8,9 +8,4 @@ public interface NumericGradient extends Gradient<Double>{
 		return p -> valueAt(p) * scalar;
 	}
 	
-//	@Override
-//	default NumericGradient truncateBelow(double min) {
-//		return (NumericGradient)(Gradient.super.truncateBelow(min));
-//	}
-	
 }

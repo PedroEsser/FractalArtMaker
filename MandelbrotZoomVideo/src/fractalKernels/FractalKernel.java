@@ -1,6 +1,5 @@
 package fractalKernels;
 
-import java.awt.dnd.peer.DropTargetPeer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +8,7 @@ import com.aparapi.Range;
 
 import fractal.FractalFrame;
 import gpuColorGradients.MultiGradient;
+import static gpuColorGradients.GradientUtils.*;
 
 public abstract class FractalKernel extends Kernel {
 
@@ -71,11 +71,15 @@ public abstract class FractalKernel extends Kernel {
 			}
 	}
 	
+	public void editParameter(String name, double value) {
+		editParameter(name, value, getParameter(name).getInc());
+	}
+	
 	public void editParameter(FractalParameter par) {
 		editParameter(par.name, par.getValue(), par.getInc());
 	}
 	
-	protected FractalParameter getParameter(String name) {
+	public FractalParameter getParameter(String name) {
 		for(FractalParameter f : fractalParameters)
 			if(f.name.equals(name))
 				return f;

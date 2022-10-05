@@ -47,7 +47,7 @@ public class LabelValueTuple extends LabelTuple<JNumberField>{
 	}
 	
 	public void setValue(double value, boolean pretty) {
-		this.getRight().setText(pretty ? GUIUtils.prettyDouble(value) : value + "");
+		this.getRight().setText(pretty ? GUIUtils.prettyDouble(value, 3) : value + "");
 	}
 	
 	public void setValue(double value) {

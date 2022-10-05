@@ -24,34 +24,34 @@ public class MandelbrotKernel extends FractalKernel{
 		int iterations = pre_iterations;
 		
 		double aux = 0;
-		double currentRE = 0;
-		double currentIM = 0;
+		double zRE = 0;
+		double zIM = 0;
 		double constantRE = topLeftRE + this.delta * i;
 		double constantIM = topLeftIM + this.delta * j;
 		
 		for(int a = 0 ; a < iterations ; a++) {
-			aux = currentRE;
-			currentRE = iterateRE(currentRE, currentIM, constantRE, constantIM);
-			currentIM = iterateIM(aux, currentIM, constantRE, constantIM);
+			aux = zRE;
+			zRE = iterateRE(zRE, zIM, constantRE, constantIM);
+			zIM = iterateIM(aux, zIM, constantRE, constantIM);
 		}
 			
-		constantRE = currentRE;
-		constantIM = currentIM;
+		constantRE = zRE;
+		constantIM = zIM;
 		
-		currentRE = 0;
-		currentIM = 0;
+		zRE = 0;
+		zIM = 0;
 		iterations = 0;
 		
-		while(currentRE * currentRE + currentIM * currentIM <= escapeRadius && iterations < maxIterations) {
-			aux = currentRE;
-			currentRE = iterateRE(currentRE, currentIM, constantRE, constantIM);
-			currentIM = iterateIM(aux, currentIM, constantRE, constantIM);
+		while(zRE * zRE + zIM * zIM <= escapeRadius && iterations < maxIterations) {
+			aux = zRE;
+			zRE = iterateRE(zRE, zIM, constantRE, constantIM);
+			zIM = iterateIM(aux, zIM, constantRE, constantIM);
 			
 			iterations+=1;		//5 iterations at once will make it run a little bit faster
 		}
 		int rgb = 0;
 		if(iterations < maxIterations) {
-			float iterationScore = (float)(iterations + 1 - log(log(sqrt(currentRE * currentRE + currentIM * currentIM)))/log(2));
+			float iterationScore = (float)(iterations + 1 - log(log(sqrt(zRE * zRE + zIM * zIM)))/log(2));
 			iterationScore =  iterationScore < 0 ? 0 : iterationScore;
 			rgb = MultiGradient.colorAtPercent(iterationScore * norm, gradient);
 		}
@@ -62,12 +62,12 @@ public class MandelbrotKernel extends FractalKernel{
 		data[i + 2] = (byte)(rgb >> 16 & 0xFF);
 	}
 	
-	public double iterateRE(double currentRE, double currentIM, double constantRE, double constantIM) {
-		return currentRE * currentRE - currentIM * currentIM + constantRE;
+	public double iterateRE(double zRE, double zIM, double constantRE, double constantIM) {
+		return zRE * zRE - zIM * zIM + constantRE;
 	}
 	
-	public double iterateIM(double currentRE, double currentIM, double constantRE, double constantIM) {
-		return 2 * currentRE * currentIM + constantIM;
+	public double iterateIM(double zRE, double zIM, double constantRE, double constantIM) {
+		return 2 * zRE * zIM + constantIM;
 	}
 	
 	@Override

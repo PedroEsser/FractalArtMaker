@@ -15,12 +15,13 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import fractal.FractalFrame;
+import fractal.FractalZoom;
 import fractalKernels.*;
 import fractals_deprecated.Complex;
 import gpuColorGradients.GradientFactoryGUI;
 import gradient.Gradient;
 import gradient.NumericGradient;
-import guiUtils.FractalParameterGUI;
+import guiUtils.FractalParametersGUI;
 import guiUtils.JGradient;
 import guiUtils.JTuple;
 import guiUtils.LabelOptionsTuple;
@@ -34,7 +35,8 @@ public class MenuGUI extends JFrame{
 	private final FractalNavigatorGUI nav;
 	
 	private static String[] FRACTAL_VARIANTS = {"Mandelbrot", "Integer Power Mandelbrot", "Real Power Mandelbrot", 
-			"Complex Power Mandelbrot", "Burning Ship", "MandelTrig", "Feather Fractal", "Hybrid Fractal"};
+			"Complex Power Mandelbrot", "Burning Ship", "MandelTrig", "Feather Fractal", "Hybrid Fractal", "Image Based Mandelbrot",
+			"Orbit Trap Mandelbrot"};
 	
 	Weighted1DPanel mainPanel;
 	LabelTuple<JGradient> iterations;
@@ -43,7 +45,9 @@ public class MenuGUI extends JFrame{
 	LabelValueTuple im;
 	GradientVisualizer visualizer;
 	LabelOptionsTuple fractalTypes;
-	JPanel parameters;
+	FractalParametersGUI parameters;
+	
+	private FractalZoom zoom;
 	
 	public MenuGUI(FractalNavigatorGUI nav) {
 		super("Menu");
@@ -51,7 +55,8 @@ public class MenuGUI extends JFrame{
 		mainPanel = new Weighted1DPanel(false);
 		//mainPanel.setLayout(new GridLayout(8, 1, 0, 8));
 		
-		iterations = new LabelTuple("Iterations: ", new JGradient(nav.getVisualizer().getNavigator().getZoom().getMaxIterationGradient()));
+		zoom = nav.getVisualizer().getNavigator().getZoom().clone();
+		iterations = new LabelTuple("Iterations: ", new JGradient(zoom.getMaxIterationGradient()));
 		mainPanel.addComponent(iterations);
 		
 		delta = new LabelValueTuple("Delta:", 0);
@@ -83,12 +88,13 @@ public class MenuGUI extends JFrame{
 		fractalTypes = new LabelOptionsTuple("Fractal:", FRACTAL_VARIANTS);
 		FractalKernel fractal = nav.getVisualizer().getNavigator().getFrame().getKernel();
 		fractalTypes.setOption(fractal.getName());
-		fractalTypes.getRight().addActionListener(e -> fillParameters(getSelectedFractal()));
+		fractalTypes.getRight().addActionListener(e -> handleFractalSelect());
 		mainPanel.addComponent(fractalTypes);
 		
-		parameters = new JPanel();
-		fillParameters(nav.getVisualizer().getFrame().getKernel());
-		mainPanel.addComponent(parameters);
+//		parameters = new JPanel();
+//		fillParameters(nav.getVisualizer().getFrame().getKernel());
+		parameters = new FractalParametersGUI(zoom);
+		mainPanel.addComponent(parameters, 3);
 		
 		JButton updateButton = new JButton("Update");
 		updateButton.setFont(new Font("Arial", Font.BOLD, 20));
@@ -116,39 +122,27 @@ public class MenuGUI extends JFrame{
 			Complex center = frame.getCenter();
 			re.setValue(center.getRe());
 			im.setValue(-center.getIm());
+			//parameters.setZoom(nav.getVisualizer().getNavigator().getZoom());
 		}
 		super.setVisible(b);
 	}
 	
 	private void updateNavigator(ActionEvent e) {
-		this.setVisible(false);
-		
 		Gradient<Double> iterations = this.iterations.getRight().getGradient();
 		double delta = this.delta.getValue();
 		double re = this.re.getValue();
 		double im = this.im.getValue();
 		
-		nav.getVisualizer().getNavigator().setParameters(iterations, delta, re, -im, getFractal());
+		FractalNavigator n = nav.getVisualizer().getNavigator();
+		parameters.updateParameters();
+		n.setParameters(iterations, delta, re, -im, parameters.getZoom());
+		
 	}
 	
-	private void fillParameters(FractalKernel kernel) {
-		parameters.removeAll();
-		List<FractalParameter> pars = kernel.getFractalParameters();
-		parameters.setLayout(new GridLayout(pars.size(), 1, 0, 4));
-		pars.forEach(p -> {
-			FractalParameterGUI par = new FractalParameterGUI(p);
-			parameters.add(par);
-		});
-		mainPanel.repaint();
-	}
-	
-	private FractalKernel getFractal() {
+	private void handleFractalSelect() {
 		FractalKernel fractal = getSelectedFractal();
-		for(Component c: parameters.getComponents()) {
-			FractalParameterGUI parGUI = (FractalParameterGUI)c;
-			fractal.editParameter(parGUI.getParameter());
-		}
-		return fractal;
+		zoom.setFractal(fractal);
+		parameters.setZoom(zoom);
 	}
 	
 	private FractalKernel getSelectedFractal() {
@@ -162,6 +156,8 @@ public class MenuGUI extends JFrame{
 			case "MandelTrig":					return new MandelTrig();
 			case "Feather Fractal":				return new FeatherFractal();
 			case "Hybrid Fractal":				return new HybridFractal();
+			case "Image Based Mandelbrot":		return new ImageBasedMandelbrotKernel();
+			case "Orbit Trap Mandelbrot":		return new OrbitTrapKernel();
 			default: 							return null;
 		}
 	}

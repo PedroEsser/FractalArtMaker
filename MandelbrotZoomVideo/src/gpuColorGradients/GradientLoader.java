@@ -123,7 +123,7 @@ public class GradientLoader extends JFrame {
 	
 	public static void addGradientEntry(String name, MultiGradient gradient) {
 		gradient.updateGradientData();
-		INSTANCE.addGradient(name, gradient);
+		getInstance().addGradient(name, gradient);
 		INSTANCE.saveGradients();
 		INSTANCE.savedGradientsPanel.updateUI();
 	}

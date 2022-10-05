@@ -58,9 +58,9 @@ public class FractalNavigatorGUI{
 			
 	}
 	
-	public void randomiseGradient() {
-		visualizer.updateGradient(GradientFactory.randomiseGradient());
-	}
+//	public void randomiseGradient() {
+//		visualizer.updateGradient(GradientFactory.randomiseGradient());
+//	}
 	
 	public void goToPercent(int d) {
 		visualizer.getNavigator().setPercent((double)d / 9);

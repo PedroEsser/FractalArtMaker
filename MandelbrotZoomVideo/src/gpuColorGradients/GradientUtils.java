@@ -26,6 +26,10 @@ public class GradientUtils {
 		return percent - floor(percent);
 	}
 	
+	public static double looped(double percent) {
+		return percent - floor(percent);
+	}
+	
 	public static float truncated(float value, float below, float above) {
 		return value < below ? below : value > above ? above : value;
 	}
@@ -35,6 +39,13 @@ public class GradientUtils {
 	}
 	
 	public static int floor(float a) {
+		int f = (int)a;
+		if(a >= 0 || a == f)
+			return f;
+		return f-1;
+	}
+	
+	public static int floor(double a) {
 		int f = (int)a;
 		if(a >= 0 || a == f)
 			return f;

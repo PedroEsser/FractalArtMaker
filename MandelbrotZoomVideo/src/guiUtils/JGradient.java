@@ -11,31 +11,59 @@ import gradient.Constant;
 import gradient.DiscreteGradient;
 import gradient.ExponentialGradient;
 import gradient.NumericGradient;
+import gradient.SinusoidalGradient;
 
 public class JGradient extends Weighted1DPanel{
 	
-	private final LabelValueTuple startPanel, endPanel;
-	private final LabelOptionsTuple grothTtypePanel;
+	private final LabelValueTuple valuePanels[];
+	private final LabelOptionsTuple grothTypePanel;
 	
-	public JGradient(double start, double end, boolean displayGrowth, GrowthRate gr) {
+//	public JGradient(double start, double end, boolean displayGrowth, GrowthRate gr) {
+//		super();
+//		valuePanels = new LabelValueTuple[4];
+//		valuePanels[0] = new LabelValueTuple("Start:", start);
+//		valuePanels[1] = new LabelValueTuple("End:", end);
+//		valuePanels[2] = new LabelValueTuple("Phase offset:", 0);
+//		valuePanels[3] = new LabelValueTuple("Frequency:", 1);
+//		grothTypePanel = new LabelOptionsTuple("Growth", GrowthRate.values());
+//		grothTypePanel.setSelectCallback(s -> handleSelect(s));
+//		grothTypePanel.setOption(gr.name());
+//		for(LabelValueTuple t : valuePanels)
+//			this.addComponent(t, 5);
+//		if(displayGrowth)
+//			this.addComponent(grothTypePanel, 1);
+//	}
+	
+	public JGradient(Gradient<Double> gradient, boolean displayGrowth) {
 		super();
-		startPanel = new LabelValueTuple("Start:", start);
-		endPanel = new LabelValueTuple("End:", end);
-		grothTtypePanel = new LabelOptionsTuple("Growth", GrowthRate.values());
-		grothTtypePanel.setSelectCallback(s -> handleSelect(s));
-		grothTtypePanel.setOption(gr.name());
-		this.addComponent(startPanel, 5);
-		this.addComponent(endPanel, 5);
+		GrowthRate gr = growthRateFor(gradient);
+		System.out.println(gradient + ",  " + gr);
+		valuePanels = new LabelValueTuple[4];
+		for(int i = 0 ; i < 4 ; i++)
+			valuePanels[i] = new LabelValueTuple("", 0);
+		
+		if(gr.name().equals(GrowthRate.SINUSOIDAL.name())) {
+			SinusoidalGradient s = (SinusoidalGradient)gradient;
+			valuePanels[0].setValue(s.getOffset());
+			valuePanels[1].setValue(s.getAmplitude());
+			valuePanels[2].setValue(s.getPhaseOffset());
+			valuePanels[3].setValue(s.getFrequency());
+		}else {
+			valuePanels[0].setValue(gradient.getStart());
+			valuePanels[1].setValue(gradient.getEnd());
+		}
+		
+		grothTypePanel = new LabelOptionsTuple("Growth", GrowthRate.values());
+		grothTypePanel.setSelectCallback(s -> handleSelect(s));
+		grothTypePanel.setOption(gr.name());
+		for(LabelValueTuple t : valuePanels)
+			this.addComponent(t, 5);
 		if(displayGrowth)
-			this.addComponent(grothTtypePanel, 1);
-	}
-	
-	public JGradient(double start, double end, boolean displayGrowth) {
-		this(start, end, displayGrowth, GrowthRate.LINEAR);
+			this.addComponent(grothTypePanel, 1);
 	}
 	
 	public JGradient(Gradient<Double> gradient) {
-		this(gradient.getStart(), gradient.getEnd(), true, growthRateFor(gradient));
+		this(gradient, true);
 	}
 	
 	public JGradient(double start, double end) {
@@ -44,35 +72,52 @@ public class JGradient extends Weighted1DPanel{
 	
 	private void handleSelect(String option) {
 		if(option.equals(GrowthRate.CONSTANT.name())) {
-			startPanel.setLabel("Value");
-			endPanel.setVisible(false);
+			valuePanels[0].setLabel("Value");
+			for(int i = 1 ; i < 4 ; i++)
+				valuePanels[i].setVisible(false);
+		}else if(option.equals(GrowthRate.SINUSOIDAL.name())){
+			valuePanels[0].setLabel("Offset");
+			valuePanels[1].setLabel("Amplitude");
+			valuePanels[2].setLabel("Phase offset");
+			valuePanels[3].setLabel("Frequency");
+			
+			for(int i = 1 ; i < 4 ; i++)
+				valuePanels[i].setVisible(true);
 		}else {
-			startPanel.setLabel("Start");
-			endPanel.setVisible(true);
+			valuePanels[0].setLabel("Start");
+			valuePanels[1].setLabel("End");
+			valuePanels[1].setVisible(true);
+			for(int i = 2 ; i < 4 ; i++)
+				valuePanels[i].setVisible(false);
 		}
 		updateUI();
 	}
 	
 	public Gradient<Double> getGradient() {
-		if(grothTtypePanel.getSelectedOption().equals(GrowthRate.LINEAR.toString())) 
-			return new LinearGradient(startPanel.getValue(), endPanel.getValue());
-		else if(grothTtypePanel.getSelectedOption().equals(GrowthRate.EXPONENTIAL.toString()))
-			return new ExponentialGradient(startPanel.getValue(), endPanel.getValue());
-		else if(grothTtypePanel.getSelectedOption().equals(GrowthRate.CONSTANT.toString()))
-			return new Constant<Double>(startPanel.getValue());
-		return new LogarithmicGradient(startPanel.getValue(), endPanel.getValue());
+		if(grothTypePanel.getSelectedOption().equals(GrowthRate.LINEAR.toString())) 
+			return new LinearGradient(valuePanels[0].getValue(), valuePanels[1].getValue());
+		else if(grothTypePanel.getSelectedOption().equals(GrowthRate.EXPONENTIAL.toString()))
+			return new ExponentialGradient(valuePanels[0].getValue(), valuePanels[1].getValue());
+		else if(grothTypePanel.getSelectedOption().equals(GrowthRate.CONSTANT.toString()))
+			return new Constant<Double>(valuePanels[0].getValue());
+		else if(grothTypePanel.getSelectedOption().equals(GrowthRate.SINUSOIDAL.toString()))
+			return new SinusoidalGradient(valuePanels[0].getValue(), valuePanels[1].getValue(), valuePanels[2].getValue(), valuePanels[3].getValue());
+		return null;
 	}
 	
 	private static GrowthRate growthRateFor(Gradient<Double> gradient, int confidence) {
 		DiscreteGradient<Double> g = gradient.toDiscrete(confidence);
 		
-		if(isLinear(g))
+		if(gradient instanceof SinusoidalGradient)
+			return GrowthRate.SINUSOIDAL;
+		
+		if(gradient instanceof LinearGradient || isLinear(g))
 			return g.valueAt(1) - g.valueAt(0) == 0 ? GrowthRate.CONSTANT : GrowthRate.LINEAR;
 		
-		if(isExponential(g)) 
+		if(gradient instanceof ExponentialGradient || isExponential(g)) 
 			return GrowthRate.EXPONENTIAL;
 		
-		return GrowthRate.LOGARITHMIC;
+		return GrowthRate.SINUSOIDAL;
 	}
 	
 	private static boolean isLinear(DiscreteGradient<Double> g) {
@@ -94,11 +139,11 @@ public class JGradient extends Weighted1DPanel{
 	}
 	
 	private static GrowthRate growthRateFor(Gradient<Double> gradient) {
-		return growthRateFor(gradient, 10);
+		return growthRateFor(gradient, 13);
 	}
 	
 	public enum GrowthRate{
-		LINEAR, EXPONENTIAL, CONSTANT, LOGARITHMIC;
+		LINEAR, EXPONENTIAL, CONSTANT, SINUSOIDAL;
 	}
 	
 }
