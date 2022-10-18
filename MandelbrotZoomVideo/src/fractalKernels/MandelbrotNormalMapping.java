@@ -80,7 +80,7 @@ public class MandelbrotNormalMapping extends MandelbrotKernel{
 		if(iterations < maxIterations) {
 			float iterationScore = (float)(iterations + 1 - log(log(sqrt(zRE * zRE + zIM * zIM)))/log(2));
 			iterationScore =  iterationScore < 0 ? 0 : iterationScore;
-			rgb = MultiGradient.colorAtPercent(iterationScore * norm, gradient);
+			rgb = MultiGradient.colorAtPercent(iterations * norm, gradient);
 			
 			aux = dCRE*dCRE + dCIM*dCIM;
 			uRE = (zRE * dCRE + zIM * dCIM)/aux;
@@ -100,6 +100,7 @@ public class MandelbrotNormalMapping extends MandelbrotKernel{
 				aux = 0;
 			
 		}
+		aux = 1;
 		int r = (int)(aux * (rgb >> 0 & 0xFF));
 		int g = (int)(aux * (rgb >> 8 & 0xFF));
 		int b = (int)(aux * (rgb >> 16 & 0xFF));

@@ -31,7 +31,7 @@ public class CoordinateSystem{
 		int pixelInc = (int)(inc/f.getDelta());
 		Graphics g = img.getGraphics();
 		while(y < f.getHeight()) {
-			g.setColor(new Color(255,  255,  255, 80));
+			g.setColor(new Color(255,  255,  255, 40));
 			g.drawLine(0, y, f.getWidth(), y);
 			int x = f.getWidth() - stringWidth(pretty(im), g)/2 - 8;
 			Point coordY = new Point(x, y);
@@ -47,7 +47,7 @@ public class CoordinateSystem{
 		int pixelInc = (int)(inc/f.getDelta());
 		Graphics g = img.getGraphics();
 		while(x < f.getWidth()) {
-			g.setColor(new Color(255,  255,  255, 80));
+			g.setColor(new Color(255,  255,  255, 40));
 			g.drawLine(x, 0, x, f.getHeight());
 			Point coordX = new Point(x, img.getHeight() - 12);
 			writeCoord(re, coordX, img);

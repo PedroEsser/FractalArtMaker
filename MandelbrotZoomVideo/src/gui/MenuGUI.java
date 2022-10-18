@@ -157,7 +157,7 @@ public class MenuGUI extends JFrame{
 			case "Feather Fractal":				return new FeatherFractal();
 			case "Hybrid Fractal":				return new HybridFractal();
 			case "Image Based Mandelbrot":		return new ImageBasedMandelbrotKernel();
-			case "Orbit Trap Mandelbrot":		return new OrbitTrapKernel();
+			case "Orbit Trap Mandelbrot":		return new CircleOrbitTrapKernel();
 			default: 							return null;
 		}
 	}

@@ -48,12 +48,13 @@ public class InfoFeature extends ToggleFeature{
 				g.drawString(par.name + ": " + par.getValue(), 5, y);
 				y+= 15;
 			}
+			g.setColor(Color.white);
 			y = img.getHeight() - keyBindings.length * 18;
 			for(String key : keyBindings) {
 				g.drawString(key, 5, y);
 				y+= 18;
 			}
-			drawCrosshair(img);
+			//drawCrosshair(img);
 			CoordinateSystem.drawCoordinateSystem(img, getCurrentFrame());
 		}
 	}

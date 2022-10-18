@@ -98,8 +98,10 @@ public class VideoMaker extends JFrame{
 		JButton audioButton = new JButton("Add Audio File");
 		audioButton.addActionListener(a -> {
 			File audio = chooseAudio();
-			audioPath = audio.getAbsolutePath();
-			audioButton.setText(audio.getName());
+			if(audio != null) {
+				audioPath = audio.getAbsolutePath();
+				audioButton.setText(audio.getName());
+			}
 		});
 		JTuple optionsTuple = new JTuple(videoOptions, audioButton);
 		mainPanel.addComponent(optionsTuple);

@@ -2,81 +2,92 @@ package fractalKernels;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import gpuColorGradients.GradientUtils;
 import gpuColorGradients.MultiGradient;
 import static gpuColorGradients.GradientUtils.*;
 import utils.ImageUtils;
 
-public class OrbitTrapKernel extends FractalKernel{
+public class CircleOrbitTrapKernel extends FractalKernel{
 	
 	private double lightAngle;
 	private double h;
 	private double orbitWeight;
 	
-	private int nBranches, nPoints;
-	private double t, dt, amplitude, amplitudeVariance, rotation, radiiSquared, intersectionX, intersectionY;
+	private int nBranches, nPoints, nAnimations;
+	private double t, dt, amplitude, amplitudeVariance, amplitudeVarianceFrequency, rotation, radiiSquared, intersectionX, intersectionY, d;
 	
-	private double[] points;
+	private List<Double> points;
+	private double[] pointsArray;
 	
-	public OrbitTrapKernel() {
+	public CircleOrbitTrapKernel() {
 		super();
 		addParameter("angle", 0, 1f/64);
 		addParameter("h", 1.5, 1f/64);
-		addParameter("Orbit weight", .25, 1f/16);
+		addParameter("Orbit weight", .02, 1f/64);
 		addParameter("Number of Branches", 4, 1);
-		addParameter("Number of Points", 10, 1);
+		addParameter("Number of Points", 30, 1);
 		
 		addParameter("t", 0, 1f/64);
-		addParameter("dt", 1f/16, 1f/32);
-		addParameter("Amplitude", 0.5, 1f/16);
-		addParameter("Amplitude variance", 0.5, 1f/16);
+		addParameter("dt", 0.015, 1f/256);
+		addParameter("Amplitude", 0.25, 1f/64);
+		addParameter("Amplitude variance", 0.1, 1f/64);
+		addParameter("Amplitude variance frequency", 5, 1f/64);
 		addParameter("Rotation", 0, 1f/16);
-		addParameter("Radii", 0.1, 1f/256);
+		addParameter("Radii", 0.06, 1f/256);
 		addParameter("X intersect", -1, 1f/16);
 		addParameter("Y intersect", 1, 1f/16);
+		addParameter("d", .125, 1f/64);
 	}
 	
 	private void circularPath() {
-		points = new double[nPoints*2];
+		nAnimations++;
 		for(int i = 0 ; i < nPoints ; i++) {
 			double u = looped(t + i*dt);
 			double angle = u * 2 * Math.PI;
-			points[i*2] = (float)(cos(angle) * (amplitude + sin(angle*amplitudeVariance)*rotation) + intersectionX);
-			points[i*2 + 1] = (float)(sin(angle) * (amplitude + sin(angle*amplitudeVariance)*rotation) + intersectionY);
+			points.add(cos(angle) * (amplitude + sin(angle*amplitudeVarianceFrequency)*amplitudeVariance) + intersectionX);
+			points.add(sin(angle) * (amplitude + sin(angle*amplitudeVarianceFrequency)*amplitudeVariance) + intersectionY);
 		}
 	}
 	
-	private void crossPath() {
-		points = new double[nPoints*2];
+	private void branchPath() {
+		nAnimations++;
 		for(int i = 0 ; i < nPoints ; i++) {
 			double u = (t + i*dt) * nBranches;
-			int b = GradientUtils.floor(u);
+			double b = GradientUtils.floor(u);
 			double s = (u - b) * 2;
 			s = s < 1 ? s : 2 - s;
 			double angle = (float)(2*Math.PI*(b/nBranches + rotation));
-			points[i*2] = (float)(cos(angle) * s * amplitude + intersectionX);
-			points[i*2 + 1] = (float)(sin(angle) * s * amplitude + intersectionY);
+			points.add(cos(angle) * s * amplitude + intersectionX + cos(u*2*Math.PI)*amplitude/3);
+			points.add(sin(angle) * s * amplitude + intersectionY + sin(u*2*Math.PI)*amplitude/3);
 		}
 	}
 	
 	private void infinityLoopPath() {
-		points = new double[nPoints*2];
+		nAnimations++;
 		for(int i = 0 ; i < nPoints ; i++) {
 			double time = t + i*dt;
 			double s = looped(time) * 2;
+			double re = 0;
+			double im = 0;
 			if(s < 1) {
-				double angle = 2 * Math.PI * s + Math.PI + rotation;
-				points[i*2] = cos(angle) + cos(rotation);
-				points[i*2 + 1] = sin(angle) + sin(rotation);
+				double angle = 2 * Math.PI * s + Math.PI;
+				re = 1 + cos(angle);
+				im = sin(angle);
 			}else {
-				s = 2 - s;
-				double angle = 2 * Math.PI * s + rotation;
-				points[i*2] = cos(angle) + cos(-rotation);
-				points[i*2 + 1] = sin(angle) + sin(-rotation);
+				s -= 1;
+				double angle = -2 * Math.PI * s;
+				re = -1 + cos(angle);
+				im = sin(angle);
 			}
-			points[i*2] = points[i*2] * amplitude + intersectionX;
-			points[i*2+1] = points[i*2+1] * amplitude + intersectionY;
+			s = re;
+			re = re*cos(rotation*2*Math.PI) + im*sin(rotation*2*Math.PI) + cos(time*2*Math.PI)*amplitude/8;
+			im = s*sin(rotation*2*Math.PI) + im*cos(rotation*2*Math.PI) + sin(time*2*Math.PI)*amplitude/8;
+			points.add(re * amplitude + intersectionX);
+			points.add(im * amplitude + intersectionY);
 		}
 	}
 	
@@ -92,13 +103,28 @@ public class OrbitTrapKernel extends FractalKernel{
 		this.dt = getParameter("dt").getValue();
 		this.amplitude = getParameter("Amplitude").getValue();
 		this.amplitudeVariance = getParameter("Amplitude variance").getValue();
+		this.amplitudeVarianceFrequency = getParameter("Amplitude variance frequency").getValue();
 		this.rotation = getParameter("Rotation").getValue();
 		this.radiiSquared = getParameter("Radii").getValue();
 		this.radiiSquared *= this.radiiSquared;
 		this.intersectionX = getParameter("X intersect").getValue();
 		this.intersectionY = getParameter("Y intersect").getValue();
-		//infinityLoopPath();
+		this.d = getParameter("d").getValue();
+		nAnimations = 0;
+		points = new ArrayList<Double>();
+		//branchPath();
+		//this.intersectionX += d;
+		infinityLoopPath();
+		/*this.intersectionX += cos(2*Math.PI/3)*d - d;
+		this.intersectionY += sin(2*Math.PI/3)*d;
 		circularPath();
+		this.intersectionX += cos(4*Math.PI/3)*d - cos(2*Math.PI/3)*d;
+		this.intersectionY += sin(4*Math.PI/3)*d - sin(2*Math.PI/3)*d;
+		t *= -1;
+		circularPath();*/
+		pointsArray = new double[points.size()];
+		for(int i = 0 ; i < pointsArray.length ; i++)
+			pointsArray[i] = points.get(i);
 		super.loadParameterValues();
 	}
 	
@@ -110,11 +136,10 @@ public class OrbitTrapKernel extends FractalKernel{
 		int iterations = pre_iterations;
 		int i = 0;
 		
-		double orbitX = 1e10;
-		double orbitY = 1e10;
-		double distance = 1e10;
+//		double orbitX = 1e10;
+//		double orbitY = 1e10;
+		double traps = 0;
 		double aux = 0;
-		double aux2 = 0;
 		double zRE = 0;
 		double zIM = 0;
 		double constantRE = topLeftRE + this.delta * getGlobalId(0);
@@ -147,17 +172,14 @@ public class OrbitTrapKernel extends FractalKernel{
 			zRE = iterateRE(zRE, zIM, constantRE, constantIM);
 			zIM = iterateIM(aux, zIM, constantRE, constantIM);
 			
-			aux = distance;
-			for(i = 0 ; i < nPoints ; i++) {
-				aux2 = (zRE - points[i*2])*(zRE - points[i*2]) + (zIM - points[i*2+1])*(zIM - points[i*2+1]);
-				aux2 = radiiSquared > aux2 ? 0 : aux2 - radiiSquared;
-				aux = min(aux, aux2);
-			}
-			if(distance > aux) {
-				distance = aux;
-				orbitX = zRE;
-				orbitY = zIM;
-			}
+			for(int j = 0 ; j < nAnimations ; j++)
+				for(i = j * nPoints ; i < (j+1) * nPoints ; i++) {
+					aux = (zRE - pointsArray[i*2])*(zRE - pointsArray[i*2]) + (zIM - pointsArray[i*2+1])*(zIM - pointsArray[i*2+1]);
+					if(radiiSquared > aux) {
+						traps++;
+						i = (j+1) * nPoints;
+					}
+				}
 			
 			iterations+=1;
 		}
@@ -183,7 +205,7 @@ public class OrbitTrapKernel extends FractalKernel{
 			if(aux < 0)
 				aux = 0;
 			
-			float orbitScore = (float)(distance == 0 ? orbitWeight : 0);
+			float orbitScore = (float)(traps * orbitWeight);
 			int rgb = MultiGradient.colorAtPercent(looped(orbitScore + iterationScore), gradient);
 			
 			data[i + 0] = (byte)((rgb >> 0 & 0xFF) * aux);

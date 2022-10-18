@@ -47,7 +47,7 @@ public class MandelbrotKernel extends FractalKernel{
 			zRE = iterateRE(zRE, zIM, constantRE, constantIM);
 			zIM = iterateIM(aux, zIM, constantRE, constantIM);
 			
-			iterations+=1;		//5 iterations at once will make it run a little bit faster
+			iterations+=1;
 		}
 		int rgb = 0;
 		if(iterations < maxIterations) {

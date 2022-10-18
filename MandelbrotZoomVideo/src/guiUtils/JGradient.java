@@ -77,8 +77,8 @@ public class JGradient extends Weighted1DPanel{
 				valuePanels[i].setVisible(false);
 		}else if(option.equals(GrowthRate.SINUSOIDAL.name())){
 			valuePanels[0].setLabel("Offset");
-			valuePanels[1].setLabel("Amplitude");
-			valuePanels[2].setLabel("Phase offset");
+			valuePanels[1].setLabel("Phase offset");
+			valuePanels[2].setLabel("Amplitude");
 			valuePanels[3].setLabel("Frequency");
 			
 			for(int i = 1 ; i < 4 ; i++)

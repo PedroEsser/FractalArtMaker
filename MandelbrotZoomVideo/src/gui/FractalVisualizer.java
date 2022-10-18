@@ -38,14 +38,14 @@ public class FractalVisualizer extends ImagePanel {
 		this.setMousePressCallback(e -> {
 			Point p = this.getPointOnPanel(e.getPoint());
 			if (SwingUtilities.isMiddleMouseButton(e)) 
-				orbitVisualizer.orbitAt(p);
+				orbitVisualizer.orbitAt(p, false);
             else if (SwingUtilities.isRightMouseButton(e)) 
             	navigator.moveAndUpdate(p);
 		});
 		this.setMouseDraggedCallback(e -> {
 			Point p = this.getPointOnPanel(e.getPoint());
 			if (SwingUtilities.isMiddleMouseButton(e)) 
-				orbitVisualizer.orbitAt(p);
+				orbitVisualizer.orbitAt(p, true);
 		});
 		this.setMouseWheelCallback(e -> {
 //			Point p = this.getPointOnImage(e.getPoint());-1.0120864027672762

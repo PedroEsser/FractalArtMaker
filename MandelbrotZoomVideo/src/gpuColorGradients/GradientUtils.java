@@ -2,8 +2,6 @@ package gpuColorGradients;
 
 public class GradientUtils {
 	
-//	public static final int DENOMINATOR = 1 << 20;		//this is sort of resolution
-	
 	public static int toRGB(int r, int g, int b) {
 		return 0x00000000 | (r << 16) | (g << 8) | (b << 0);
 	}
@@ -11,10 +9,6 @@ public class GradientUtils {
 	public static int fromFloatTo255(float f) {
 		return (int)(f*255);
 	}
-//	
-//	public static float from255ToFloat(int i) {
-//		return (float)i / 255f;
-//	}
 	
 	public static float bounced(float percent) {
 		int p = floor(percent);
@@ -51,14 +45,6 @@ public class GradientUtils {
 			return f;
 		return f-1;
 	}
-	
-//	public static float toMyFloat(int i) {
-//		return (float)i / DENOMINATOR;
-//	}
-//	
-//	public static int toMyInt(float f) {
-//		return (int)(f * DENOMINATOR);
-//	}
 	
 	public static void assertInRange(float start, float end, float... vals) {
 		for(float val : vals)
