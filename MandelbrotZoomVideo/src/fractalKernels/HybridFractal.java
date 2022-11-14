@@ -6,7 +6,7 @@ public class HybridFractal extends FractalKernel{
 
 	private double lightAngle;
 	private double h;
-	private int modOffset = 0;
+	private int mod, modOffset;
 	private double morphPower;
 	
 	public HybridFractal() {
@@ -15,7 +15,7 @@ public class HybridFractal extends FractalKernel{
 		addParameter("h", 1.5, 0.0625);
 		addParameter("mod offset", 0, 1);
 		addParameter("C morph power", 1, 1d/16);
-		
+		addParameter("mod", 1, 1);
 	}
 	
 	@Override
@@ -23,6 +23,7 @@ public class HybridFractal extends FractalKernel{
 		this.lightAngle = getParameter("angle").getValue();
 		this.h = getParameter("h").getValue();
 		this.modOffset = getParameter("mod offset").getValueAsInt();
+		this.mod = getParameter("mod").getValueAsInt();
 		this.morphPower = getParameter("C morph power").getValue();
 		super.loadParameterValues();
 	}

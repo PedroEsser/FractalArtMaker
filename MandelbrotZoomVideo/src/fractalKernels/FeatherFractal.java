@@ -79,27 +79,21 @@ public class FeatherFractal extends FractalKernel {
 		
 		
 		while(currentRE * currentRE + currentIM * currentIM <= escapeRadius && iterations < maxIterations) {
-			if(iterations % mod != (mod-1)) {
-				aux = currentRE;
-				currentRE = currentRE * currentRE - currentIM * currentIM + constantRE;
-				currentIM = 2 * aux * currentIM + constantIM;
-			}else {
-				angle = atan2(currentIM, currentRE);
-				lnR = log(sqrt(currentRE * currentRE + currentIM * currentIM));
-				radius = exp(lnR * complexPower[0] - complexPower[1] * angle);
-				newAngle = lnR * complexPower[1] + complexPower[0] * angle;
-				zRE3 = cos(newAngle) * radius;
-				zIM3 = sin(newAngle) * radius;
+			angle = atan2(currentIM, currentRE);
+			lnR = log(sqrt(currentRE * currentRE + currentIM * currentIM));
+			radius = exp(lnR * complexPower[0] - complexPower[1] * angle);
+			newAngle = lnR * complexPower[1] + complexPower[0] * angle;
+			zRE3 = cos(newAngle) * radius;
+			zIM3 = sin(newAngle) * radius;
 //				zRE3 = currentRE*currentRE*currentRE - 3*currentRE*currentIM*currentIM;
 //				zIM3 = 3*currentRE*currentRE*currentIM - currentIM*currentIM*currentIM;
-				wRE = offset[0] + currentRE*currentRE;
-				wIM = offset[1] - currentIM*currentIM;
-				aux = wRE*wRE + wIM*wIM;
-				wRE /= aux;
-				wIM /= aux;
-				currentRE = zRE3 * wRE - zIM3 * wIM + constantRE;
-				currentIM = zIM3 * wRE + zRE3 * wIM + constantIM;
-			}
+			wRE = offset[0] + currentRE*currentRE;
+			wIM = offset[1] - currentIM*currentIM;
+			aux = wRE*wRE + wIM*wIM;
+			wRE /= aux;
+			wIM /= aux;
+			currentRE = zRE3 * wRE - zIM3 * wIM + constantRE;
+			currentIM = zIM3 * wRE + zRE3 * wIM + constantIM;
 			
 			iterations+=1;
 		}

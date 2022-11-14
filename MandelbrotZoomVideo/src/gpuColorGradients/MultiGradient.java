@@ -8,6 +8,7 @@ import gradient.Gradient;
 
 public class MultiGradient extends ColorGradient implements Serializable{
 
+	private static final long serialVersionUID = -941517393775335432L;
 	private final ArrayList<GradientWeightTuple> gradients;
 	
 	public MultiGradient(boolean loop, float range, float offset, ThreeChannelGradient... gradients) {
@@ -45,6 +46,12 @@ public class MultiGradient extends ColorGradient implements Serializable{
 	
 	public boolean removeGradient(ThreeChannelGradient gradient) {
 		return gradients.remove(findTuple(gradient));
+	}
+	
+	public void swap(int i, int j) {
+		GradientWeightTuple t = gradients.get(i);
+		gradients.set(i, gradients.get(j));
+		gradients.set(j, t);
 	}
 	
 	public void updateGradientData() {

@@ -84,6 +84,11 @@ public class MultiGradientEditor extends GradientEditor{
 		selectGradient(Math.min(selectedIndex, getGradient().getNumberOfGradients()-1));
 	}
 	
+	public void swapPositions(int i, int j) {
+		getGradient().swap(i, j);
+		selectGradient(j);
+	}
+	
 	@Override
 	protected void updateGradient() {
 		getGradient().offseted(offsetParameter.getValueAsFloat()).updateGradientData();
@@ -96,9 +101,9 @@ public class MultiGradientEditor extends GradientEditor{
 		public void keyPressed(KeyEvent e) {
 			int n = getGradient().getNumberOfGradients();
 			if(e.getKeyCode() == KeyEvent.VK_RIGHT) {
-				selectGradient((selectedIndex + 1) % n);
+				swapPositions(selectedIndex, (selectedIndex + 1) % n);
 			}else if(e.getKeyCode() == KeyEvent.VK_LEFT) {
-				selectGradient((selectedIndex - 1 + n) % n);
+				swapPositions(selectedIndex, (selectedIndex - 1 + n) % n);
 			}else if(e.getKeyCode() == KeyEvent.VK_DELETE) {
 				removeSelectedGradient();
 			}

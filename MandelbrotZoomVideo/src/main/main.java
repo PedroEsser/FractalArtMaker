@@ -5,6 +5,7 @@ import javax.swing.UIManager;
 import com.aparapi.Range;
 import com.formdev.flatlaf.FlatDarkLaf;
 
+import gpuColorGradients.GradientUtils;
 import gui.FractalNavigatorGUI;
 
 public class main {
@@ -19,7 +20,6 @@ public class main {
 //		Engine.startEngine();
 		
 		new FractalNavigatorGUI();
-
 		
 		//new GradientFactoryGUI(GradientFactory.testV2(5, 1, .5, false));
 		

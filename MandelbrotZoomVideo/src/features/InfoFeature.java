@@ -19,7 +19,7 @@ public class InfoFeature extends ToggleFeature{
 			"[RIGHT-CLICK] Center",
 			"[MIDDLE-CLICK] Visualize orbit",
 			"[SCROLL] Zoom",
-			"[O] Toggle orbit",
+			"[O] Clear orbits",
 			"[F] Toggle fullscreen",
 			"[I] Save Image",
 			"[V] Create Video",

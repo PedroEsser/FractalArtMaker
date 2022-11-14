@@ -40,26 +40,20 @@ public class IntegerPowerMandelbrotKernel extends FractalKernel {
 		int power2 = 0;
 	
 		for(int a = 0 ; a < iterations ; a++) {
-			if(iterations%mod != (mod-1)) {
-				aux = currentRE;
-				currentRE = currentRE * currentRE - currentIM * currentIM + constantRE;
-				currentIM = 2 * aux * currentIM + constantIM;
-			}else {
-				re = 1;
-				im = 0;
-				for(power2 = 1 ; power2 <= power ; power2 <<= 1) {
-					if((power2 & power) != 0) {
-						aux = re;
-						re = re * currentRE - im * currentIM;
-						im = aux * currentIM + im * currentRE;
-					}
-					aux = currentRE;
-					currentRE = currentRE * currentRE - currentIM * currentIM;
-					currentIM = 2 * aux * currentIM;
+			re = 1;
+			im = 0;
+			for(power2 = 1 ; power2 <= power ; power2 <<= 1) {
+				if((power2 & power) != 0) {
+					aux = re;
+					re = re * currentRE - im * currentIM;
+					im = aux * currentIM + im * currentRE;
 				}
-				currentRE = re + constantRE;
-				currentIM = im + constantIM;
+				aux = currentRE;
+				currentRE = currentRE * currentRE - currentIM * currentIM;
+				currentIM = 2 * aux * currentIM;
 			}
+			currentRE = re + constantRE;
+			currentIM = im + constantIM;
 		}
 		
 			
@@ -71,26 +65,20 @@ public class IntegerPowerMandelbrotKernel extends FractalKernel {
 		iterations = 0;
 		
 		while(currentRE * currentRE + currentIM * currentIM <= escapeRadius && iterations < maxIterations) {
-			if(iterations%mod == (mod-1)) {
-				aux = currentRE;
-				currentRE = currentRE * currentRE - currentIM * currentIM + constantRE;
-				currentIM = 2 * aux * currentIM + constantIM;
-			}else {
-				re = 1;
-				im = 0;
-				for(power2 = 1 ; power2 <= power ; power2 <<= 1) {
-					if((power2 & power) != 0) {
-						aux = re;
-						re = re * currentRE - im * currentIM;
-						im = aux * currentIM + im * currentRE;
-					}
-					aux = currentRE;
-					currentRE = currentRE * currentRE - currentIM * currentIM;
-					currentIM = 2 * aux * currentIM;
+			re = 1;
+			im = 0;
+			for(power2 = 1 ; power2 <= power ; power2 <<= 1) {
+				if((power2 & power) != 0) {
+					aux = re;
+					re = re * currentRE - im * currentIM;
+					im = aux * currentIM + im * currentRE;
 				}
-				currentRE = re + constantRE;
-				currentIM = im + constantIM;
+				aux = currentRE;
+				currentRE = currentRE * currentRE - currentIM * currentIM;
+				currentIM = 2 * aux * currentIM;
 			}
+			currentRE = re + constantRE;
+			currentIM = im + constantIM;
 			
 			iterations+=1;
 		}

@@ -14,24 +14,22 @@ public abstract class FractalKernel extends Kernel {
 
 	private final List<FractalParameter> fractalParameters = new ArrayList<>();
 	
-	private FractalFrame frame;
-	protected double topLeftRE, topLeftIM, delta;
+	protected FractalFrame frame;
+	protected double centerRE, centerIM, delta, angle;
 	protected byte[] data;
 	protected float[] gradient;
-	protected int maxIterations, width;
+	protected int maxIterations, width, height;
 	protected float norm;
 	protected int pre_iterations = 1;
-	protected double escapeRadius = 100;
-	
-	protected int mod = 1;
-	protected int modOffset = 0;
+	protected double escapeRadius = 100, morphPower = 0;
 	
 	public FractalKernel() {
 		super();
 		addParameter("Pre Iterations", 1, 1);
 		addParameter("Escape Radius", 100, 10);
-		addParameter("mod", 1, 1);
-		addParameter("Mod Offset", 0, 1);
+		addParameter("angle", 0, 1d/64);
+		addParameter("Gradient offset", 0, 1d/64);
+		addParameter("C power morph", 1, 1f/128);
 	}
 	
 	public FractalKernel(FractalFrame frame) {
@@ -42,11 +40,11 @@ public abstract class FractalKernel extends Kernel {
 	public void setFrame(FractalFrame frame) {
 		this.frame = frame;
 		this.width = frame.getWidth();
-		this.topLeftRE = frame.complexAt(0, 0)[0];
-		this.topLeftIM = frame.complexAt(0, 0)[1];
+		this.height = frame.getHeight();
+		this.centerRE = frame.getCenter().getRe();
+		this.centerIM = frame.getCenter().getIm();
 		this.delta = frame.getDelta();
 		this.maxIterations = frame.getMaxIterations();
-		this.gradient = frame.getGradient().getGradientData();
 		this.norm = frame.getNorm();
 	}
 	
@@ -94,15 +92,16 @@ public abstract class FractalKernel extends Kernel {
 		return frame.getWidth() * frame.getHeight();
 	}
 	
-	public void executeAll() {
-		//assert frame == null : "No FractalFrame has been set to this Kernel!";
-		long t = System.currentTimeMillis();
+	public void loadAndExecute() {
 		loadParameterValues();
+		executeAll();
+	}
+	
+	protected void executeAll() {
 		data = frame.getData();
-		//execute(Range.create2D(frame.getWidth()-frame.getWidth()%GROUP_SIZE+(frame.getWidth()%GROUP_SIZE==0?0:GROUP_SIZE), frame.getHeight()-frame.getHeight()%GROUP_SIZE+(frame.getHeight()%GROUP_SIZE==0?0:GROUP_SIZE), GROUP_SIZE, GROUP_SIZE));
+		long t = System.currentTimeMillis();
 		execute(Range.create2D(frame.getWidth(), frame.getHeight()));
 		long diff = System.currentTimeMillis() - t;
-		
 		System.out.println(this.getTargetDevice().getShortDescription() + ", " + diff + " millis passed");
 	}
 	
@@ -128,8 +127,9 @@ public abstract class FractalKernel extends Kernel {
 	protected void loadParameterValues() {
 		this.pre_iterations = this.getParameter("Pre Iterations").getValueAsInt();
 		this.escapeRadius = this.getParameter("Escape Radius").getValue();
-		this.mod = getParameter("mod").getValueAsInt();
-		this.modOffset = getParameter("Mod Offset").getValueAsInt();
+		this.angle = getParameter("angle").getValue() * Math.PI * 2;
+		this.gradient = frame.getGradient().offseted((float)getParameter("Gradient offset").getValue()).getGradientData();
+		this.morphPower = getParameter("C power morph").getValue();
 	}
 	
 	public static double amplitudeSquared(double[] complex) {

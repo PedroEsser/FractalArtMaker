@@ -26,8 +26,9 @@ public class MandelbrotKernel extends FractalKernel{
 		double aux = 0;
 		double zRE = 0;
 		double zIM = 0;
-		double constantRE = topLeftRE + this.delta * i;
-		double constantIM = topLeftIM + this.delta * j;
+		double constantRE = centerRE + this.delta * (i - height/2);
+		double constantIM = centerIM + this.delta * (j - width/2);
+		
 		
 		for(int a = 0 ; a < iterations ; a++) {
 			aux = zRE;

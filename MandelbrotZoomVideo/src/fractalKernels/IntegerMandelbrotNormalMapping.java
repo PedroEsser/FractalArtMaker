@@ -4,18 +4,18 @@ import gpuColorGradients.MultiGradient;
 
 public class IntegerMandelbrotNormalMapping extends IntegerPowerMandelbrotKernel{
 
-	private double angle;
+	private double lightAngle;
 	private double h;
 	
 	public IntegerMandelbrotNormalMapping() {
 		super();
-		addParameter("angle", 0, 0.0625);
+		addParameter("lightAngle", 0, 0.0625);
 		addParameter("h", 1.5, 0.0625);
 	}
 	
 	@Override
 	protected void loadParameterValues() {
-		this.angle = getParameter("angle").getValue();
+		this.lightAngle = getParameter("lightAngle").getValue();
 		this.h = getParameter("h").getValue();
 		super.loadParameterValues();
 	}
@@ -26,16 +26,18 @@ public class IntegerMandelbrotNormalMapping extends IntegerPowerMandelbrotKernel
 		
 		int i = getGlobalId(0);
 		int j = getGlobalId(1);
+		double constantRE = this.delta * (i - width/2);
+		double constantIM = this.delta * (j - height/2);
+		double aux = constantRE;
+		constantRE = cos(angle)*aux - sin(angle)*constantIM + centerRE;
+		constantIM = cos(angle)*constantIM + sin(angle)*aux + centerIM;
 		
 		int iterations = pre_iterations;
 		
 		double re = 0;
 		double im = 0;
-		double aux = 0;
 		double zRE = 0;
 		double zIM = 0;
-		double constantRE = topLeftRE + this.delta * i;
-		double constantIM = topLeftIM + this.delta * j;
 		
 		double dCRE = 0;
 		double dCIM = 0;
@@ -76,7 +78,7 @@ public class IntegerMandelbrotNormalMapping extends IntegerPowerMandelbrotKernel
 			
 			re = 1;
 			im = 0;
-			p = iterations % mod == modOffset % mod ? power : 2;
+			p = power;
 			for(int power2 = 1 ; power2 <= p-1 ; power2 <<= 1) {
 				if((power2 & (p-1)) != 0) {
 					aux = re;
@@ -116,7 +118,7 @@ public class IntegerMandelbrotNormalMapping extends IntegerPowerMandelbrotKernel
 			uRE /= aux;
 			uIM /= aux;									//u = u/abs(u)
 			
-			aux = 2 * Math.PI * angle;
+			aux = 2 * Math.PI * lightAngle;
 			zRE = cos(aux);
 			zIM = sin(aux);
 			reflection = uRE * zRE + uIM * zIM + h;	//reflection = dot(u, v) + h2

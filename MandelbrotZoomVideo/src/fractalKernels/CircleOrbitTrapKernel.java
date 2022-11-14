@@ -46,7 +46,7 @@ public class CircleOrbitTrapKernel extends FractalKernel{
 	private void circularPath() {
 		nAnimations++;
 		for(int i = 0 ; i < nPoints ; i++) {
-			double u = looped(t + i*dt);
+			double u = loopedDouble(t + i*dt);
 			double angle = u * 2 * Math.PI;
 			points.add(cos(angle) * (amplitude + sin(angle*amplitudeVarianceFrequency)*amplitudeVariance) + intersectionX);
 			points.add(sin(angle) * (amplitude + sin(angle*amplitudeVarianceFrequency)*amplitudeVariance) + intersectionY);
@@ -57,7 +57,7 @@ public class CircleOrbitTrapKernel extends FractalKernel{
 		nAnimations++;
 		for(int i = 0 ; i < nPoints ; i++) {
 			double u = (t + i*dt) * nBranches;
-			double b = GradientUtils.floor(u);
+			double b = GradientUtils.floorDouble(u);
 			double s = (u - b) * 2;
 			s = s < 1 ? s : 2 - s;
 			double angle = (float)(2*Math.PI*(b/nBranches + rotation));
@@ -70,7 +70,7 @@ public class CircleOrbitTrapKernel extends FractalKernel{
 		nAnimations++;
 		for(int i = 0 ; i < nPoints ; i++) {
 			double time = t + i*dt;
-			double s = looped(time) * 2;
+			double s = loopedDouble(time) * 2;
 			double re = 0;
 			double im = 0;
 			if(s < 1) {

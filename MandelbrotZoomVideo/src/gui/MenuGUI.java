@@ -36,7 +36,7 @@ public class MenuGUI extends JFrame{
 	
 	private static String[] FRACTAL_VARIANTS = {"Mandelbrot", "Integer Power Mandelbrot", "Real Power Mandelbrot", 
 			"Complex Power Mandelbrot", "Burning Ship", "MandelTrig", "Feather Fractal", "Hybrid Fractal", "Image Based Mandelbrot",
-			"Orbit Trap Mandelbrot"};
+			"Orbit Trap Mandelbrot", "Custom Orbit Trap Mandelbrot"};
 	
 	Weighted1DPanel mainPanel;
 	LabelTuple<JGradient> iterations;
@@ -158,6 +158,7 @@ public class MenuGUI extends JFrame{
 			case "Hybrid Fractal":				return new HybridFractal();
 			case "Image Based Mandelbrot":		return new ImageBasedMandelbrotKernel();
 			case "Orbit Trap Mandelbrot":		return new CircleOrbitTrapKernel();
+			case "Custom Orbit Trap Mandelbrot":return new CustomOrbitTrapKernel();
 			default: 							return null;
 		}
 	}

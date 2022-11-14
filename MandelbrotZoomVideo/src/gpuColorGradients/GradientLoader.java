@@ -60,6 +60,7 @@ public class GradientLoader extends JFrame {
 		mainPanel = new Weighted1DPanel(false, 5, 0, 5, 0);
 		savedGradientsPanel = new Weighted1DPanel(false, 5, 0, 5, 0);
 		JScrollPane pane = new JScrollPane(savedGradientsPanel);
+		pane.getVerticalScrollBar().setUnitIncrement(16);
 
 		mainPanel.addComponent(label("Saved Gradients"), .5);
 		mainPanel.addComponent(pane, 5);
@@ -122,8 +123,9 @@ public class GradientLoader extends JFrame {
 	}
 	
 	public static void addGradientEntry(String name, MultiGradient gradient) {
-		gradient.updateGradientData();
-		getInstance().addGradient(name, gradient);
+		MultiGradient g = gradient.copy();
+		g.updateGradientData();
+		getInstance().addGradient(name, g);
 		INSTANCE.saveGradients();
 		INSTANCE.savedGradientsPanel.updateUI();
 	}
@@ -206,13 +208,12 @@ public class GradientLoader extends JFrame {
 		MultiGradient g = getSelectedGradient();
 		if(g != null)
 			for(int i = 0 ; i < g.getNumberOfGradients() ; i++) 
-				factory.addGradient(g.getGradientAtIndex(i));
-			
+				factory.addGradient(g.getGradientAtIndex(i).copy());
 	}
 	
 	private void handleSet() {
 		if(getSelectedGradient() != null)
-			factory.setGradient(getSelectedGradient());
+			factory.setGradient(getSelectedGradient().copy());
 	}
 	
 	public static void open(GradientFactoryGUI factory) {
@@ -257,6 +258,7 @@ public class GradientLoader extends JFrame {
 			ois = new ObjectInputStream(fis);
 			savedGradients = (ArrayList<NameGradientTuple>)ois.readObject();
 		} catch (Exception e1) {
+			e1.printStackTrace();
 		}finally {
 			if(ois != null)
 				try {

@@ -46,7 +46,7 @@ public class FractalOrbitVisualizer extends ToggleFeature{
 				g.fillOval(p.x-1, p.y-1, 3, 3);
 				
 				if(Double.isNaN(aux[0]) || Double.isNaN(aux[1]))
-					return;
+					break;
 				drawConnection(current, aux, g);
 			}
 		}

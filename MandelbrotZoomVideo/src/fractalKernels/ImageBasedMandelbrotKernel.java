@@ -1,5 +1,6 @@
 package fractalKernels;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 
@@ -15,10 +16,10 @@ public class ImageBasedMandelbrotKernel extends MandelbrotKernel{
 	private double imgX, imgY, imgScaleX, imgScaleY, imgRotation;
 	
 	private byte[] imgData;
-	private int imgWidth, imgHeight;
+	private int imgWidth, imgHeight, imageFlag = -1;
 	
 	public ImageBasedMandelbrotKernel() {
-		this("C:\\Users\\pedro\\Desktop/fotoFenix.jpg");//"C:\\Users\\pedro\\Desktop/wednesdayFrog.png"
+		this("D:\\MandelbrotStuff\\images/Inferno.png");//"C:\\Users\\pedro\\Desktop/wednesdayFrog.png"
 	}
 	
 	public ImageBasedMandelbrotKernel(String imgPath) {
@@ -33,17 +34,37 @@ public class ImageBasedMandelbrotKernel extends MandelbrotKernel{
 		updateImage(imgPath);
 	}
 	
-	public void updateImage(String imgPath) {
-		BufferedImage img = ImageUtils.getImageFromPath(imgPath);
+	public void updateImage(BufferedImage img) {
 		BufferedImage convertedImg = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
 		convertedImg.getGraphics().drawImage(img, 0, 0, null);
 		imgData = ((DataBufferByte)convertedImg.getRaster().getDataBuffer()).getData();
-		System.out.println(Byte.toUnsignedInt(imgData[0]) + ", " + imgData[1] + ", " + imgData[2] + ", " + imgData[3]);
 		imgWidth = convertedImg.getWidth();
 		imgHeight = convertedImg.getHeight();
 		double max = Math.max(imgWidth, imgHeight);
 		getParameter("Image scale x").setValue(imgWidth / max);
 		getParameter("Image scale y").setValue(imgHeight / max);
+	}
+	
+	public void updateImage(String imgPath) {
+		updateImage(ImageUtils.getImageFromPath(imgPath));
+	}
+	
+	private void fractalCeption() {
+		MultiGradient g = frame.getGradient();
+		this.gradient = g.offseted(g.getOffset() + .5f).getGradientData();
+		imageFlag = -2;			// no image orbit flag
+		executeAll();
+		imageFlag = -1;			// yes image orbit flag
+		BufferedImage img = frame.getImage();
+		updateImage(img);
+		g.offseted(g.getOffset() - .5f);
+		this.gradient = g.getGradientData();
+//		BufferedImage convertedImg = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+//		convertedImg.getGraphics().drawImage(img, 0, 0, null);
+//		ImageUtils.processImage(convertedImg, c -> {
+//			return new Color(0, 0, 0, c.getRGB() == -16777216 ? 255 : 0);
+//		});
+//		updateImage(convertedImg);
 	}
 	
 	public int mapToImage(double re, double im) {
@@ -59,20 +80,26 @@ public class ImageBasedMandelbrotKernel extends MandelbrotKernel{
 		if(x < 0 || x >= imgWidth || y < 0 || y >= imgHeight)
 			return -1;
 		int index = (imgWidth * y + x)*4;
-		if(imgData[index] == 0)
+		if(imgData[index] == 0)					// if pixel is transparent
 			return -1;
-		/*double r = 0, g = 0, b = 0, a = 0;
-		for(int i = 0 ; i < 4 ; i++) {
-			index = (imgWidth * (y + i/2) + (x + i%2))*4;
-			aux = (1 - abs(re - (x + i%2))) * (1 - abs(im - (y + i/2)));
-			r += Byte.toUnsignedInt(imgData[index+3]) * aux;
-			g += Byte.toUnsignedInt(imgData[index+2]) * aux;
-			b += Byte.toUnsignedInt(imgData[index+1]) * aux;
-			a += Byte.toUnsignedInt(imgData[index+0]) * aux;
-		}
-		return toRGB((int)r, (int)g, (int)b);*/
 		return getRGBAt(index);
 	}
+	
+	public int mapToImageV2(double re, double im) {
+		if(re*re + im*im <= 4)
+			return -1;
+		
+		re = loopedDouble(re);
+		im = loopedDouble(im);
+		int x = (int)(imgWidth * re);
+		int y = (int)(imgHeight * im);
+		int index = (imgWidth * y + x)*4;
+		if(imgData[index] == 0)
+			return 0;
+		return getRGBAt(index);
+	}
+	
+	
 	
 	public int getRGBAt(int imgIndex) {
 		return toRGB(Byte.toUnsignedInt(imgData[imgIndex+3]), Byte.toUnsignedInt(imgData[imgIndex+2]), Byte.toUnsignedInt(imgData[imgIndex+1]));
@@ -88,6 +115,7 @@ public class ImageBasedMandelbrotKernel extends MandelbrotKernel{
 		this.imgY = getParameter("Image y").getValue();
 		this.imgRotation = getParameter("Image rotation").getValue() * 2 * Math.PI;
 		super.loadParameterValues();
+		//fractalCeption();
 	}
 	
 	
@@ -97,7 +125,7 @@ public class ImageBasedMandelbrotKernel extends MandelbrotKernel{
 		
 		int iterations = pre_iterations;
 		int i = 0;
-		int rgb = -1;
+		int rgb = imageFlag;
 		
 		double aux = 0;
 		double zRE = 0;
@@ -123,7 +151,7 @@ public class ImageBasedMandelbrotKernel extends MandelbrotKernel{
 		zIM = 0;
 		iterations = 0;
 		
-		while(zRE * zRE + zIM * zIM <= escapeRadius && iterations < maxIterations/* && rgb == -1*/) {
+		while(zRE * zRE + zIM * zIM <= escapeRadius && iterations < maxIterations) {
 			aux = dCRE;
 			dCRE = 2 * (dCRE * zRE - dCIM * zIM) + 1;
 			dCIM = 2 * (aux * zIM + dCIM * zRE);		//dC = 2 * dC * Z + 1
@@ -132,7 +160,7 @@ public class ImageBasedMandelbrotKernel extends MandelbrotKernel{
 			zRE = iterateRE(zRE, zIM, constantRE, constantIM);
 			zIM = iterateIM(aux, zIM, constantRE, constantIM);
 			
-			if(rgb == -1) 
+			if(rgb != -1)
 				rgb = mapToImage(zRE, zIM);
 			
 			iterations+=1;
@@ -140,7 +168,7 @@ public class ImageBasedMandelbrotKernel extends MandelbrotKernel{
 		i = (width * getGlobalId(1) + getGlobalId(0)) * 3;
 		if(iterations < maxIterations) {
 			
-			if(rgb == -1) {
+			if(rgb < 0) {
 				float iterationScore = (float)(iterations + 1 - log(log(sqrt(zRE * zRE + zIM * zIM)))/log(2));
 				iterationScore =  iterationScore < 0 ? 0 : iterationScore * norm;
 				rgb = MultiGradient.colorAtPercent(iterationScore, gradient);

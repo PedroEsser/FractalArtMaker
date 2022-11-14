@@ -56,7 +56,7 @@ public class FractalProducer extends Thread {
 		while(currentTask != null && !cancelled) {
 			FractalKernel kernel = currentTask.frame.getKernel();
 			try {
-				kernel.executeAll();
+				kernel.loadAndExecute();
 				buffer.finishedTask(currentTask);
 				currentTask = buffer.getNextTask();
 			}catch(Exception e) {

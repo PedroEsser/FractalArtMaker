@@ -7,6 +7,7 @@ import javax.swing.JPanel;
 import gradient.Gradient;
 import gradient.LinearGradient;
 import gradient.LogarithmicGradient;
+import gradient.CurveInterpolation;
 import gradient.Constant;
 import gradient.DiscreteGradient;
 import gradient.ExponentialGradient;
@@ -45,12 +46,17 @@ public class JGradient extends Weighted1DPanel{
 		if(gr.name().equals(GrowthRate.SINUSOIDAL.name())) {
 			SinusoidalGradient s = (SinusoidalGradient)gradient;
 			valuePanels[0].setValue(s.getOffset());
-			valuePanels[1].setValue(s.getAmplitude());
-			valuePanels[2].setValue(s.getPhaseOffset());
+			valuePanels[1].setValue(s.getPhaseOffset());
+			valuePanels[2].setValue(s.getAmplitude());
 			valuePanels[3].setValue(s.getFrequency());
 		}else {
 			valuePanels[0].setValue(gradient.getStart());
 			valuePanels[1].setValue(gradient.getEnd());
+			if(gr.name().equals(GrowthRate.CURVE.name())) {
+				CurveInterpolation s = (CurveInterpolation)gradient;
+				valuePanels[2].setValue(s.getCurvature());
+			}
+				
 		}
 		
 		grothTypePanel = new LabelOptionsTuple("Growth", GrowthRate.values());
@@ -87,8 +93,12 @@ public class JGradient extends Weighted1DPanel{
 			valuePanels[0].setLabel("Start");
 			valuePanels[1].setLabel("End");
 			valuePanels[1].setVisible(true);
-			for(int i = 2 ; i < 4 ; i++)
-				valuePanels[i].setVisible(false);
+			if(option.equals(GrowthRate.CURVE.name())) {
+				valuePanels[2].setVisible(true);
+				valuePanels[2].setLabel("Curvature");
+			}else
+				valuePanels[2].setVisible(false);
+			valuePanels[3].setVisible(false);
 		}
 		updateUI();
 	}
@@ -102,6 +112,8 @@ public class JGradient extends Weighted1DPanel{
 			return new Constant<Double>(valuePanels[0].getValue());
 		else if(grothTypePanel.getSelectedOption().equals(GrowthRate.SINUSOIDAL.toString()))
 			return new SinusoidalGradient(valuePanels[0].getValue(), valuePanels[1].getValue(), valuePanels[2].getValue(), valuePanels[3].getValue());
+		else if(grothTypePanel.getSelectedOption().equals(GrowthRate.CURVE.toString()))
+			return new CurveInterpolation(valuePanels[0].getValue(), valuePanels[1].getValue(), valuePanels[2].getValue());
 		return null;
 	}
 	
@@ -110,6 +122,9 @@ public class JGradient extends Weighted1DPanel{
 		
 		if(gradient instanceof SinusoidalGradient)
 			return GrowthRate.SINUSOIDAL;
+		
+		if(gradient instanceof CurveInterpolation)
+			return GrowthRate.CURVE;
 		
 		if(gradient instanceof LinearGradient || isLinear(g))
 			return g.valueAt(1) - g.valueAt(0) == 0 ? GrowthRate.CONSTANT : GrowthRate.LINEAR;
@@ -143,7 +158,7 @@ public class JGradient extends Weighted1DPanel{
 	}
 	
 	public enum GrowthRate{
-		LINEAR, EXPONENTIAL, CONSTANT, SINUSOIDAL;
+		LINEAR, EXPONENTIAL, CONSTANT, SINUSOIDAL, CURVE;
 	}
 	
 }

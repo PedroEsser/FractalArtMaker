@@ -20,7 +20,7 @@ public class FractalFrame {
 
 	public static final FractalKernel DEFAULT_FRACTAL = new MandelbrotNormalMapping();
 	public static final int DEFAULT_MAX_ITERATIONS = 40;
-	public static final MultiGradient DEFAULT_GRADIENT = new MultiGradient(new ThreeChannelGradient()).loop(10);
+	public static final MultiGradient DEFAULT_GRADIENT = new MultiGradient(new ThreeChannelGradient());
 	private static final double DEFAULT_DELTA = 0.01;
 	
 	private FractalKernel fractal;
@@ -74,7 +74,7 @@ public class FractalFrame {
 	public void calculateAll() {
 		try {
 			fractal.setFrame(this);
-			fractal.executeAll();
+			fractal.loadAndExecute();
 		}catch(Exception e) {
 			e.printStackTrace();
 		}

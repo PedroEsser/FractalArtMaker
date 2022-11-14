@@ -4,22 +4,19 @@ import gpuColorGradients.MultiGradient;
 
 public class MandelbrotNormalMapping extends MandelbrotKernel{
 
-	private double angle;
+	private double lightAngle;
 	private double h;
-	private double morphPower;
 	
 	public MandelbrotNormalMapping() {
 		super();
-		addParameter("angle", 0.5, 1f/64);
+		addParameter("lightAngle", 0.5, 1f/64);
 		addParameter("h", 1.5, 1f/64);
-		addParameter("C power morph", 1, 1f/64);
 	}
 	
 	@Override
 	protected void loadParameterValues() {
-		this.angle = getParameter("angle").getValue();
+		this.lightAngle = getParameter("lightAngle").getValue();
 		this.h = getParameter("h").getValue();
-		this.morphPower = getParameter("C power morph").getValue();
 		super.loadParameterValues();
 	}
 	
@@ -29,15 +26,16 @@ public class MandelbrotNormalMapping extends MandelbrotKernel{
 	public void run() {		
 		int width = this.width;
 		
-		int i = getGlobalId(0);
-		int j = getGlobalId(1);
-		
 		int iterations = pre_iterations;
 		
-		double constantRE = topLeftRE + this.delta * i;
-		double constantIM = topLeftIM + this.delta * j;
+		int i = getGlobalId(0);
+		int j = getGlobalId(1);
+		double constantRE = this.delta * (i - width/2);
+		double constantIM = this.delta * (j - height/2);
+		double aux = constantRE;
+		constantRE = cos(angle)*aux - sin(angle)*constantIM + centerRE;
+		constantIM = cos(angle)*constantIM + sin(angle)*aux + centerIM;
 		
-		double aux = 0;
 		double zRE = 0;
 		double zIM = 0;
 		
@@ -80,7 +78,7 @@ public class MandelbrotNormalMapping extends MandelbrotKernel{
 		if(iterations < maxIterations) {
 			float iterationScore = (float)(iterations + 1 - log(log(sqrt(zRE * zRE + zIM * zIM)))/log(2));
 			iterationScore =  iterationScore < 0 ? 0 : iterationScore;
-			rgb = MultiGradient.colorAtPercent(iterations * norm, gradient);
+			rgb = MultiGradient.colorAtPercent(iterationScore * norm, gradient);
 			
 			aux = dCRE*dCRE + dCIM*dCIM;
 			uRE = (zRE * dCRE + zIM * dCIM)/aux;
@@ -90,7 +88,7 @@ public class MandelbrotNormalMapping extends MandelbrotKernel{
 			uRE /= aux;
 			uIM /= aux;									//u = u/abs(u)
 			
-			aux = 2 * Math.PI * angle;
+			aux = 2 * Math.PI * lightAngle;
 			zRE = cos(aux);
 			zIM = sin(aux);
 			aux = uRE * zRE + uIM * zIM + h;	//reflection = dot(u, v) + h2

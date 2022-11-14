@@ -45,13 +45,12 @@ public class VideoMaker extends JFrame{
 	LabelValueTuple width;
 	LabelValueTuple height;
 	JTextField name;
-	LabelValueTuple shift;
 	JTextField dir;
 	GradientVisualizer visualizer;
 	JButton renderToggle;
 	JProgressBar progress;
 	LabelOptionsTuple videoOptions;
-	JGradient jGradient;
+	JGradient zoomJGradient;
 	FractalVideo video;
 
 	public VideoMaker(FractalVisualizer vis) {
@@ -71,12 +70,9 @@ public class VideoMaker extends JFrame{
 		JTuple<LabelValueTuple, LabelValueTuple> dimPanel = new JTuple(width, height);
 		mainPanel.addComponent(dimPanel);
 		
-		jGradient = new JGradient(0, 1);
-		LabelTuple<JGradient> zoomTuple = new LabelTuple("Zoom", jGradient);
+		zoomJGradient = new JGradient(0, 1);
+		LabelTuple<JGradient> zoomTuple = new LabelTuple("Zoom", zoomJGradient);
 		mainPanel.addComponent(zoomTuple);
-		
-		shift = new LabelValueTuple("Shift:", 0);
-		mainPanel.addComponent(shift);
 		
 		visualizer = new GradientVisualizer(vis.getGradient());
 		JPanel panel = new LabelTuple("Gradient: ", visualizer);
@@ -171,12 +167,7 @@ public class VideoMaker extends JFrame{
 			
 			FractalZoom zoom = vis.getNavigator().getZoom().clone();
 			zoom.setDimensions((int)width.getValue(), (int)height.getValue());
-			float offset = (float)shift.getValue();
-			MultiGradient gradient = vis.getGradient().copy();
-			float startOffset = gradient.getOffset();
-			System.out.println(startOffset);
-			zoom.setColorGradient(p -> gradient.offseted((float)(startOffset + p*offset)));
-			Gradient<FractalFrame> z = zoom.fromNumericRange(jGradient.getGradient());
+			Gradient<FractalFrame> z = zoom.fromNumericRange(zoomJGradient.getGradient());
 			switch(videoOption) {
 				case "mp4(ffmpeg)": video = new FractalFFMPEG(z, fp, dur, videoPath, audioPath, progress);
 				break;
