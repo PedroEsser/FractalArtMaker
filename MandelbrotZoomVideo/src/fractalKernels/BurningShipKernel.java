@@ -10,14 +10,16 @@ public class BurningShipKernel extends FractalKernel{
 		
 		int i = getGlobalId(0);
 		int j = getGlobalId(1);
+		double constantRE = this.delta * (i - width/2);
+		double constantIM = this.delta * (j - height/2);
+		double aux = constantRE;
+		constantRE = cos(angle)*aux - sin(angle)*constantIM + centerRE;
+		constantIM = cos(angle)*constantIM + sin(angle)*aux + centerIM;
 		
 		int iterations = pre_iterations;
 		
-		double aux = 0;
 		double zRE = 0;
 		double zIM = 0;
-		double constantRE = topLeftRE + this.delta * i;
-		double constantIM = topLeftIM + this.delta * j;
 		
 		for(int a = 0 ; a < iterations ; a++) {
 			aux = zRE;
