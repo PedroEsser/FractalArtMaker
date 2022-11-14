@@ -15,7 +15,7 @@ public class ComplexPowerMandelbrotKernel extends FractalKernel{
 		super();
 		addParameter("Re(power)", c.getRe(), 1d/256);
 		addParameter("Im(power)", c.getIm(), 1d/1024);
-		addParameter("angle", 0.5, 1f/64);
+		addParameter("lightAngle", 0.5, 1f/64);
 		addParameter("h", 1.5, 1f/64);
 	}
 	
@@ -31,7 +31,7 @@ public class ComplexPowerMandelbrotKernel extends FractalKernel{
 	protected void loadParameterValues() {
 		this.powerRE = getParameter("Re(power)").getValue();
 		this.powerIM = getParameter("Im(power)").getValue();
-		this.lightAngle = getParameter("angle").getValue();
+		this.lightAngle = getParameter("lightAngle").getValue();
 		this.h = getParameter("h").getValue();
 		super.loadParameterValues();
 	}
@@ -42,13 +42,16 @@ public class ComplexPowerMandelbrotKernel extends FractalKernel{
 		
 		int i = getGlobalId(0);
 		int j = getGlobalId(1);
+		double constantRE = this.delta * (i - width/2);
+		double constantIM = this.delta * (j - height/2);
+		double aux = constantRE;
+		constantRE = cos(angle)*aux - sin(angle)*constantIM + centerRE;
+		constantIM = cos(angle)*constantIM + sin(angle)*aux + centerIM;
 		
 		int iterations = pre_iterations;
 		
 		double zRE = 1E-100;
 		double zIM = 1E-100;
-		double constantRE = topLeftRE + this.delta * i;
-		double constantIM = topLeftIM + this.delta * j;
 		
 		double angle = 0;
 		double lnR = 0;

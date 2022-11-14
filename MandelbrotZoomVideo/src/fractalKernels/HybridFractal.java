@@ -7,24 +7,21 @@ public class HybridFractal extends FractalKernel{
 	private double lightAngle;
 	private double h;
 	private int mod, modOffset;
-	private double morphPower;
 	
 	public HybridFractal() {
 		super();
-		addParameter("angle", 0, 0.0625);
+		addParameter("lightAngle", 0, 0.0625);
 		addParameter("h", 1.5, 0.0625);
 		addParameter("mod offset", 0, 1);
-		addParameter("C morph power", 1, 1d/16);
 		addParameter("mod", 1, 1);
 	}
 	
 	@Override
 	protected void loadParameterValues() {
-		this.lightAngle = getParameter("angle").getValue();
+		this.lightAngle = getParameter("lightAngle").getValue();
 		this.h = getParameter("h").getValue();
 		this.modOffset = getParameter("mod offset").getValueAsInt();
 		this.mod = getParameter("mod").getValueAsInt();
-		this.morphPower = getParameter("C morph power").getValue();
 		super.loadParameterValues();
 	}
 	
@@ -47,10 +44,14 @@ public class HybridFractal extends FractalKernel{
 	public void run() {
 		int iterations = pre_iterations;
 		
-		double constantRE = topLeftRE + this.delta * getGlobalId(0);
-		double constantIM = topLeftIM + this.delta * getGlobalId(1);
+		int i = getGlobalId(0);
+		int j = getGlobalId(1);
+		double constantRE = this.delta * (i - width/2);
+		double constantIM = this.delta * (j - height/2);
+		double aux = constantRE;
+		constantRE = cos(angle)*aux - sin(angle)*constantIM + centerRE;
+		constantIM = cos(angle)*constantIM + sin(angle)*aux + centerIM;
 		
-		double aux = 0;
 		double dCRE = 0;
 		double dCIM = 0;
 		double reflection = 0;
@@ -79,7 +80,6 @@ public class HybridFractal extends FractalKernel{
 		iterations = 0;
 		zRE = 0;
 		zIM = 0;
-		int i = 0;
 		int m = 0;
 		
 		while(zRE * zRE + zIM * zIM < escapeRadius && iterations < maxIterations) {

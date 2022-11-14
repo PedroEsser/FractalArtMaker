@@ -26,14 +26,16 @@ public class MandelTrig extends MandelbrotKernel {
 		
 		int i = getGlobalId(0);
 		int j = getGlobalId(1);
+		double constantRE = this.delta * (i - width/2);
+		double constantIM = this.delta * (j - height/2);
+		double aux = constantRE;
+		constantRE = cos(angle)*aux - sin(angle)*constantIM + centerRE;
+		constantIM = cos(angle)*constantIM + sin(angle)*aux + centerIM;
 		
 		int iterations = pre_iterations;
 		
-		double aux = 0;
 		double currentRE = 0;
 		double currentIM = 0;
-		double constantRE = topLeftRE + this.delta * i;
-		double constantIM = topLeftIM + this.delta * j;
 		
 		double angle = 0;
 		double lnR = 0;
@@ -45,8 +47,6 @@ public class MandelTrig extends MandelbrotKernel {
 				aux = currentRE;
 				currentRE = iterateRE(currentRE, currentIM, constantRE, constantIM);
 				currentIM = iterateIM(aux, currentIM, constantRE, constantIM);
-//				currentRE = tan(currentRE);
-//				currentIM = cos(currentIM) + sin(currentIM);
 			}
 			constantRE = currentRE;
 			constantIM = currentIM;
@@ -60,14 +60,6 @@ public class MandelTrig extends MandelbrotKernel {
 			aux = currentRE;
 			currentRE = iterateRE(currentRE, currentIM, constantRE, constantIM);
 			currentIM = iterateIM(aux, currentIM, constantRE, constantIM);
-//			angle = atan2(currentIM, currentRE);
-//			lnR = log(sqrt(currentRE * currentRE + currentIM * currentIM));
-//			radius = exp(lnR * powerRE - powerIM * angle);
-//			newAngle = lnR * powerIM + powerRE * angle;
-//			currentRE = cos(newAngle) * radius + constantRE;
-//			currentIM = sin(newAngle) * radius + constantIM;
-//			currentRE = tan(currentRE);
-//			currentIM = cos(currentIM) + sin(currentIM);
 			
 			iterations+=1;
 		}

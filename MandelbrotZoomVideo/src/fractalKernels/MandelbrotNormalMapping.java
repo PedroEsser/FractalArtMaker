@@ -98,7 +98,7 @@ public class MandelbrotNormalMapping extends MandelbrotKernel{
 				aux = 0;
 			
 		}
-		aux = 1;
+		//aux = 1;
 		int r = (int)(aux * (rgb >> 0 & 0xFF));
 		int g = (int)(aux * (rgb >> 8 & 0xFF));
 		int b = (int)(aux * (rgb >> 16 & 0xFF));

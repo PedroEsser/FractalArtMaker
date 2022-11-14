@@ -6,7 +6,7 @@ import gpuColorGradients.MultiGradient;
 public class CustomOrbitTrapKernel extends MandelbrotKernel{
 
 	private double lightAngle, h;
-	private double x, y, trapAngle, height;
+	private double x, y, trapAngle, trapHeight;
 	private double frequency, phaseOffset, amplitude, spacing;
 	private int nLines = 4;
 	
@@ -17,7 +17,7 @@ public class CustomOrbitTrapKernel extends MandelbrotKernel{
 		addParameter("x", 0, 1f/64);
 		addParameter("y", 0, 1f/32);
 		addParameter("trapAngle", 0, 1f/64);
-		addParameter("height", 1, 1f/64);
+		addParameter("trapHeight", 1, 1f/64);
 		addParameter("frequency", 1, 1f/64);
 		addParameter("phaseOffset", 0, 1f/32);
 		addParameter("amplitude", 2, 1f/64);
@@ -32,7 +32,7 @@ public class CustomOrbitTrapKernel extends MandelbrotKernel{
 		this.x = getParameter("x").getValue();
 		this.y = getParameter("y").getValue();
 		this.trapAngle = 2*Math.PI*getParameter("trapAngle").getValue();
-		this.height = getParameter("height").getValue();
+		this.trapHeight = getParameter("trapHeight").getValue();
 		this.frequency = getParameter("frequency").getValue();
 		this.phaseOffset = getParameter("phaseOffset").getValue();
 		this.amplitude = getParameter("amplitude").getValue();
@@ -44,9 +44,9 @@ public class CustomOrbitTrapKernel extends MandelbrotKernel{
 	public int lineTrap(double re, double im) {
 		im = abs(im);
 		double dist = cos(trapAngle)*(y - im) - sin(trapAngle)*(x - re);
-		if(dist > height || dist < 0)
+		if(dist > trapHeight || dist < 0)
 			return -1;
-		return MultiGradient.colorAtPercent((float)(dist/height), gradient);
+		return MultiGradient.colorAtPercent((float)(dist/trapHeight), gradient);
 	}
 	
 	public int linesTrap(double re, double im, double offset) {
@@ -55,27 +55,27 @@ public class CustomOrbitTrapKernel extends MandelbrotKernel{
 		im -= y;
 		double a = atan2(im, re) - trapAngle;
 		a = GradientUtils.genericMod(a, 2*Math.PI/nLines);
-		a = sin(a) * sqrt(re*re + im*im) + height/2;
-		if(abs(a) < height/2)
-			return MultiGradient.colorAtPercent((float)(a/height + 1f/2), gradient);
+		a = sin(a) * sqrt(re*re + im*im) + trapHeight/2;
+		if(abs(a) < trapHeight/2)
+			return MultiGradient.colorAtPercent((float)(a/trapHeight + 1f/2), gradient);
 		return -1;
 	}
 	
 	public int sineLineTrap(double re, double im) {
 		double sine = sin(re*frequency + phaseOffset) * amplitude + y;
-		double dist = sine - abs(im) + height/2;
-		if(dist > height || dist < 0)
+		double dist = sine - abs(im) + trapHeight/2;
+		if(dist > trapHeight || dist < 0)
 			return -1;
-		return MultiGradient.colorAtPercent((float)(dist/height), gradient);
+		return MultiGradient.colorAtPercent((float)(dist/trapHeight), gradient);
 	}
 	
 	public int ringTrap(double re, double im, int i) {
 		double xDiff = GradientUtils.genericMod(re - x, spacing) - spacing/2;
 		double yDiff = GradientUtils.genericMod(im - y, spacing) - spacing/2;
 		double dist = xDiff*xDiff + yDiff*yDiff - amplitude;
-		if(abs(dist) > height)
+		if(abs(dist) > trapHeight)
 			return -1;
-		return MultiGradient.colorAtPercent((float)(dist/height/2 + (float)i/frequency + 1f/2), gradient);
+		return MultiGradient.colorAtPercent((float)(dist/trapHeight/2 + (float)i/frequency + 1f/2), gradient);
 	}
 	
 	public int squareRingTrap(double re, double im, int i) {
@@ -85,9 +85,9 @@ public class CustomOrbitTrapKernel extends MandelbrotKernel{
 		xDiff = cos(trapAngle)*xDiff - sin(trapAngle)*yDiff;
 		yDiff = cos(trapAngle)*yDiff + sin(trapAngle)*dist;
 		dist = abs(xDiff) + abs(yDiff) - amplitude;
-		if(abs(dist) > height)
+		if(abs(dist) > trapHeight)
 			return -1;
-		return MultiGradient.colorAtPercent((float)(dist/height/2 + (float)i/frequency + 1f/2), gradient);
+		return MultiGradient.colorAtPercent((float)(dist/trapHeight/2 + (float)i/frequency + 1f/2), gradient);
 	}
 	
 	@Override
@@ -95,17 +95,16 @@ public class CustomOrbitTrapKernel extends MandelbrotKernel{
 		int width = this.width;
 		
 		int iterations = pre_iterations;
-		int rgb = -1;
-		int trap = -1;
 		int i = getGlobalId(0);
 		int j = getGlobalId(1);
-		
 		double constantRE = this.delta * (i - width/2);
 		double constantIM = this.delta * (j - height/2);
 		double aux = constantRE;
 		constantRE = cos(angle)*aux - sin(angle)*constantIM + centerRE;
 		constantIM = cos(angle)*constantIM + sin(angle)*aux + centerIM;
 		
+		int trap = -1;
+		int rgb = -1;
 		
 		double zRE = 0;
 		double zIM = 0;
@@ -120,14 +119,16 @@ public class CustomOrbitTrapKernel extends MandelbrotKernel{
 		constantRE = cos(aux) * uRE;
 		constantIM = sin(aux) * uRE;
 		
-		for(int a = 0 ; a < iterations && zRE * zRE + zIM * zIM <= escapeRadius ; a++) {
-			aux = zRE;
-			zRE = iterateRE(zRE, zIM, constantRE, constantIM);
-			zIM = iterateIM(aux, zIM, constantRE, constantIM);
+		if(iterations > 0) {
+			for(int a = 0 ; a < iterations && zRE * zRE + zIM * zIM <= escapeRadius ; a++) {
+				aux = zRE;
+				zRE = iterateRE(zRE, zIM, constantRE, constantIM);
+				zIM = iterateIM(aux, zIM, constantRE, constantIM);
+			}
+			constantRE = zRE;
+			constantIM = zIM;
 		}
-			
-		constantRE = zRE;
-		constantIM = zIM;
+		
 		
 		zRE = 0;
 		zIM = 0;
@@ -142,7 +143,7 @@ public class CustomOrbitTrapKernel extends MandelbrotKernel{
 			zRE = iterateRE(zRE, zIM, constantRE, constantIM);
 			zIM = iterateIM(aux, zIM, constantRE, constantIM);
 			
-			trap = linesTrap(zRE, zIM, (double)iterations/maxIterations);
+			trap = squareRingTrap(zRE, zIM, iterations);
 			if(trap != -1)
 				rgb = trap;
 			
@@ -171,7 +172,7 @@ public class CustomOrbitTrapKernel extends MandelbrotKernel{
 		}else
 			rgb = 0;
 		
-		i = (width * j + i) * 3;
+		i = (width * getGlobalId(1) + getGlobalId(0)) * 3;
 		data[i + 0] = (byte)((rgb >> 0 & 0xFF) * aux);
 		data[i + 1] = (byte)((rgb >> 8 & 0xFF) * aux);
 		data[i + 2] = (byte)((rgb >> 16 & 0xFF) * aux);
